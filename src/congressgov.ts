@@ -51,7 +51,7 @@ export interface CongressVote {
 }
 
 // Convert Congress.gov member to our internal format
-export function convertCongressMember(member: any): Array<{
+export function convertCongressMember(member: any, knownChamber?: 'house' | 'senate'): Array<{
 	propublica_id: string;
 	name: string;
 	first_name: string;
@@ -160,19 +160,26 @@ export function convertCongressMember(member: any): Array<{
 		chamber = 'senate';
 	}
 	
-	// If still no chamber, try to infer from the API call context (but we don't have that here)
-	// For now, we'll be more lenient and allow empty chamber if we have other data
+	// If still no chamber, use the known chamber from the API call
+	if ((chamber !== 'house' && chamber !== 'senate') && knownChamber) {
+		chamber = knownChamber;
+	}
+	
+	// If still no chamber, skip this member
 	if (chamber !== 'house' && chamber !== 'senate') {
 		// Last resort: check if there's any indication in the data structure
 		// Skip for now - require chamber to be determined
-		console.warn('Skipping member - cannot determine chamber:', { 
-			bioguideId, 
-			chamber, 
-			hasTerm: !!currentTerm,
-			termChamber: currentTerm?.chamber,
-			memberChamber: member.chamber,
-			keys: Object.keys(member).slice(0, 15) 
-		});
+		if (results.length < 3) { // Only log first few
+			console.warn('Skipping member - cannot determine chamber:', { 
+				bioguideId, 
+				chamber, 
+				knownChamber,
+				hasTerm: !!currentTerm,
+				termChamber: currentTerm?.chamber,
+				memberChamber: member.chamber,
+				keys: Object.keys(member).slice(0, 15) 
+			});
+		}
 		return results;
 	}
 	

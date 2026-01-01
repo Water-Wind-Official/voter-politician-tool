@@ -121,7 +121,7 @@ async function handleSync(request: Request, env: Env): Promise<Response> {
 		}
 		
 		for (const member of houseMembers) {
-			const converted = convertCongressMember(member);
+			const converted = convertCongressMember(member, 'house');
 			if (converted.length === 0) {
 				houseSkipped++;
 			}
@@ -142,7 +142,7 @@ async function handleSync(request: Request, env: Env): Promise<Response> {
 		}
 		
 		for (const member of senateMembers) {
-			const converted = convertCongressMember(member);
+			const converted = convertCongressMember(member, 'senate');
 			if (converted.length === 0) {
 				senateSkipped++;
 			}
@@ -251,8 +251,8 @@ async function handleDebug(request: Request, env: Env): Promise<Response> {
 		const senateMembers = await fetchCongressMembers('senate', env.CONGRESS_API_KEY);
 		
 		// Try converting one to see what happens
-		const testHouseConversion = houseMembers.length > 0 ? convertCongressMember(houseMembers[0]) : [];
-		const testSenateConversion = senateMembers.length > 0 ? convertCongressMember(senateMembers[0]) : [];
+		const testHouseConversion = houseMembers.length > 0 ? convertCongressMember(houseMembers[0], 'house') : [];
+		const testSenateConversion = senateMembers.length > 0 ? convertCongressMember(senateMembers[0], 'senate') : [];
 		
 		return new Response(JSON.stringify({
 			houseSample: houseMembers.length > 0 ? houseMembers[0] : null,

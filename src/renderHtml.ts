@@ -238,7 +238,7 @@ export function renderPoliticianList(
 		${politicians.length === 0 ? `
 			<div class="empty-state">
 				<h2>No politicians found</h2>
-				<p>Try adjusting your filters or <a href="/sync">sync data from ProPublica</a></p>
+				<p>Try adjusting your filters or <a href="/sync">sync data from Congress.gov</a></p>
 			</div>
 		` : `
 			<div class="politicians-grid">
@@ -264,7 +264,7 @@ export function renderPoliticianList(
 		
 		<div class="legal-notice">
 			<strong>Legal Notice:</strong> This website displays public voting records and information about elected officials. 
-			All data is sourced from the <a href="https://www.propublica.org/datastore/api/propublica-congress-api" target="_blank">ProPublica Congress API</a> 
+			All data is sourced from the <a href="https://api.congress.gov/" target="_blank">Congress.gov API</a> 
 			and is used in accordance with their terms of service. Voting records are matters of public record and may be freely republished.
 		</div>
 	</div>
@@ -569,7 +569,7 @@ export function renderPoliticianProfile(
 			<h2 class="section-title">Voting Record</h2>
 			${votes.length === 0 ? `
 				<div class="empty-votes">
-					<p>No voting records available yet. <a href="/sync">Sync data from ProPublica</a> to see voting history.</p>
+					<p>No voting records available yet. <a href="/sync">Sync data from Congress.gov</a> to see voting history.</p>
 				</div>
 			` : votes.map(v => {
 				const positionClass = v.position.toLowerCase().replace(' ', '-');

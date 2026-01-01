@@ -23,13 +23,12 @@ This website is designed to comply with legal requirements:
 
 ## Data Source
 
-This project uses the **GovTrack.us API**, which provides:
+This project uses the **Congress.gov API**, which provides:
 - Current members of Congress
-- Voting records and roll call votes
-- Bill information
-- No API key required (free and open)
+- Official government data
+- Requires free API key (sign up at https://api.congress.gov/sign-up)
 
-**Note**: The ProPublica Congress API has been discontinued as of 2024. This project has been updated to use GovTrack.us as the primary data source.
+**Note**: This project uses the official Congress.gov API as the primary data source.
 
 ## Setup Instructions
 
@@ -37,7 +36,7 @@ This project uses the **GovTrack.us API**, which provides:
 
 - Node.js 18+ and npm/pnpm
 - A Cloudflare account
-- **No API key needed!** GovTrack API is free and open
+- A Congress.gov API key (free): https://api.congress.gov/sign-up
 
 ### 2. Install Dependencies
 
@@ -92,9 +91,9 @@ Visit `http://localhost:8787/sync` to fetch and sync data from GovTrack. This wi
 - Fetch recent votes
 - Link voting records to politicians
 
-**Note**: The sync endpoint may take a few minutes to complete as it fetches data from the GovTrack API.
+**Note**: The sync endpoint may take a few minutes to complete as it fetches data from the Congress.gov API.
 
-### 7. Deploy
+### 8. Deploy
 
 ```bash
 npm run deploy
@@ -118,9 +117,8 @@ After deployment, visit `https://your-worker.workers.dev/sync` to sync data.
 ### Syncing Data
 
 The `/sync` endpoint fetches:
-- All current House and Senate members
-- Recent votes from both chambers
-- Voting positions for each member
+- All current House and Senate members from Congress.gov
+- Note: Vote data may not be available through Congress.gov API (endpoint limitations)
 
 Run this periodically (e.g., daily via a cron job) to keep data up to date.
 
@@ -182,5 +180,5 @@ This project is provided as-is for educational purposes. Ensure compliance with 
 
 ## Credits
 
-- Data provided by [GovTrack.us](https://www.govtrack.us/)
+- Data provided by [Congress.gov API](https://api.congress.gov/)
 - Built with [Cloudflare Workers](https://workers.cloudflare.com/) and [D1 Database](https://developers.cloudflare.com/d1/)
