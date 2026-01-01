@@ -205,33 +205,48 @@ export async function fetchCongressVotes(
 	congress: number = 118,
 	limit: number = 50
 ): Promise<CongressVote[]> {
-	// Congress.gov API v3 uses /vote with query parameters
-	// Format: /vote?chamber=House&api_key=...
-	const chamberParam = chamber === 'house' ? 'House' : 'Senate';
-	const url = `${CONGRESS_API_BASE}/vote?chamber=${chamberParam}&api_key=${apiKey}&format=json&limit=${limit}`;
+	// Note: Congress.gov API v3 may not have a direct vote endpoint
+	// This function attempts to fetch votes, but may not be available
+	// Alternative: Votes might be available through bill endpoints or member-specific endpoints
 	
-	const response = await fetch(url, {
-		headers: {
-			'User-Agent': 'PoliticianVotingRecords/1.0',
-			'Accept': 'application/json',
-		},
-	});
+	// Try different possible vote endpoints
+	const endpoints = [
+		`${CONGRESS_API_BASE}/vote?chamber=${chamber === 'house' ? 'House' : 'Senate'}&api_key=${apiKey}&format=json&limit=${limit}`,
+		`${CONGRESS_API_BASE}/rollcall?chamber=${chamber === 'house' ? 'House' : 'Senate'}&api_key=${apiKey}&format=json&limit=${limit}`,
+		`${CONGRESS_API_BASE}/vote/${congress}/${chamber === 'house' ? 'house' : 'senate'}?api_key=${apiKey}&format=json&limit=${limit}`,
+	];
 
-	if (!response.ok) {
-		const errorText = await response.text().catch(() => '');
-		throw new Error(`Congress.gov API error: ${response.status} ${response.statusText}. ${errorText}`);
-	}
+	for (const url of endpoints) {
+		try {
+			const response = await fetch(url, {
+				headers: {
+					'User-Agent': 'PoliticianVotingRecords/1.0',
+					'Accept': 'application/json',
+				},
+			});
 
-	const data = await response.json();
-	// Congress.gov API v3 returns votes in a votes array
-	if (data.votes && Array.isArray(data.votes)) {
-		return data.votes;
+			if (response.ok) {
+				const data = await response.json();
+				// Try different response structures
+				if (data.votes && Array.isArray(data.votes)) {
+					return data.votes;
+				}
+				if (data.results && data.results.votes && Array.isArray(data.results.votes)) {
+					return data.results.votes;
+				}
+				if (data.rollCalls && Array.isArray(data.rollCalls)) {
+					return data.rollCalls;
+				}
+				if (Array.isArray(data)) {
+					return data;
+				}
+			}
+		} catch (e) {
+			// Try next endpoint
+			continue;
+		}
 	}
-	if (data.results && data.results.votes && Array.isArray(data.results.votes)) {
-		return data.results.votes;
-	}
-	if (Array.isArray(data)) {
-		return data;
-	}
-	return [];
+	
+	// If all endpoints fail, throw error
+	throw new Error('Congress.gov API does not have a vote endpoint available. Vote data cannot be synced through this API.');
 }

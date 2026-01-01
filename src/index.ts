@@ -125,46 +125,56 @@ async function handleSync(request: Request, env: Env): Promise<Response> {
 			}
 		}
 
-		// Fetch recent votes and sync
-		const houseVotes = await fetchCongressVotes('house', env.CONGRESS_API_KEY, 118, 100);
+		// Fetch recent votes and sync (optional - Congress.gov API may not have vote endpoint)
 		let houseVoteCount = 0;
 		let houseVoteRecordCount = 0;
-		
-		for (const vote of houseVotes) {
-			const voteData = convertCongressVote(vote);
-			const voteId = await upsertVote(env.DB, voteData);
-			houseVoteCount++;
-			
-			// Sync voting positions
-			for (const member of vote.members) {
-				const politicianId = `congress-${member.bioguideId}`;
-				const politician = await getPoliticianByProPublicaId(env.DB, politicianId);
-				if (politician) {
-					const position = mapCongressVote(member.vote);
-					await upsertVotingRecord(env.DB, politician.id, voteId, position);
-					houseVoteRecordCount++;
-				}
-			}
-		}
-
-		const senateVotes = await fetchCongressVotes('senate', env.CONGRESS_API_KEY, 118, 100);
 		let senateVoteCount = 0;
 		let senateVoteRecordCount = 0;
+		let voteError: string | null = null;
 		
-		for (const vote of senateVotes) {
-			const voteData = convertCongressVote(vote);
-			const voteId = await upsertVote(env.DB, voteData);
-			senateVoteCount++;
+		try {
+			const houseVotes = await fetchCongressVotes('house', env.CONGRESS_API_KEY, 118, 100);
 			
-			for (const member of vote.members) {
-				const politicianId = `congress-${member.bioguideId}`;
-				const politician = await getPoliticianByProPublicaId(env.DB, politicianId);
-				if (politician) {
-					const position = mapCongressVote(member.vote);
-					await upsertVotingRecord(env.DB, politician.id, voteId, position);
-					senateVoteRecordCount++;
+			for (const vote of houseVotes) {
+				const voteData = convertCongressVote(vote);
+				const voteId = await upsertVote(env.DB, voteData);
+				houseVoteCount++;
+				
+				// Sync voting positions
+				for (const member of vote.members) {
+					const politicianId = `congress-${member.bioguideId}`;
+					const politician = await getPoliticianByProPublicaId(env.DB, politicianId);
+					if (politician) {
+						const position = mapCongressVote(member.vote);
+						await upsertVotingRecord(env.DB, politician.id, voteId, position);
+						houseVoteRecordCount++;
+					}
 				}
 			}
+		} catch (error: any) {
+			voteError = `House votes: ${error.message}`;
+		}
+
+		try {
+			const senateVotes = await fetchCongressVotes('senate', env.CONGRESS_API_KEY, 118, 100);
+			
+			for (const vote of senateVotes) {
+				const voteData = convertCongressVote(vote);
+				const voteId = await upsertVote(env.DB, voteData);
+				senateVoteCount++;
+				
+				for (const member of vote.members) {
+					const politicianId = `congress-${member.bioguideId}`;
+					const politician = await getPoliticianByProPublicaId(env.DB, politicianId);
+					if (politician) {
+						const position = mapCongressVote(member.vote);
+						await upsertVotingRecord(env.DB, politician.id, voteId, position);
+						senateVoteRecordCount++;
+					}
+				}
+			}
+		} catch (error: any) {
+			voteError = voteError ? `${voteError}; Senate votes: ${error.message}` : `Senate votes: ${error.message}`;
 		}
 
 		return new Response(JSON.stringify({ 
@@ -175,7 +185,8 @@ async function handleSync(request: Request, env: Env): Promise<Response> {
 			houseVotes: houseVoteCount,
 			senateVotes: senateVoteCount,
 			houseVoteRecords: houseVoteRecordCount,
-			senateVoteRecords: senateVoteRecordCount
+			senateVoteRecords: senateVoteRecordCount,
+			note: voteError ? `Note: Vote data unavailable - ${voteError}. Members synced successfully.` : undefined
 		}), {
 			headers: { "content-type": "application/json" },
 		});
