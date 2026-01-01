@@ -4,16 +4,30 @@
 
 const CONGRESS_API_BASE = 'https://api.congress.gov/v3';
 
+// Congress.gov API v3 member structure (flexible to handle actual API response)
 export interface CongressMember {
-	bioguideId: string;
-	firstName: string;
-	lastName: string;
+	bioguideId?: string;
+	firstName?: string;
+	lastName?: string;
 	middleName?: string;
-	partyName: string;
-	state: string;
+	partyName?: string;
+	party?: string;
+	state?: string;
 	district?: number;
-	chamber: 'House' | 'Senate';
+	chamber?: 'House' | 'Senate';
 	url?: string;
+	// Handle different possible field names
+	member?: {
+		bioguideId?: string;
+		firstName?: string;
+		lastName?: string;
+	};
+	terms?: Array<{
+		chamber?: string;
+		state?: string;
+		district?: number;
+		party?: string;
+	}>;
 }
 
 export interface CongressVote {
@@ -37,7 +51,7 @@ export interface CongressVote {
 }
 
 // Convert Congress.gov member to our internal format
-export function convertCongressMember(member: CongressMember): Array<{
+export function convertCongressMember(member: any): Array<{
 	propublica_id: string;
 	name: string;
 	first_name: string;
@@ -62,21 +76,45 @@ export function convertCongressMember(member: CongressMember): Array<{
 		website: string | null;
 	}> = [];
 
-	const chamber = member.chamber === 'House' ? 'house' : 'senate';
-	const district = member.district ? String(member.district) : null;
-	const fullName = member.middleName 
-		? `${member.firstName} ${member.middleName} ${member.lastName}`
-		: `${member.firstName} ${member.lastName}`;
+	// Handle nested member structure
+	const memberData = member.member || member;
+	const bioguideId = memberData.bioguideId || member.bioguideId;
+	const firstName = memberData.firstName || member.firstName || '';
+	const lastName = memberData.lastName || member.lastName || '';
+	const middleName = memberData.middleName || member.middleName;
+	
+	if (!bioguideId || !firstName || !lastName) {
+		// Skip invalid members
+		return results;
+	}
+
+	// Get current term (most recent active term)
+	const terms = member.terms || [];
+	const currentTerm = terms.find((t: any) => !t.endDate) || terms[terms.length - 1] || {};
+	
+	const chamber = (currentTerm.chamber || member.chamber || '').toLowerCase();
+	if (chamber !== 'house' && chamber !== 'senate') {
+		// Skip if we can't determine chamber
+		return results;
+	}
+	
+	const state = currentTerm.state || member.state || '';
+	const party = currentTerm.party || member.party || member.partyName || 'Unknown';
+	const district = currentTerm.district || member.district;
+	
+	const fullName = middleName 
+		? `${firstName} ${middleName} ${lastName}`
+		: `${firstName} ${lastName}`;
 
 	results.push({
-		propublica_id: `congress-${member.bioguideId}`,
-		name: fullName,
-		first_name: member.firstName,
-		last_name: member.lastName,
-		state: member.state,
-		party: member.partyName || 'Unknown',
-		chamber: chamber,
-		district: district,
+		propublica_id: `congress-${bioguideId}`,
+		name: fullName.trim(),
+		first_name: firstName,
+		last_name: lastName,
+		state: state,
+		party: party,
+		chamber: chamber as 'house' | 'senate',
+		district: district ? String(district) : null,
 		twitter_handle: null, // Congress.gov API doesn't include Twitter
 		website: member.url || null,
 	});
@@ -130,8 +168,10 @@ export async function fetchCongressMembers(
 	apiKey: string,
 	congress: number = 118
 ): Promise<CongressMember[]> {
-	const chamberParam = chamber === 'house' ? 'house' : 'senate';
-	const url = `${CONGRESS_API_BASE}/member/${chamberParam}?api_key=${apiKey}&format=json`;
+	// Congress.gov API v3 uses /member with query parameters, not path parameters
+	// Format: /member?chamber=House&api_key=...
+	const chamberParam = chamber === 'house' ? 'House' : 'Senate';
+	const url = `${CONGRESS_API_BASE}/member?chamber=${chamberParam}&api_key=${apiKey}&format=json&limit=500`;
 	
 	const response = await fetch(url, {
 		headers: {
@@ -146,16 +186,15 @@ export async function fetchCongressMembers(
 	}
 
 	const data = await response.json();
-	// Congress.gov API returns members in different structures depending on endpoint
-	// Try multiple possible response structures
+	// Congress.gov API v3 returns members in a members array
 	if (data.members && Array.isArray(data.members)) {
 		return data.members;
 	}
+	if (data.results && data.results.members && Array.isArray(data.results.members)) {
+		return data.results.members;
+	}
 	if (Array.isArray(data)) {
 		return data;
-	}
-	if (data.results && Array.isArray(data.results)) {
-		return data.results;
 	}
 	return [];
 }
@@ -166,8 +205,10 @@ export async function fetchCongressVotes(
 	congress: number = 118,
 	limit: number = 50
 ): Promise<CongressVote[]> {
-	const chamberParam = chamber === 'house' ? 'house' : 'senate';
-	const url = `${CONGRESS_API_BASE}/vote/${chamberParam}?api_key=${apiKey}&format=json&limit=${limit}`;
+	// Congress.gov API v3 uses /vote with query parameters
+	// Format: /vote?chamber=House&api_key=...
+	const chamberParam = chamber === 'house' ? 'House' : 'Senate';
+	const url = `${CONGRESS_API_BASE}/vote?chamber=${chamberParam}&api_key=${apiKey}&format=json&limit=${limit}`;
 	
 	const response = await fetch(url, {
 		headers: {
@@ -182,16 +223,15 @@ export async function fetchCongressVotes(
 	}
 
 	const data = await response.json();
-	// Congress.gov API returns votes in different structures depending on endpoint
-	// Try multiple possible response structures
+	// Congress.gov API v3 returns votes in a votes array
 	if (data.votes && Array.isArray(data.votes)) {
 		return data.votes;
 	}
+	if (data.results && data.results.votes && Array.isArray(data.results.votes)) {
+		return data.results.votes;
+	}
 	if (Array.isArray(data)) {
 		return data;
-	}
-	if (data.results && Array.isArray(data.results)) {
-		return data.results;
 	}
 	return [];
 }
