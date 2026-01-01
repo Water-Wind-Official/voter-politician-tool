@@ -1,0 +1,16 @@
+{
+	"compatibility_date": "2025-10-08",
+	"main": "src/index.ts",
+	"name": "voter-politician-tool",
+	"upload_source_maps": true,
+	"d1_databases": [
+		{
+			"binding": "DB",
+			"database_id": "ca4f8d27-32a7-44dc-94c0-baf4f30aa956",
+			"database_name": "subsystem"
+		}
+	],
+	"observability": {
+		"enabled": true
+	}
+}
