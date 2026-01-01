@@ -101,14 +101,28 @@ export function renderPoliticianList(
 			font-size: 1rem;
 			font-weight: 600;
 			cursor: pointer;
-			transition: transform 0.2s, box-shadow 0.2s;
+			transition: transform 0.2s, box-shadow 0.2s, opacity 0.2s;
 			text-decoration: none;
 			display: inline-block;
 		}
 		
-		.btn:hover {
+		.btn:hover:not(:disabled) {
 			transform: translateY(-2px);
 			box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+		}
+		
+		.btn:disabled {
+			opacity: 0.6;
+			cursor: not-allowed;
+		}
+		
+		@keyframes spin {
+			from { transform: rotate(0deg); }
+			to { transform: rotate(360deg); }
+		}
+		
+		.syncing {
+			animation: spin 1s linear infinite;
 		}
 		
 		.politicians-grid {
@@ -232,13 +246,14 @@ export function renderPoliticianList(
 				<option value="senate" ${selectedChamber === 'senate' ? 'selected' : ''}>Senate</option>
 			</select>
 			
-			<a href="/sync" class="btn" style="margin-left: auto;">🔄 Sync Data</a>
+			<button id="sync-btn" class="btn" style="margin-left: auto;" onclick="syncData()">🔄 Sync Data</button>
+			<div id="sync-status" style="display: none; margin-left: 1rem; color: white; font-weight: 600;"></div>
 		</div>
 		
 		${politicians.length === 0 ? `
 			<div class="empty-state">
 				<h2>No politicians found</h2>
-				<p>Try adjusting your filters or <a href="/sync">sync data from Congress.gov</a></p>
+				<p>Try adjusting your filters or <button onclick="syncData()" class="btn" style="margin-top: 1rem;">🔄 Sync Data from Congress.gov</button></p>
 			</div>
 		` : `
 			<div class="politicians-grid">
@@ -277,6 +292,52 @@ export function renderPoliticianList(
 			if (state) params.set('state', state);
 			if (chamber) params.set('chamber', chamber);
 			window.location.href = '/' + (params.toString() ? '?' + params.toString() : '');
+		}
+		
+		async function syncData() {
+			const btn = document.getElementById('sync-btn');
+			const status = document.getElementById('sync-status');
+			
+			if (!btn || !status) {
+				// If elements don't exist (e.g., on politician profile page), navigate to sync
+				window.location.href = '/sync';
+				return;
+			}
+			
+			// Disable button and show loading
+			btn.disabled = true;
+			btn.innerHTML = '⏳ Syncing...';
+			btn.classList.add('syncing');
+			status.style.display = 'block';
+			status.textContent = 'Syncing data from Congress.gov...';
+			status.style.color = '#fff';
+			
+			try {
+				const response = await fetch('/sync');
+				const data = await response.json();
+				
+				if (data.success) {
+					status.textContent = \`✅ Success! Synced \${data.houseMembers || 0} House members and \${data.senateMembers || 0} Senate members. Refreshing...\`;
+					status.style.color = '#10b981';
+					
+					// Wait a moment then refresh the page to show new data
+					setTimeout(() => {
+						window.location.reload();
+					}, 2000);
+				} else {
+					status.textContent = \`❌ Error: \${data.error || 'Unknown error'}\`;
+					status.style.color = '#ef4444';
+					btn.disabled = false;
+					btn.innerHTML = '🔄 Sync Data';
+					btn.classList.remove('syncing');
+				}
+			} catch (error) {
+				status.textContent = \`❌ Error: \${error.message}\`;
+				status.style.color = '#ef4444';
+				btn.disabled = false;
+				btn.innerHTML = '🔄 Sync Data';
+				btn.classList.remove('syncing');
+			}
 		}
 	</script>
 </body>
@@ -569,7 +630,7 @@ export function renderPoliticianProfile(
 			<h2 class="section-title">Voting Record</h2>
 			${votes.length === 0 ? `
 				<div class="empty-votes">
-					<p>No voting records available yet. <a href="/sync">Sync data from Congress.gov</a> to see voting history.</p>
+					<p>No voting records available yet. <button onclick="window.location.href='/sync'" class="btn" style="margin-top: 1rem;">🔄 Sync Data from Congress.gov</button></p>
 				</div>
 			` : votes.map(v => {
 				const positionClass = v.position.toLowerCase().replace(' ', '-');
