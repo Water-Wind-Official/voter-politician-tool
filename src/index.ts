@@ -35,6 +35,10 @@ export default {
 			return handleSync(request, env);
 		}
 
+		if (path === '/debug') {
+			return handleDebug(request, env);
+		}
+
 		// 404
 		return new Response('Not Found', { status: 404 });
 	},
@@ -236,3 +240,39 @@ async function handleSync(request: Request, env: Env): Promise<Response> {
 	}
 }
 
+async function handleDebug(request: Request, env: Env): Promise<Response> {
+	if (!env.CONGRESS_API_KEY) {
+		return new Response('Congress.gov API key not configured', { status: 500 });
+	}
+
+	try {
+		// Fetch a small sample to see the structure
+		const houseMembers = await fetchCongressMembers('house', env.CONGRESS_API_KEY);
+		const senateMembers = await fetchCongressMembers('senate', env.CONGRESS_API_KEY);
+		
+		// Try converting one to see what happens
+		const testHouseConversion = houseMembers.length > 0 ? convertCongressMember(houseMembers[0]) : [];
+		const testSenateConversion = senateMembers.length > 0 ? convertCongressMember(senateMembers[0]) : [];
+		
+		return new Response(JSON.stringify({
+			houseSample: houseMembers.length > 0 ? houseMembers[0] : null,
+			senateSample: senateMembers.length > 0 ? senateMembers[0] : null,
+			houseCount: houseMembers.length,
+			senateCount: senateMembers.length,
+			houseKeys: houseMembers.length > 0 ? Object.keys(houseMembers[0]) : [],
+			senateKeys: senateMembers.length > 0 ? Object.keys(senateMembers[0]) : [],
+			testHouseConversion: testHouseConversion,
+			testSenateConversion: testSenateConversion,
+		}, null, 2), {
+			headers: { "content-type": "application/json" },
+		});
+	} catch (error: any) {
+		return new Response(JSON.stringify({ 
+			error: error.message,
+			stack: error.stack
+		}), {
+			status: 500,
+			headers: { "content-type": "application/json" },
+		});
+	}
+}

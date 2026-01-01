@@ -119,37 +119,65 @@ export function convertCongressMember(member: any): Array<{
 		return results;
 	}
 
-	// Get current term (most recent active term)
-	const terms = member.terms || member.term || [];
-	const currentTerm = Array.isArray(terms) 
-		? (terms.find((t: any) => !t.endDate || !t.end) || terms[terms.length - 1] || {})
-		: terms;
+	// Get current term (most recent active term) - handle various structures
+	let terms = member.terms || member.term || member.memberTerms || [];
+	if (!Array.isArray(terms)) {
+		terms = [terms];
+	}
+	const currentTerm = terms.length > 0
+		? (terms.find((t: any) => !t.endDate && !t.end && !t.endDateString) || terms[terms.length - 1] || {})
+		: {};
 	
 	// Try to get chamber from multiple possible locations
 	let chamber = '';
+	
+	// Try term first
 	if (currentTerm && currentTerm.chamber) {
 		chamber = String(currentTerm.chamber).toLowerCase();
-	} else if (member.chamber) {
+	}
+	// Try member level
+	if (!chamber && member.chamber) {
 		chamber = String(member.chamber).toLowerCase();
-	} else if (memberData.chamber) {
+	}
+	// Try memberData level
+	if (!chamber && memberData.chamber) {
 		chamber = String(memberData.chamber).toLowerCase();
+	}
+	// Try type field
+	if (!chamber && (member.type || memberData.type)) {
+		const type = String(member.type || memberData.type).toLowerCase();
+		if (type === 'rep' || type === 'representative') {
+			chamber = 'house';
+		} else if (type === 'sen' || type === 'senator') {
+			chamber = 'senate';
+		}
 	}
 	
 	// Normalize chamber values
-	if (chamber.includes('house') || chamber === 'h' || chamber === 'rep') {
+	if (chamber.includes('house') || chamber === 'h' || chamber === 'rep' || chamber === 'representative') {
 		chamber = 'house';
-	} else if (chamber.includes('senate') || chamber === 's' || chamber === 'sen') {
+	} else if (chamber.includes('senate') || chamber === 's' || chamber === 'sen' || chamber === 'senator') {
 		chamber = 'senate';
 	}
 	
+	// If still no chamber, try to infer from the API call context (but we don't have that here)
+	// For now, we'll be more lenient and allow empty chamber if we have other data
 	if (chamber !== 'house' && chamber !== 'senate') {
-		// Skip if we can't determine chamber
-		console.warn('Skipping member - cannot determine chamber:', { bioguideId, chamber, keys: Object.keys(member).slice(0, 10) });
+		// Last resort: check if there's any indication in the data structure
+		// Skip for now - require chamber to be determined
+		console.warn('Skipping member - cannot determine chamber:', { 
+			bioguideId, 
+			chamber, 
+			hasTerm: !!currentTerm,
+			termChamber: currentTerm?.chamber,
+			memberChamber: member.chamber,
+			keys: Object.keys(member).slice(0, 15) 
+		});
 		return results;
 	}
 	
-	const state = currentTerm?.state || member.state || memberData.state || '';
-	const party = currentTerm?.party || member.party || member.partyName || memberData.party || memberData.partyName || 'Unknown';
+	const state = currentTerm?.state || member.state || memberData.state || member.stateCode || memberData.stateCode || '';
+	const party = currentTerm?.party || member.party || member.partyName || memberData.party || memberData.partyName || member.partyCode || memberData.partyCode || 'Unknown';
 	const district = currentTerm?.district || member.district || memberData.district;
 	
 	const fullName = middleName 
