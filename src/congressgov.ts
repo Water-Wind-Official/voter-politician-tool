@@ -80,21 +80,42 @@ export function convertCongressMember(member: any): Array<{
 	const memberData = member.member || member;
 	
 	// Try different possible field names for bioguideId
-	const bioguideId = memberData.bioguideId || member.bioguideId || memberData.id || member.id;
+	const bioguideId = memberData.bioguideId || member.bioguideId || memberData.id || member.id || memberData.memberId || member.memberId;
 	
 	// Try different possible field names for names
-	const firstName = memberData.firstName || member.firstName || memberData.first_name || member.first_name || memberData.givenName || member.givenName || '';
-	const lastName = memberData.lastName || member.lastName || memberData.last_name || member.last_name || memberData.familyName || member.familyName || '';
-	const middleName = memberData.middleName || member.middleName || memberData.middle_name || member.middle_name;
+	const firstName = memberData.firstName || member.firstName || memberData.first_name || member.first_name || memberData.givenName || member.givenName || memberData.name?.first || member.name?.first || '';
+	const lastName = memberData.lastName || member.lastName || memberData.last_name || member.last_name || memberData.familyName || member.familyName || memberData.name?.last || member.name?.last || '';
+	const middleName = memberData.middleName || member.middleName || memberData.middle_name || member.middle_name || memberData.name?.middle || member.name?.middle;
 	
-	// Debug: Log if we're skipping a member
-	if (!bioguideId || !firstName || !lastName) {
-		console.warn('Skipping member - missing required fields:', {
-			bioguideId: !!bioguideId,
-			firstName: !!firstName,
-			lastName: !!lastName,
-			keys: Object.keys(member).slice(0, 10)
-		});
+	// If we have a full name string, try to parse it
+	let parsedFirstName = firstName;
+	let parsedLastName = lastName;
+	if ((!firstName || !lastName) && memberData.name) {
+		const fullName = typeof memberData.name === 'string' ? memberData.name : (member.name || '');
+		if (fullName) {
+			const nameParts = fullName.trim().split(/\s+/);
+			if (nameParts.length >= 2) {
+				parsedFirstName = nameParts[0];
+				parsedLastName = nameParts[nameParts.length - 1];
+			}
+		}
+	}
+	
+	// Use parsed names if original names are missing
+	const finalFirstName = parsedFirstName || firstName;
+	const finalLastName = parsedLastName || lastName;
+	
+	// Debug: Log if we're skipping a member (only log first few to avoid spam)
+	if (!bioguideId || !finalFirstName || !finalLastName) {
+		if (results.length < 3) { // Only log first 3 skipped members
+			console.warn('Skipping member - missing required fields:', {
+				bioguideId: bioguideId || 'MISSING',
+				firstName: finalFirstName || 'MISSING',
+				lastName: finalLastName || 'MISSING',
+				allKeys: Object.keys(member),
+				sampleData: JSON.stringify(member).substring(0, 300)
+			});
+		}
 		return results;
 	}
 
@@ -132,20 +153,20 @@ export function convertCongressMember(member: any): Array<{
 	const district = currentTerm?.district || member.district || memberData.district;
 	
 	const fullName = middleName 
-		? `${firstName} ${middleName} ${lastName}`
-		: `${firstName} ${lastName}`;
+		? `${finalFirstName} ${middleName} ${finalLastName}`
+		: `${finalFirstName} ${finalLastName}`;
 
 	results.push({
 		propublica_id: `congress-${bioguideId}`,
 		name: fullName.trim(),
-		first_name: firstName,
-		last_name: lastName,
+		first_name: finalFirstName,
+		last_name: finalLastName,
 		state: state,
 		party: party,
 		chamber: chamber as 'house' | 'senate',
 		district: district ? String(district) : null,
 		twitter_handle: null, // Congress.gov API doesn't include Twitter
-		website: member.url || null,
+		website: member.url || memberData.url || null,
 	});
 
 	return results;

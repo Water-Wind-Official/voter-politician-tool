@@ -110,6 +110,12 @@ async function handleSync(request: Request, env: Env): Promise<Response> {
 		const houseMembers = await fetchCongressMembers('house', env.CONGRESS_API_KEY);
 		let houseCount = 0;
 		let houseSkipped = 0;
+		
+		// Log first member structure for debugging
+		if (houseMembers.length > 0) {
+			console.log('Sample House member structure:', JSON.stringify(houseMembers[0]).substring(0, 500));
+		}
+		
 		for (const member of houseMembers) {
 			const converted = convertCongressMember(member);
 			if (converted.length === 0) {
@@ -125,6 +131,12 @@ async function handleSync(request: Request, env: Env): Promise<Response> {
 		const senateMembers = await fetchCongressMembers('senate', env.CONGRESS_API_KEY);
 		let senateCount = 0;
 		let senateSkipped = 0;
+		
+		// Log first member structure for debugging
+		if (senateMembers.length > 0) {
+			console.log('Sample Senate member structure:', JSON.stringify(senateMembers[0]).substring(0, 500));
+		}
+		
 		for (const member of senateMembers) {
 			const converted = convertCongressMember(member);
 			if (converted.length === 0) {
