@@ -102,12 +102,19 @@ async function handleSync(request: Request, env: Env): Promise<Response> {
 		});
 	}
 	
+	// Debug info
+	let debugInfo: any = {};
+	
 	try {
 		// Fetch and sync House members
 		const houseMembers = await fetchCongressMembers('house', env.CONGRESS_API_KEY);
 		let houseCount = 0;
+		let houseSkipped = 0;
 		for (const member of houseMembers) {
 			const converted = convertCongressMember(member);
+			if (converted.length === 0) {
+				houseSkipped++;
+			}
 			for (const person of converted) {
 				await upsertPolitician(env.DB, person);
 				houseCount++;
@@ -117,13 +124,27 @@ async function handleSync(request: Request, env: Env): Promise<Response> {
 		// Fetch and sync Senate members
 		const senateMembers = await fetchCongressMembers('senate', env.CONGRESS_API_KEY);
 		let senateCount = 0;
+		let senateSkipped = 0;
 		for (const member of senateMembers) {
 			const converted = convertCongressMember(member);
+			if (converted.length === 0) {
+				senateSkipped++;
+			}
 			for (const person of converted) {
 				await upsertPolitician(env.DB, person);
 				senateCount++;
 			}
 		}
+		
+		// Debug info
+		debugInfo = {
+			houseMembersReceived: houseMembers.length,
+			houseMembersSynced: houseCount,
+			houseMembersSkipped: houseSkipped,
+			senateMembersReceived: senateMembers.length,
+			senateMembersSynced: senateCount,
+			senateMembersSkipped: senateSkipped,
+		};
 
 		// Fetch recent votes and sync (optional - Congress.gov API may not have vote endpoint)
 		let houseVoteCount = 0;
@@ -186,6 +207,7 @@ async function handleSync(request: Request, env: Env): Promise<Response> {
 			senateVotes: senateVoteCount,
 			houseVoteRecords: houseVoteRecordCount,
 			senateVoteRecords: senateVoteRecordCount,
+			debug: debugInfo,
 			note: voteError ? `Note: Vote data unavailable - ${voteError}. Members synced successfully.` : undefined
 		}), {
 			headers: { "content-type": "application/json" },

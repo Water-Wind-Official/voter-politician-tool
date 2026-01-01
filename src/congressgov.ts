@@ -76,31 +76,60 @@ export function convertCongressMember(member: any): Array<{
 		website: string | null;
 	}> = [];
 
-	// Handle nested member structure
+	// Handle nested member structure - try multiple possible field names
 	const memberData = member.member || member;
-	const bioguideId = memberData.bioguideId || member.bioguideId;
-	const firstName = memberData.firstName || member.firstName || '';
-	const lastName = memberData.lastName || member.lastName || '';
-	const middleName = memberData.middleName || member.middleName;
 	
+	// Try different possible field names for bioguideId
+	const bioguideId = memberData.bioguideId || member.bioguideId || memberData.id || member.id;
+	
+	// Try different possible field names for names
+	const firstName = memberData.firstName || member.firstName || memberData.first_name || member.first_name || memberData.givenName || member.givenName || '';
+	const lastName = memberData.lastName || member.lastName || memberData.last_name || member.last_name || memberData.familyName || member.familyName || '';
+	const middleName = memberData.middleName || member.middleName || memberData.middle_name || member.middle_name;
+	
+	// Debug: Log if we're skipping a member
 	if (!bioguideId || !firstName || !lastName) {
-		// Skip invalid members
+		console.warn('Skipping member - missing required fields:', {
+			bioguideId: !!bioguideId,
+			firstName: !!firstName,
+			lastName: !!lastName,
+			keys: Object.keys(member).slice(0, 10)
+		});
 		return results;
 	}
 
 	// Get current term (most recent active term)
-	const terms = member.terms || [];
-	const currentTerm = terms.find((t: any) => !t.endDate) || terms[terms.length - 1] || {};
+	const terms = member.terms || member.term || [];
+	const currentTerm = Array.isArray(terms) 
+		? (terms.find((t: any) => !t.endDate || !t.end) || terms[terms.length - 1] || {})
+		: terms;
 	
-	const chamber = (currentTerm.chamber || member.chamber || '').toLowerCase();
+	// Try to get chamber from multiple possible locations
+	let chamber = '';
+	if (currentTerm && currentTerm.chamber) {
+		chamber = String(currentTerm.chamber).toLowerCase();
+	} else if (member.chamber) {
+		chamber = String(member.chamber).toLowerCase();
+	} else if (memberData.chamber) {
+		chamber = String(memberData.chamber).toLowerCase();
+	}
+	
+	// Normalize chamber values
+	if (chamber.includes('house') || chamber === 'h' || chamber === 'rep') {
+		chamber = 'house';
+	} else if (chamber.includes('senate') || chamber === 's' || chamber === 'sen') {
+		chamber = 'senate';
+	}
+	
 	if (chamber !== 'house' && chamber !== 'senate') {
 		// Skip if we can't determine chamber
+		console.warn('Skipping member - cannot determine chamber:', { bioguideId, chamber, keys: Object.keys(member).slice(0, 10) });
 		return results;
 	}
 	
-	const state = currentTerm.state || member.state || '';
-	const party = currentTerm.party || member.party || member.partyName || 'Unknown';
-	const district = currentTerm.district || member.district;
+	const state = currentTerm?.state || member.state || memberData.state || '';
+	const party = currentTerm?.party || member.party || member.partyName || memberData.party || memberData.partyName || 'Unknown';
+	const district = currentTerm?.district || member.district || memberData.district;
 	
 	const fullName = middleName 
 		? `${firstName} ${middleName} ${lastName}`
@@ -186,16 +215,27 @@ export async function fetchCongressMembers(
 	}
 
 	const data = await response.json();
-	// Congress.gov API v3 returns members in a members array
+	
+	// Debug: Log the structure to understand the API response
+	// console.log('Congress.gov API response structure:', JSON.stringify(Object.keys(data)).substring(0, 200));
+	
+	// Congress.gov API v3 returns members in different possible structures
+	// Try multiple possible response structures
 	if (data.members && Array.isArray(data.members)) {
 		return data.members;
 	}
 	if (data.results && data.results.members && Array.isArray(data.results.members)) {
 		return data.results.members;
 	}
+	if (data.results && Array.isArray(data.results)) {
+		return data.results;
+	}
 	if (Array.isArray(data)) {
 		return data;
 	}
+	
+	// If we get here, log what we actually got
+	console.error('Unexpected Congress.gov API response structure:', JSON.stringify(data).substring(0, 500));
 	return [];
 }
 
