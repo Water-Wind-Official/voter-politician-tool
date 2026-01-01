@@ -2,5 +2,5 @@
 
 interface Env {
 	DB: D1Database;
-	// No API keys needed - GovTrack API is free and open!
+	CONGRESS_API_KEY?: string;
 }

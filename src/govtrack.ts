@@ -116,10 +116,16 @@ export async function fetchGovTrackMembers(
 	const roleType = chamber === 'house' ? 'rep' : 'sen';
 	const url = `${GOVTRACK_API_BASE}/person?roles__current=true&roles__role_type=${roleType}&limit=${limit}`;
 	
-	const response = await fetch(url);
+	const response = await fetch(url, {
+		headers: {
+			'User-Agent': 'Mozilla/5.0 (compatible; PoliticianVotingRecords/1.0)',
+			'Accept': 'application/json',
+		},
+	});
 
 	if (!response.ok) {
-		throw new Error(`GovTrack API error: ${response.status} ${response.statusText}`);
+		const errorText = await response.text().catch(() => '');
+		throw new Error(`GovTrack API error: ${response.status} ${response.statusText}. ${errorText}`);
 	}
 
 	const data = await response.json();
@@ -132,10 +138,16 @@ export async function fetchGovTrackRecentVotes(
 ): Promise<GovTrackVote[]> {
 	const url = `${GOVTRACK_API_BASE}/vote?chamber=${chamber}&limit=${limit}&order_by=-created`;
 	
-	const response = await fetch(url);
+	const response = await fetch(url, {
+		headers: {
+			'User-Agent': 'Mozilla/5.0 (compatible; PoliticianVotingRecords/1.0)',
+			'Accept': 'application/json',
+		},
+	});
 
 	if (!response.ok) {
-		throw new Error(`GovTrack API error: ${response.status} ${response.statusText}`);
+		const errorText = await response.text().catch(() => '');
+		throw new Error(`GovTrack API error: ${response.status} ${response.statusText}. ${errorText}`);
 	}
 
 	const data = await response.json();
@@ -148,10 +160,16 @@ export async function fetchGovTrackPersonVotes(
 ): Promise<GovTrackVote[]> {
 	const url = `${GOVTRACK_API_BASE}/vote?voters__person=${personId}&limit=${limit}&order_by=-created`;
 	
-	const response = await fetch(url);
+	const response = await fetch(url, {
+		headers: {
+			'User-Agent': 'Mozilla/5.0 (compatible; PoliticianVotingRecords/1.0)',
+			'Accept': 'application/json',
+		},
+	});
 
 	if (!response.ok) {
-		throw new Error(`GovTrack API error: ${response.status} ${response.statusText}`);
+		const errorText = await response.text().catch(() => '');
+		throw new Error(`GovTrack API error: ${response.status} ${response.statusText}. ${errorText}`);
 	}
 
 	const data = await response.json();

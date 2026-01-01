@@ -2,11 +2,12 @@ import { renderPoliticianList, renderPoliticianProfile } from "./renderHtml";
 import { getPoliticians, getPolitician, getPoliticianVotes, getPoliticianByProPublicaId } from "./db";
 import { upsertPolitician, upsertVote, upsertVotingRecord } from "./db";
 import { 
-	fetchGovTrackMembers, 
-	fetchGovTrackRecentVotes, 
-	convertGovTrackPerson, 
-	convertGovTrackVote 
-} from "./govtrack";
+	fetchCongressMembers, 
+	fetchCongressVotes, 
+	convertCongressMember,
+	convertCongressVote,
+	mapCongressVote
+} from "./congressgov";
 
 export default {
 	async fetch(request: Request, env: Env): Promise<Response> {
@@ -88,15 +89,25 @@ async function handleApiRequest(request: Request, env: Env, path: string): Promi
 }
 
 async function handleSync(request: Request, env: Env): Promise<Response> {
-	// This endpoint syncs data from GovTrack API
-	// No API key required - GovTrack API is free and open
+	// This endpoint syncs data from Congress.gov API
+	// Requires CONGRESS_API_KEY in environment variables
+	
+	if (!env.CONGRESS_API_KEY) {
+		return new Response(JSON.stringify({ 
+			success: false, 
+			error: 'Congress.gov API key not configured. Set CONGRESS_API_KEY environment variable.' 
+		}), {
+			status: 500,
+			headers: { "content-type": "application/json" },
+		});
+	}
 	
 	try {
 		// Fetch and sync House members
-		const houseMembers = await fetchGovTrackMembers('house');
+		const houseMembers = await fetchCongressMembers('house', env.CONGRESS_API_KEY);
 		let houseCount = 0;
 		for (const member of houseMembers) {
-			const converted = convertGovTrackPerson(member);
+			const converted = convertCongressMember(member);
 			for (const person of converted) {
 				await upsertPolitician(env.DB, person);
 				houseCount++;
@@ -104,10 +115,10 @@ async function handleSync(request: Request, env: Env): Promise<Response> {
 		}
 
 		// Fetch and sync Senate members
-		const senateMembers = await fetchGovTrackMembers('senate');
+		const senateMembers = await fetchCongressMembers('senate', env.CONGRESS_API_KEY);
 		let senateCount = 0;
 		for (const member of senateMembers) {
-			const converted = convertGovTrackPerson(member);
+			const converted = convertCongressMember(member);
 			for (const person of converted) {
 				await upsertPolitician(env.DB, person);
 				senateCount++;
@@ -115,42 +126,41 @@ async function handleSync(request: Request, env: Env): Promise<Response> {
 		}
 
 		// Fetch recent votes and sync
-		const houseVotes = await fetchGovTrackRecentVotes('house', 100);
+		const houseVotes = await fetchCongressVotes('house', env.CONGRESS_API_KEY, 118, 100);
 		let houseVoteCount = 0;
 		let houseVoteRecordCount = 0;
 		
 		for (const vote of houseVotes) {
-			const voteData = convertGovTrackVote(vote);
+			const voteData = convertCongressVote(vote);
 			const voteId = await upsertVote(env.DB, voteData);
 			houseVoteCount++;
 			
 			// Sync voting positions
-			for (const voter of vote.voters) {
-				const politicianId = `govtrack-${voter.person}`;
+			for (const member of vote.members) {
+				const politicianId = `congress-${member.bioguideId}`;
 				const politician = await getPoliticianByProPublicaId(env.DB, politicianId);
 				if (politician) {
-					// Map GovTrack vote options to standard positions
-					const position = mapVoteOption(voter.option.key);
+					const position = mapCongressVote(member.vote);
 					await upsertVotingRecord(env.DB, politician.id, voteId, position);
 					houseVoteRecordCount++;
 				}
 			}
 		}
 
-		const senateVotes = await fetchGovTrackRecentVotes('senate', 100);
+		const senateVotes = await fetchCongressVotes('senate', env.CONGRESS_API_KEY, 118, 100);
 		let senateVoteCount = 0;
 		let senateVoteRecordCount = 0;
 		
 		for (const vote of senateVotes) {
-			const voteData = convertGovTrackVote(vote);
+			const voteData = convertCongressVote(vote);
 			const voteId = await upsertVote(env.DB, voteData);
 			senateVoteCount++;
 			
-			for (const voter of vote.voters) {
-				const politicianId = `govtrack-${voter.person}`;
+			for (const member of vote.members) {
+				const politicianId = `congress-${member.bioguideId}`;
 				const politician = await getPoliticianByProPublicaId(env.DB, politicianId);
 				if (politician) {
-					const position = mapVoteOption(voter.option.key);
+					const position = mapCongressVote(member.vote);
 					await upsertVotingRecord(env.DB, politician.id, voteId, position);
 					senateVoteRecordCount++;
 				}
@@ -159,7 +169,7 @@ async function handleSync(request: Request, env: Env): Promise<Response> {
 
 		return new Response(JSON.stringify({ 
 			success: true, 
-			message: 'Data synced successfully from GovTrack API',
+			message: 'Data synced successfully from Congress.gov API',
 			houseMembers: houseCount,
 			senateMembers: senateCount,
 			houseVotes: houseVoteCount,
@@ -172,7 +182,7 @@ async function handleSync(request: Request, env: Env): Promise<Response> {
 	} catch (error: any) {
 		return new Response(JSON.stringify({ 
 			success: false, 
-			error: error.message,
+			error: error.message || 'Unknown error',
 			stack: error.stack
 		}), {
 			status: 500,
@@ -181,18 +191,3 @@ async function handleSync(request: Request, env: Env): Promise<Response> {
 	}
 }
 
-// Map GovTrack vote options to standard positions
-function mapVoteOption(option: string): 'Yes' | 'No' | 'Not Voting' | 'Present' {
-	const normalized = option.toLowerCase().trim();
-	
-	if (normalized === 'yes' || normalized === 'yea' || normalized === 'y') {
-		return 'Yes';
-	}
-	if (normalized === 'no' || normalized === 'nay' || normalized === 'n') {
-		return 'No';
-	}
-	if (normalized === 'present' || normalized === 'p') {
-		return 'Present';
-	}
-	return 'Not Voting';
-}
