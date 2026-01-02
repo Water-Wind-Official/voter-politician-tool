@@ -2,6 +2,7 @@
 
 import { renderHomePage } from "./renderMap";
 import { renderPoliticianProfile } from "./renderHtml";
+import { renderAdminLogin, renderAdminDashboard } from "./renderAdmin";
 import { 
 	getAllStates, 
 	getStateByCode,
@@ -9,7 +10,15 @@ import {
 	getRepresentative,
 	getVoterDataByState,
 	getVoterDemographicsByState,
-	getPoliticianVotes
+	getPoliticianVotes,
+	getAllRepresentatives,
+	createRepresentative,
+	updateRepresentative,
+	deleteRepresentative,
+	upsertVoterData,
+	getAllVotes,
+	createVote,
+	getDistrictsByState
 } from "./db";
 
 export default {
@@ -20,6 +29,11 @@ export default {
 		// API endpoints
 		if (path.startsWith('/api/')) {
 			return handleApiRequest(request, env, path);
+		}
+
+		// Admin API endpoints (before admin dashboard check)
+		if (path.startsWith('/api/admin/')) {
+			return handleAdminApi(request, env, path);
 		}
 
 		// Web pages
@@ -40,6 +54,19 @@ export default {
 			if (!isNaN(id)) {
 				return handleRepresentativePage(request, env, id);
 			}
+		}
+
+		// Admin routes
+		if (path === '/admin' || path === '/admin/') {
+			return handleAdminDashboard(request, env);
+		}
+
+		if (path === '/admin/login') {
+			return handleAdminLogin(request, env);
+		}
+
+		if (path === '/admin/logout') {
+			return handleAdminLogout(request, env);
 		}
 
 		// 404
@@ -106,6 +133,120 @@ async function handleApiRequest(request: Request, env: Env, path: string): Promi
 			}
 			return Response.json({ representative });
 		}
+	}
+
+	return new Response('Not found', { status: 404 });
+}
+
+// Admin authentication
+const ADMIN_PASSWORD = 'Anarchy420';
+
+function checkAdminAuth(request: Request): boolean {
+	const cookie = request.headers.get('Cookie');
+	return cookie?.includes('admin_auth=true') || false;
+}
+
+function setAdminAuth(response: Response): void {
+	response.headers.set('Set-Cookie', 'admin_auth=true; Path=/; HttpOnly; SameSite=Strict; Max-Age=86400');
+}
+
+function clearAdminAuth(response: Response): void {
+	response.headers.set('Set-Cookie', 'admin_auth=false; Path=/; HttpOnly; SameSite=Strict; Max-Age=0');
+}
+
+async function handleAdminLogin(request: Request, env: Env): Promise<Response> {
+	if (request.method === 'POST') {
+		const body = await request.json() as { password?: string };
+		if (body.password === ADMIN_PASSWORD) {
+			const response = new Response(JSON.stringify({ success: true }), {
+				headers: { 'Content-Type': 'application/json' }
+			});
+			setAdminAuth(response);
+			return response;
+		}
+		return new Response(JSON.stringify({ success: false }), {
+			status: 401,
+			headers: { 'Content-Type': 'application/json' }
+		});
+	}
+	return new Response(renderAdminLogin(), {
+		headers: { 'Content-Type': 'text/html' }
+	});
+}
+
+async function handleAdminLogout(request: Request, env: Env): Promise<Response> {
+	const response = new Response(JSON.stringify({ success: true }), {
+		headers: { 'Content-Type': 'application/json' }
+	});
+	clearAdminAuth(response);
+	return response;
+}
+
+async function handleAdminDashboard(request: Request, env: Env): Promise<Response> {
+	if (!checkAdminAuth(request)) {
+		return Response.redirect(new URL('/admin/login', request.url).toString(), 302);
+	}
+
+	const states = await getAllStates(env.DB);
+	const representatives = await getAllRepresentatives(env.DB);
+	const voterData = await Promise.all(
+		states.map(s => getVoterDataByState(env.DB, s.code))
+	).then(results => results.filter(r => r !== null));
+	const votes = await getAllVotes(env.DB);
+
+	return new Response(renderAdminDashboard({
+		states,
+		representatives,
+		voterData,
+		votes
+	}), {
+		headers: { 'Content-Type': 'text/html' }
+	});
+}
+
+async function handleAdminApi(request: Request, env: Env, path: string): Promise<Response> {
+	if (!checkAdminAuth(request)) {
+		return new Response('Unauthorized', { status: 401 });
+	}
+
+	// Representative CRUD
+	if (path === '/api/admin/representative' && request.method === 'POST') {
+		const body = await request.json() as any;
+		const id = await createRepresentative(env.DB, body);
+		return Response.json({ success: true, id });
+	}
+
+	if (path.startsWith('/api/admin/representative/') && request.method === 'PUT') {
+		const id = parseInt(path.split('/')[4]);
+		if (isNaN(id)) {
+			return new Response('Invalid ID', { status: 400 });
+		}
+		const body = await request.json() as any;
+		await updateRepresentative(env.DB, id, body);
+		return Response.json({ success: true });
+	}
+
+	if (path.startsWith('/api/admin/representative/') && request.method === 'DELETE') {
+		const id = parseInt(path.split('/')[4]);
+		if (isNaN(id)) {
+			return new Response('Invalid ID', { status: 400 });
+		}
+		await deleteRepresentative(env.DB, id);
+		return Response.json({ success: true });
+	}
+
+	// Voter data
+	if (path === '/api/admin/voter-data' && request.method === 'POST') {
+		const body = await request.json() as any;
+		const id = await upsertVoterData(env.DB, body);
+		return Response.json({ success: true, id });
+	}
+
+	// Votes
+	if (path === '/api/admin/vote' && request.method === 'POST') {
+		const body = await request.json() as any;
+		const id = await createVote(env.DB, body);
+		return Response.json({ success: true, id });
 	}
 
 	return new Response('Not found', { status: 404 });

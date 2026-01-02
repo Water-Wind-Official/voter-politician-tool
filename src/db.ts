@@ -325,3 +325,207 @@ export async function getVoterDemographicsByState(
 	const stmt = db.prepare(query);
 	return (await stmt.bind(...params).all<VoterDemographic>()).results;
 }
+
+// Admin functions for CRUD operations
+
+export async function getAllRepresentatives(db: D1Database): Promise<Representative[]> {
+	const result = await db
+		.prepare(`
+			SELECT r.*, d.district_number, d.name as district_name
+			FROM representatives r
+			LEFT JOIN districts d ON r.district_id = d.id
+			ORDER BY r.state_code, r.chamber, d.district_number, r.last_name
+		`)
+		.all<Representative>();
+	return result.results;
+}
+
+export async function createRepresentative(db: D1Database, data: Partial<Representative>): Promise<number> {
+	const result = await db
+		.prepare(`
+			INSERT INTO representatives (
+				external_id, name, first_name, last_name, middle_name, suffix,
+				state_code, party, chamber, district_id, office_address, office_phone,
+				email, twitter_handle, facebook_url, website, photo_url, bio,
+				term_start, term_end, is_active
+			) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+			RETURNING id
+		`)
+		.bind(
+			data.external_id || null,
+			data.name || '',
+			data.first_name || null,
+			data.last_name || null,
+			data.middle_name || null,
+			data.suffix || null,
+			data.state_code || '',
+			data.party || null,
+			data.chamber || 'house',
+			data.district_id || null,
+			data.office_address || null,
+			data.office_phone || null,
+			data.email || null,
+			data.twitter_handle || null,
+			data.facebook_url || null,
+			data.website || null,
+			data.photo_url || null,
+			data.bio || null,
+			data.term_start || null,
+			data.term_end || null,
+			data.is_active !== undefined ? (data.is_active ? 1 : 0) : 1
+		)
+		.first<{ id: number }>();
+	return result!.id;
+}
+
+export async function updateRepresentative(db: D1Database, id: number, data: Partial<Representative>): Promise<void> {
+	const updates: string[] = [];
+	const values: any[] = [];
+
+	if (data.name !== undefined) { updates.push('name = ?'); values.push(data.name); }
+	if (data.first_name !== undefined) { updates.push('first_name = ?'); values.push(data.first_name); }
+	if (data.last_name !== undefined) { updates.push('last_name = ?'); values.push(data.last_name); }
+	if (data.middle_name !== undefined) { updates.push('middle_name = ?'); values.push(data.middle_name); }
+	if (data.suffix !== undefined) { updates.push('suffix = ?'); values.push(data.suffix); }
+	if (data.state_code !== undefined) { updates.push('state_code = ?'); values.push(data.state_code); }
+	if (data.party !== undefined) { updates.push('party = ?'); values.push(data.party); }
+	if (data.chamber !== undefined) { updates.push('chamber = ?'); values.push(data.chamber); }
+	if (data.district_id !== undefined) { updates.push('district_id = ?'); values.push(data.district_id); }
+	if (data.office_address !== undefined) { updates.push('office_address = ?'); values.push(data.office_address); }
+	if (data.office_phone !== undefined) { updates.push('office_phone = ?'); values.push(data.office_phone); }
+	if (data.email !== undefined) { updates.push('email = ?'); values.push(data.email); }
+	if (data.twitter_handle !== undefined) { updates.push('twitter_handle = ?'); values.push(data.twitter_handle); }
+	if (data.facebook_url !== undefined) { updates.push('facebook_url = ?'); values.push(data.facebook_url); }
+	if (data.website !== undefined) { updates.push('website = ?'); values.push(data.website); }
+	if (data.photo_url !== undefined) { updates.push('photo_url = ?'); values.push(data.photo_url); }
+	if (data.bio !== undefined) { updates.push('bio = ?'); values.push(data.bio); }
+	if (data.term_start !== undefined) { updates.push('term_start = ?'); values.push(data.term_start); }
+	if (data.term_end !== undefined) { updates.push('term_end = ?'); values.push(data.term_end); }
+	if (data.is_active !== undefined) { updates.push('is_active = ?'); values.push(data.is_active ? 1 : 0); }
+
+	updates.push('updated_at = CURRENT_TIMESTAMP');
+	values.push(id);
+
+	await db
+		.prepare(`UPDATE representatives SET ${updates.join(', ')} WHERE id = ?`)
+		.bind(...values)
+		.run();
+}
+
+export async function deleteRepresentative(db: D1Database, id: number): Promise<void> {
+	await db.prepare('DELETE FROM representatives WHERE id = ?').bind(id).run();
+}
+
+export async function upsertVoterData(db: D1Database, data: Partial<VoterData>): Promise<number> {
+	const result = await db
+		.prepare(`
+			INSERT INTO voter_data (
+				state_code, total_registered_voters, total_population, voting_age_population,
+				voter_turnout_percentage, last_election_date, data_source, data_year, notes
+			) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+			ON CONFLICT(state_code, data_year) DO UPDATE SET
+				total_registered_voters = excluded.total_registered_voters,
+				total_population = excluded.total_population,
+				voting_age_population = excluded.voting_age_population,
+				voter_turnout_percentage = excluded.voter_turnout_percentage,
+				last_election_date = excluded.last_election_date,
+				data_source = excluded.data_source,
+				notes = excluded.notes,
+				updated_at = CURRENT_TIMESTAMP
+			RETURNING id
+		`)
+		.bind(
+			data.state_code || '',
+			data.total_registered_voters || null,
+			data.total_population || null,
+			data.voting_age_population || null,
+			data.voter_turnout_percentage || null,
+			data.last_election_date || null,
+			data.data_source || null,
+			data.data_year || new Date().getFullYear(),
+			data.notes || null
+		)
+		.first<{ id: number }>();
+	return result!.id;
+}
+
+export async function upsertVoterDemographic(db: D1Database, data: Partial<VoterDemographic>): Promise<number> {
+	const result = await db
+		.prepare(`
+			INSERT INTO voter_demographics (
+				state_code, district_id, demographic_type, category, count, percentage, data_year
+			) VALUES (?, ?, ?, ?, ?, ?, ?)
+			ON CONFLICT DO NOTHING
+			RETURNING id
+		`)
+		.bind(
+			data.state_code || '',
+			data.district_id || null,
+			data.demographic_type || '',
+			data.category || '',
+			data.count || null,
+			data.percentage || null,
+			data.data_year || new Date().getFullYear()
+		)
+		.first<{ id: number }>();
+	return result ? result.id : 0;
+}
+
+export async function createDistrict(db: D1Database, data: Partial<District>): Promise<number> {
+	const result = await db
+		.prepare(`
+			INSERT INTO districts (state_code, district_number, name, population, area_sq_miles, description)
+			VALUES (?, ?, ?, ?, ?, ?)
+			RETURNING id
+		`)
+		.bind(
+			data.state_code || '',
+			data.district_number || null,
+			data.name || null,
+			data.population || null,
+			data.area_sq_miles || null,
+			data.description || null
+		)
+		.first<{ id: number }>();
+	return result!.id;
+}
+
+export async function getAllVotes(db: D1Database): Promise<any[]> {
+	const result = await db
+		.prepare('SELECT * FROM votes ORDER BY date DESC LIMIT 100')
+		.all();
+	return result.results;
+}
+
+export async function createVote(db: D1Database, data: Partial<VoteData>): Promise<number> {
+	const result = await db
+		.prepare(`
+			INSERT INTO votes (
+				propublica_roll_id, bill_id, bill_title, bill_number, description,
+				question, date, chamber, result
+			) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+			ON CONFLICT(propublica_roll_id) DO UPDATE SET
+				bill_id = excluded.bill_id,
+				bill_title = excluded.bill_title,
+				bill_number = excluded.bill_number,
+				description = excluded.description,
+				question = excluded.question,
+				date = excluded.date,
+				chamber = excluded.chamber,
+				result = excluded.result
+			RETURNING id
+		`)
+		.bind(
+			data.propublica_roll_id || `vote-${Date.now()}`,
+			data.bill_id || null,
+			data.bill_title || null,
+			data.bill_number || null,
+			data.description || null,
+			data.question || null,
+			data.date || new Date().toISOString().split('T')[0],
+			data.chamber || 'house',
+			data.result || null
+		)
+		.first<{ id: number }>();
+	return result!.id;
+}
