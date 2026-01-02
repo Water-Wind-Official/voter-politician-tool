@@ -143,19 +143,19 @@ export function renderHomePage(states: State[]): string {
 		}
 		
 		.state-path.republican {
-			fill: #ff6b6b !important; /* Vibrant pastel red for Republican states */
+			fill: #ff6b6b; /* Vibrant pastel red for Republican states */
 		}
 
 		.state-path.democrat {
-			fill: #74b9ff !important; /* Vibrant pastel blue for Democratic states */
+			fill: #74b9ff; /* Vibrant pastel blue for Democratic states */
 		}
 
 		.state-path.republican:hover {
-			fill: #ff5252 !important; /* Darker red on hover */
+			fill: #ff5252; /* Darker red on hover */
 		}
 
 		.state-path.democrat:hover {
-			fill: #0984e3 !important; /* Darker blue on hover */
+			fill: #0984e3; /* Darker blue on hover */
 		}
 		
 		.state-path:hover:not(.republican):not(.democrat) {
@@ -406,17 +406,6 @@ export function renderHomePage(states: State[]): string {
 					${generateUSMapSVG(states)}
 				</svg>
 				<div id="state-info" class="state-info"></div>
-				<div class="map-legend">
-					<div class="legend-title">2024 Election</div>
-					<div class="legend-item">
-						<div class="legend-color republican"></div>
-						<span>Republican Win</span>
-					</div>
-					<div class="legend-item">
-						<div class="legend-color democrat"></div>
-						<span>Democratic Win</span>
-					</div>
-				</div>
 			</div>
 		</div>
 		
@@ -719,11 +708,6 @@ function generateUSMapSVG(states: State[]): string {
 			electoralClass = 'republican';
 		} else if (state?.electoral_winner === 'Democrat') {
 			electoralClass = 'democrat';
-		}
-
-		// Debug: Log electoral winners for a few states
-		if (['CA', 'TX', 'FL', 'NY'].includes(code)) {
-			console.log(`${code}: electoral_winner = "${state?.electoral_winner}", class = "${electoralClass}"`);
 		}
 		
 		// Create a rounded rectangle for each state

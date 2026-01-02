@@ -354,31 +354,97 @@ async function handleAdminApi(request: Request, env: Env, path: string): Promise
 
 	// Populate 2024 electoral data
 	if (path === '/api/admin/populate-electoral-2024' && request.method === 'POST') {
-		// Test with just a few states first
-		const testStates = {
-			'CA': { winner: 'Democrat', votes: 54, margin: 16.8 },
-			'TX': { winner: 'Republican', votes: 40, margin: 11.0 },
-			'FL': { winner: 'Republican', votes: 30, margin: 3.1 },
-			'NY': { winner: 'Democrat', votes: 28, margin: 21.4 }
+		console.log('Populate electoral data endpoint called');
+
+		// Official 2024 Electoral Vote Results
+		const electoralData: Record<string, { total: number; harris: number; trump: number; margin?: number }> = {
+			'AL': { total: 9, harris: 0, trump: 9, margin: 25.5 },
+			'AK': { total: 3, harris: 0, trump: 3, margin: 19.4 },
+			'AZ': { total: 11, harris: 0, trump: 11, margin: 5.2 },
+			'AR': { total: 6, harris: 0, trump: 6, margin: 27.6 },
+			'CA': { total: 54, harris: 54, trump: 0, margin: 16.8 },
+			'CO': { total: 10, harris: 10, trump: 0, margin: 14.0 },
+			'CT': { total: 7, harris: 7, trump: 0, margin: 21.2 },
+			'DE': { total: 3, harris: 3, trump: 0, margin: 19.0 },
+			'DC': { total: 3, harris: 3, trump: 0, margin: 86.8 },
+			'FL': { total: 30, harris: 0, trump: 30, margin: 3.1 },
+			'GA': { total: 16, harris: 0, trump: 16, margin: 5.2 },
+			'HI': { total: 4, harris: 4, trump: 0, margin: 29.5 },
+			'ID': { total: 4, harris: 0, trump: 4, margin: 31.8 },
+			'IL': { total: 19, harris: 19, trump: 0, margin: 17.6 },
+			'IN': { total: 11, harris: 0, trump: 11, margin: 21.1 },
+			'IA': { total: 6, harris: 0, trump: 6, margin: 14.1 },
+			'KS': { total: 6, harris: 0, trump: 6, margin: 18.2 },
+			'KY': { total: 8, harris: 0, trump: 8, margin: 26.0 },
+			'LA': { total: 8, harris: 0, trump: 8, margin: 19.6 },
+			'ME': { total: 4, harris: 3, trump: 1, margin: 9.1 },
+			'MD': { total: 10, harris: 10, trump: 0, margin: 33.2 },
+			'MA': { total: 11, harris: 11, trump: 0, margin: 33.5 },
+			'MI': { total: 15, harris: 0, trump: 15, margin: 2.9 },
+			'MN': { total: 10, harris: 10, trump: 0, margin: 7.2 },
+			'MS': { total: 6, harris: 0, trump: 6, margin: 17.8 },
+			'MO': { total: 10, harris: 0, trump: 10, margin: 15.4 },
+			'MT': { total: 4, harris: 0, trump: 4, margin: 16.4 },
+			'NE': { total: 5, harris: 1, trump: 4, margin: 15.2 },
+			'NV': { total: 6, harris: 0, trump: 6, margin: 2.4 },
+			'NH': { total: 4, harris: 4, trump: 0, margin: 8.8 },
+			'NJ': { total: 14, harris: 14, trump: 0, margin: 15.9 },
+			'NM': { total: 5, harris: 5, trump: 0, margin: 10.8 },
+			'NY': { total: 28, harris: 28, trump: 0, margin: 21.4 },
+			'NC': { total: 16, harris: 0, trump: 16, margin: 3.3 },
+			'ND': { total: 3, harris: 0, trump: 3, margin: 33.4 },
+			'OH': { total: 17, harris: 0, trump: 17, margin: 8.0 },
+			'OK': { total: 7, harris: 0, trump: 7, margin: 32.3 },
+			'OR': { total: 8, harris: 8, trump: 0, margin: 16.1 },
+			'PA': { total: 19, harris: 0, trump: 19, margin: 0.3 },
+			'RI': { total: 4, harris: 4, trump: 0, margin: 19.8 },
+			'SC': { total: 9, harris: 0, trump: 9, margin: 14.0 },
+			'SD': { total: 3, harris: 0, trump: 3, margin: 21.9 },
+			'TN': { total: 11, harris: 0, trump: 11, margin: 23.9 },
+			'TX': { total: 40, harris: 0, trump: 40, margin: 11.0 },
+			'UT': { total: 6, harris: 0, trump: 6, margin: 20.6 },
+			'VT': { total: 3, harris: 3, trump: 0, margin: 25.2 },
+			'VA': { total: 13, harris: 13, trump: 0, margin: 10.2 },
+			'WA': { total: 12, harris: 12, trump: 0, margin: 18.2 },
+			'WV': { total: 4, harris: 0, trump: 4, margin: 26.8 },
+			'WI': { total: 10, harris: 0, trump: 10, margin: 0.9 },
+			'WY': { total: 3, harris: 0, trump: 3, margin: 43.4 }
 		};
 
 		let updated = 0;
-		for (const [stateCode, data] of Object.entries(testStates)) {
-			await updateStateElectoralData(
-				env.DB,
-				stateCode,
-				data.winner,
-				2024,
-				data.margin,
-				data.votes
-			);
-			updated++;
+		let errors = 0;
+
+		for (const [stateCode, data] of Object.entries(electoralData)) {
+			try {
+				const winner = data.harris > data.trump ? 'Democrat' : data.trump > data.harris ? 'Republican' : 'Split';
+				await updateStateElectoralData(
+					env.DB,
+					stateCode,
+					winner,
+					2024,
+					data.margin || null,
+					data.total
+				);
+				updated++;
+			} catch (error) {
+				console.error(`Error updating ${stateCode}:`, error);
+				errors++;
+			}
 		}
+
+		console.log(`Populate complete: ${updated} updated, ${errors} errors`);
 
 		return Response.json({
 			success: true,
-			message: `Updated electoral data for ${updated} test states`,
-			testStates: Object.keys(testStates)
+			message: `Updated electoral data for ${updated} states (${errors} errors)`,
+			electoralBreakdown: {
+				republicanStates: Object.values(electoralData).filter(d => d.trump > d.harris).length,
+				democratStates: Object.values(electoralData).filter(d => d.harris > d.trump).length,
+				splitStates: Object.values(electoralData).filter(d => d.harris === d.trump).length,
+				totalElectoralVotes: Object.values(electoralData).reduce((sum, d) => sum + d.total, 0)
+			},
+			updated,
+			errors
 		});
 	}
 
@@ -549,10 +615,44 @@ async function handleAdminApi(request: Request, env: Env, path: string): Promise
 			electoral_votes: s.electoral_votes
 		}));
 
+		// Test the color logic
+		const colorTest = electoralSummary.map(s => ({
+			code: s.code,
+			winner: s.electoral_winner,
+			cssClass: s.electoral_winner === 'Republican' ? 'republican' :
+					  s.electoral_winner === 'Democrat' ? 'democrat' : 'none'
+		})).filter(s => s.cssClass !== 'none');
+
 		return Response.json({
 			totalStates: states.length,
 			statesWithElectoralData: electoralSummary.filter(s => s.electoral_winner).length,
-			electoralData: electoralSummary
+			electoralData: electoralSummary.slice(0, 10), // First 10 states only
+			colorTest,
+			testStates: ['CA', 'TX', 'FL', 'NY'].map(code => {
+				const state = electoralSummary.find(s => s.code === code);
+				return {
+					code,
+					winner: state?.electoral_winner,
+					cssClass: state?.electoral_winner === 'Republican' ? 'republican' :
+							 state?.electoral_winner === 'Democrat' ? 'democrat' : 'none'
+				};
+			})
+		});
+	}
+
+	// Test endpoint to manually set electoral data for a few states
+	if (path === '/api/admin/test-electoral' && request.method === 'POST') {
+		console.log('Test electoral endpoint called');
+
+		// Manually set test data
+		await updateStateElectoralData(env.DB, 'CA', 'Democrat', 2024, 16.8, 54);
+		await updateStateElectoralData(env.DB, 'TX', 'Republican', 2024, 11.0, 40);
+		await updateStateElectoralData(env.DB, 'FL', 'Republican', 2024, 3.1, 30);
+		await updateStateElectoralData(env.DB, 'NY', 'Democrat', 2024, 21.4, 28);
+
+		return Response.json({
+			success: true,
+			message: 'Test electoral data set for CA, TX, FL, NY'
 		});
 	}
 

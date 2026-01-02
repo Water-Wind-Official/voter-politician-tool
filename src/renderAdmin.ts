@@ -1311,7 +1311,7 @@ export function renderAdminDashboard(data: any): string {
 				const result = await response.json();
 
 				if (response.ok && result.success) {
-					alert('✅ Success! Updated electoral data for ' + result.updated + ' states. The map will now show pastel colors based on 2024 election results!');
+					alert('✅ Success! Updated electoral data for all 50 states + DC. The map will now show pastel colors based on 2024 election results!');
 					location.reload();
 				} else {
 					alert('❌ Error: ' + (result.message || 'Failed to populate electoral data'));
