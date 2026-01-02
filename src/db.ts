@@ -1,5 +1,8 @@
-// Database operations for politicians and votes
-import type { Politician, Vote, VotingRecord } from './types';
+// Database operations for state-based voter information system
+import type { 
+	Politician, Vote, VotingRecord, 
+	State, Representative, District, VoterData, VoterDemographic 
+} from './types';
 
 // Generic politician data interface
 export interface PoliticianData {
@@ -219,4 +222,106 @@ export async function getPoliticianVotes(
 			result: row.result,
 		},
 	}));
+}
+
+// New database functions for state-based system
+
+export async function getAllStates(db: D1Database): Promise<State[]> {
+	const result = await db
+		.prepare('SELECT * FROM states ORDER BY name')
+		.all<State>();
+	return result.results;
+}
+
+export async function getStateByCode(db: D1Database, code: string): Promise<State | null> {
+	const result = await db
+		.prepare('SELECT * FROM states WHERE code = ?')
+		.bind(code)
+		.first<State>();
+	return result || null;
+}
+
+export async function getRepresentativesByState(
+	db: D1Database,
+	stateCode: string,
+	chamber?: 'house' | 'senate'
+): Promise<Representative[]> {
+	let query = `
+		SELECT r.*, d.district_number, d.name as district_name
+		FROM representatives r
+		LEFT JOIN districts d ON r.district_id = d.id
+		WHERE r.state_code = ? AND r.is_active = 1
+	`;
+	const params: any[] = [stateCode];
+
+	if (chamber) {
+		query += ' AND r.chamber = ?';
+		params.push(chamber);
+	}
+
+	query += ' ORDER BY r.chamber, d.district_number, r.last_name';
+
+	const stmt = db.prepare(query);
+	if (params.length > 1) {
+		return (await stmt.bind(...params).all<Representative>()).results;
+	}
+	return (await stmt.bind(stateCode).all<Representative>()).results;
+}
+
+export async function getRepresentative(db: D1Database, id: number): Promise<Representative | null> {
+	const result = await db
+		.prepare(`
+			SELECT r.*, d.district_number, d.name as district_name
+			FROM representatives r
+			LEFT JOIN districts d ON r.district_id = d.id
+			WHERE r.id = ?
+		`)
+		.bind(id)
+		.first<Representative>();
+	return result || null;
+}
+
+export async function getDistrictsByState(db: D1Database, stateCode: string): Promise<District[]> {
+	const result = await db
+		.prepare('SELECT * FROM districts WHERE state_code = ? ORDER BY district_number')
+		.bind(stateCode)
+		.all<District>();
+	return result.results;
+}
+
+export async function getVoterDataByState(
+	db: D1Database,
+	stateCode: string
+): Promise<VoterData | null> {
+	const result = await db
+		.prepare(`
+			SELECT * FROM voter_data 
+			WHERE state_code = ? 
+			ORDER BY data_year DESC 
+			LIMIT 1
+		`)
+		.bind(stateCode)
+		.first<VoterData>();
+	return result || null;
+}
+
+export async function getVoterDemographicsByState(
+	db: D1Database,
+	stateCode: string,
+	districtId?: number
+): Promise<VoterDemographic[]> {
+	let query = 'SELECT * FROM voter_demographics WHERE state_code = ?';
+	const params: any[] = [stateCode];
+
+	if (districtId) {
+		query += ' AND district_id = ?';
+		params.push(districtId);
+	} else {
+		query += ' AND district_id IS NULL';
+	}
+
+	query += ' ORDER BY demographic_type, category';
+
+	const stmt = db.prepare(query);
+	return (await stmt.bind(...params).all<VoterDemographic>()).results;
 }

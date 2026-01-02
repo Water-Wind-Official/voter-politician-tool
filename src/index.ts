@@ -1,13 +1,16 @@
-import { renderPoliticianList, renderPoliticianProfile } from "./renderHtml";
-import { getPoliticians, getPolitician, getPoliticianVotes, getPoliticianByProPublicaId } from "./db";
-import { upsertPolitician, upsertVote, upsertVotingRecord } from "./db";
+/// <reference types="../worker-configuration.d.ts" />
+
+import { renderHomePage } from "./renderMap";
+import { renderPoliticianProfile } from "./renderHtml";
 import { 
-	fetchCongressMembers, 
-	fetchCongressVotes, 
-	convertCongressMember,
-	convertCongressVote,
-	mapCongressVote
-} from "./congressgov";
+	getAllStates, 
+	getStateByCode,
+	getRepresentativesByState,
+	getRepresentative,
+	getVoterDataByState,
+	getVoterDemographicsByState,
+	getPoliticianVotes
+} from "./db";
 
 export default {
 	async fetch(request: Request, env: Env): Promise<Response> {
@@ -24,19 +27,19 @@ export default {
 			return handleHomePage(request, env);
 		}
 
-		if (path.startsWith('/politician/')) {
+		if (path.startsWith('/representative/')) {
 			const id = parseInt(path.split('/')[2]);
 			if (!isNaN(id)) {
-				return handlePoliticianPage(request, env, id);
+				return handleRepresentativePage(request, env, id);
 			}
 		}
 
-		if (path === '/sync') {
-			return handleSync(request, env);
-		}
-
-		if (path === '/debug') {
-			return handleDebug(request, env);
+		// Legacy politician route for backward compatibility
+		if (path.startsWith('/politician/')) {
+			const id = parseInt(path.split('/')[2]);
+			if (!isNaN(id)) {
+				return handleRepresentativePage(request, env, id);
+			}
 		}
 
 		// 404
@@ -45,250 +48,274 @@ export default {
 } satisfies ExportedHandler<Env>;
 
 async function handleHomePage(request: Request, env: Env): Promise<Response> {
-	const state = new URL(request.url).searchParams.get('state');
-	const chamber = new URL(request.url).searchParams.get('chamber');
-
-	const politicians = await getPoliticians(env.DB, state || undefined, chamber || undefined);
-
-	return new Response(renderPoliticianList(politicians, state, chamber), {
+	const states = await getAllStates(env.DB);
+	
+	return new Response(renderHomePage(states), {
 		headers: { "content-type": "text/html" },
 	});
 }
 
-async function handlePoliticianPage(request: Request, env: Env, id: number): Promise<Response> {
-	const politician = await getPolitician(env.DB, id);
+async function handleRepresentativePage(request: Request, env: Env, id: number): Promise<Response> {
+	const representative = await getRepresentative(env.DB, id);
 	
-	if (!politician) {
-		return new Response('Politician not found', { status: 404 });
+	if (!representative) {
+		return new Response('Representative not found', { status: 404 });
 	}
 
-	const votes = await getPoliticianVotes(env.DB, id, 50);
+	// Try to get votes if voting_records table still references old politician_id
+	// For now, we'll show the profile without votes until we migrate the data
+	const votes: any[] = []; // TODO: Migrate voting records to use representative_id
 
-	return new Response(renderPoliticianProfile(politician, votes), {
+	return new Response(renderRepresentativeProfile(representative, votes), {
 		headers: { "content-type": "text/html" },
 	});
 }
 
 async function handleApiRequest(request: Request, env: Env, path: string): Promise<Response> {
-	if (path === '/api/politicians') {
-		const state = new URL(request.url).searchParams.get('state');
-		const chamber = new URL(request.url).searchParams.get('chamber');
-		const politicians = await getPoliticians(env.DB, state || undefined, chamber || undefined);
-		return Response.json(politicians);
+	// State-specific data endpoint
+	if (path.startsWith('/api/state/')) {
+		const stateCode = path.split('/')[3]?.toUpperCase();
+		if (!stateCode || stateCode.length !== 2) {
+			return new Response('Invalid state code', { status: 400 });
+		}
+
+		const state = await getStateByCode(env.DB, stateCode);
+		if (!state) {
+			return new Response('State not found', { status: 404 });
+		}
+
+		const representatives = await getRepresentativesByState(env.DB, stateCode);
+		const voterData = await getVoterDataByState(env.DB, stateCode);
+		const demographics = await getVoterDemographicsByState(env.DB, stateCode);
+
+		return Response.json({
+			state,
+			representatives,
+			voterData,
+			demographics
+		});
 	}
 
-	if (path.startsWith('/api/politician/')) {
+	// Representative endpoint
+	if (path.startsWith('/api/representative/')) {
 		const id = parseInt(path.split('/')[3]);
 		if (!isNaN(id)) {
-			const politician = await getPolitician(env.DB, id);
-			if (!politician) {
+			const representative = await getRepresentative(env.DB, id);
+			if (!representative) {
 				return new Response('Not found', { status: 404 });
 			}
-			const votes = await getPoliticianVotes(env.DB, id);
-			return Response.json({ politician, votes });
+			return Response.json({ representative });
 		}
 	}
 
 	return new Response('Not found', { status: 404 });
 }
 
-async function handleSync(request: Request, env: Env): Promise<Response> {
-	// This endpoint syncs data from Congress.gov API
-	// Requires CONGRESS_API_KEY in environment variables
+function renderRepresentativeProfile(representative: any, votes: any[]): string {
+	const partyClass = representative.party?.toLowerCase() || 'independent';
 	
-	if (!env.CONGRESS_API_KEY) {
-		return new Response(JSON.stringify({ 
-			success: false, 
-			error: 'Congress.gov API key not configured. Set CONGRESS_API_KEY environment variable.' 
-		}), {
-			status: 500,
-			headers: { "content-type": "application/json" },
-		});
-	}
-	
-	// Debug info
-	let debugInfo: any = {};
-	
-	try {
-		// Fetch and sync House members
-		const houseMembers = await fetchCongressMembers('house', env.CONGRESS_API_KEY);
-		let houseCount = 0;
-		let houseSkipped = 0;
-		
-		// Log first member structure for debugging
-		if (houseMembers.length > 0) {
-			console.log('Sample House member structure:', JSON.stringify(houseMembers[0]).substring(0, 500));
+	return `
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+	<title>${escapeHtml(representative.name)} - Profile</title>
+	<style>
+		* {
+			margin: 0;
+			padding: 0;
+			box-sizing: border-box;
 		}
 		
-		for (const member of houseMembers) {
-			const converted = convertCongressMember(member, 'house');
-			if (converted.length === 0) {
-				houseSkipped++;
-			}
-			for (const person of converted) {
-				await upsertPolitician(env.DB, person);
-				houseCount++;
-			}
-		}
-
-		// Fetch and sync Senate members
-		const senateMembers = await fetchCongressMembers('senate', env.CONGRESS_API_KEY);
-		let senateCount = 0;
-		let senateSkipped = 0;
-		
-		// Log first member structure for debugging
-		if (senateMembers.length > 0) {
-			console.log('Sample Senate member structure:', JSON.stringify(senateMembers[0]).substring(0, 500));
+		body {
+			font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+			background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+			min-height: 100vh;
+			padding: 2rem;
+			color: #333;
 		}
 		
-		for (const member of senateMembers) {
-			const converted = convertCongressMember(member, 'senate');
-			if (converted.length === 0) {
-				senateSkipped++;
-			}
-			for (const person of converted) {
-				await upsertPolitician(env.DB, person);
-				senateCount++;
-			}
+		.container {
+			max-width: 1000px;
+			margin: 0 auto;
 		}
 		
-		// Debug info
-		debugInfo = {
-			houseMembersReceived: houseMembers.length,
-			houseMembersSynced: houseCount,
-			houseMembersSkipped: houseSkipped,
-			senateMembersReceived: senateMembers.length,
-			senateMembersSynced: senateCount,
-			senateMembersSkipped: senateSkipped,
-		};
-
-		// Fetch recent votes and sync (optional - Congress.gov API may not have vote endpoint)
-		let houseVoteCount = 0;
-		let houseVoteRecordCount = 0;
-		let senateVoteCount = 0;
-		let senateVoteRecordCount = 0;
-		let voteError: string | null = null;
+		.back-link {
+			display: inline-block;
+			margin-bottom: 1rem;
+			color: white;
+			text-decoration: none;
+			font-weight: 600;
+			opacity: 0.9;
+		}
 		
-		try {
-			const houseVotes = await fetchCongressVotes('house', env.CONGRESS_API_KEY, 118, 100);
+		.back-link:hover {
+			opacity: 1;
+		}
+		
+		.profile-header {
+			background: white;
+			border-radius: 12px;
+			padding: 2rem;
+			margin-bottom: 2rem;
+			box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+		}
+		
+		.profile-name {
+			font-size: 2.5rem;
+			margin-bottom: 1rem;
+			color: #333;
+		}
+		
+		.profile-details {
+			display: grid;
+			grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+			gap: 1rem;
+			margin-top: 1.5rem;
+		}
+		
+		.detail-item {
+			display: flex;
+			flex-direction: column;
+		}
+		
+		.detail-label {
+			font-size: 0.85rem;
+			color: #666;
+			text-transform: uppercase;
+			letter-spacing: 0.5px;
+			margin-bottom: 0.25rem;
+		}
+		
+		.detail-value {
+			font-size: 1.1rem;
+			font-weight: 600;
+			color: #333;
+		}
+		
+		.badge {
+			display: inline-block;
+			padding: 0.5rem 1rem;
+			border-radius: 20px;
+			font-size: 0.9rem;
+			font-weight: 600;
+			margin-top: 0.5rem;
+		}
+		
+		.badge-democrat {
+			background: #3b82f6;
+			color: white;
+		}
+		
+		.badge-republican {
+			background: #ef4444;
+			color: white;
+		}
+		
+		.badge-independent {
+			background: #6b7280;
+			color: white;
+		}
+		
+		.social-links {
+			display: flex;
+			gap: 1rem;
+			margin-top: 1rem;
+			flex-wrap: wrap;
+		}
+		
+		.social-link {
+			padding: 0.5rem 1rem;
+			background: #f3f4f6;
+			border-radius: 8px;
+			text-decoration: none;
+			color: #333;
+			font-weight: 600;
+			transition: background 0.2s;
+		}
+		
+		.social-link:hover {
+			background: #e5e7eb;
+		}
+	</style>
+</head>
+<body>
+	<div class="container">
+		<a href="/" class="back-link">← Back to Map</a>
+		
+		<div class="profile-header">
+			<h1 class="profile-name">${escapeHtml(representative.name)}</h1>
+			${representative.party ? `<span class="badge badge-${partyClass}">${escapeHtml(representative.party)}</span>` : ''}
 			
-			for (const vote of houseVotes) {
-				const voteData = convertCongressVote(vote);
-				const voteId = await upsertVote(env.DB, voteData);
-				houseVoteCount++;
-				
-				// Sync voting positions - need to fetch member votes for each vote
-				// Congress.gov API has a separate endpoint for member votes: /house-vote/{congress}/{session}/{rollCallVoteNumber}/members
-				if (vote.members && Array.isArray(vote.members)) {
-					for (const member of vote.members) {
-						const bioguideId = member.bioguideId;
-						if (bioguideId) {
-							const politicianId = `congress-${bioguideId}`;
-							const politician = await getPoliticianByProPublicaId(env.DB, politicianId);
-							if (politician) {
-								const votePosition = (member as any).vote || (member as any).votePosition || 'Not Voting';
-								const position = mapCongressVote(votePosition);
-								await upsertVotingRecord(env.DB, politician.id, voteId, position);
-								houseVoteRecordCount++;
-							}
-						}
-					}
-				} else {
-					// If members aren't in the vote object, we'd need to fetch from the members endpoint
-					// For now, skip individual member votes if not available
-				}
-			}
-		} catch (error: any) {
-			voteError = `House votes: ${error.message}`;
-		}
-
-		try {
-			const senateVotes = await fetchCongressVotes('senate', env.CONGRESS_API_KEY, 118, 100);
+			<div class="profile-details">
+				<div class="detail-item">
+					<div class="detail-label">State</div>
+					<div class="detail-value">${escapeHtml(representative.state_code)}</div>
+				</div>
+				<div class="detail-item">
+					<div class="detail-label">Chamber</div>
+					<div class="detail-value">${representative.chamber === 'house' ? 'House of Representatives' : 'Senate'}</div>
+				</div>
+				${representative.district_number ? `
+				<div class="detail-item">
+					<div class="detail-label">District</div>
+					<div class="detail-value">${representative.district_number}</div>
+				</div>
+				` : ''}
+				${representative.office_phone ? `
+				<div class="detail-item">
+					<div class="detail-label">Office Phone</div>
+					<div class="detail-value">${escapeHtml(representative.office_phone)}</div>
+				</div>
+				` : ''}
+				${representative.email ? `
+				<div class="detail-item">
+					<div class="detail-label">Email</div>
+					<div class="detail-value">${escapeHtml(representative.email)}</div>
+				</div>
+				` : ''}
+			</div>
 			
-			for (const vote of senateVotes) {
-				const voteData = convertCongressVote(vote);
-				const voteId = await upsertVote(env.DB, voteData);
-				senateVoteCount++;
-				
-				if (vote.members && Array.isArray(vote.members)) {
-					for (const member of vote.members) {
-						const bioguideId = member.bioguideId;
-						if (bioguideId) {
-							const politicianId = `congress-${bioguideId}`;
-							const politician = await getPoliticianByProPublicaId(env.DB, politicianId);
-							if (politician) {
-								const votePosition = (member as any).vote || (member as any).votePosition || 'Not Voting';
-								const position = mapCongressVote(votePosition);
-								await upsertVotingRecord(env.DB, politician.id, voteId, position);
-								senateVoteRecordCount++;
-							}
-						}
-					}
-				}
-			}
-		} catch (error: any) {
-			voteError = voteError ? `${voteError}; Senate votes: ${error.message}` : `Senate votes: ${error.message}`;
-		}
-
-		return new Response(JSON.stringify({ 
-			success: true, 
-			message: 'Data synced successfully from Congress.gov API',
-			houseMembers: houseCount,
-			senateMembers: senateCount,
-			houseVotes: houseVoteCount,
-			senateVotes: senateVoteCount,
-			houseVoteRecords: houseVoteRecordCount,
-			senateVoteRecords: senateVoteRecordCount,
-			debug: debugInfo,
-			note: voteError ? `Note: Vote data unavailable - ${voteError}. Members synced successfully.` : undefined
-		}), {
-			headers: { "content-type": "application/json" },
-		});
-	} catch (error: any) {
-		return new Response(JSON.stringify({ 
-			success: false, 
-			error: error.message || 'Unknown error',
-			stack: error.stack
-		}), {
-			status: 500,
-			headers: { "content-type": "application/json" },
-		});
-	}
+			${representative.bio ? `
+				<div style="margin-top: 1.5rem; padding-top: 1.5rem; border-top: 1px solid #e5e7eb;">
+					<h3 style="margin-bottom: 0.5rem; color: #333;">Biography</h3>
+					<p style="color: #666; line-height: 1.6;">${escapeHtml(representative.bio)}</p>
+				</div>
+			` : ''}
+			
+			<div class="social-links">
+				${representative.twitter_handle ? `
+					<a href="https://twitter.com/${escapeHtml(representative.twitter_handle)}" target="_blank" class="social-link">
+						🐦 Twitter: @${escapeHtml(representative.twitter_handle)}
+					</a>
+				` : ''}
+				${representative.facebook_url ? `
+					<a href="${escapeHtml(representative.facebook_url)}" target="_blank" class="social-link">
+						📘 Facebook
+					</a>
+				` : ''}
+				${representative.website ? `
+					<a href="${escapeHtml(representative.website)}" target="_blank" class="social-link">
+						🌐 Official Website
+					</a>
+				` : ''}
+			</div>
+		</div>
+	</div>
+</body>
+</html>
+	`;
 }
 
-async function handleDebug(request: Request, env: Env): Promise<Response> {
-	if (!env.CONGRESS_API_KEY) {
-		return new Response('Congress.gov API key not configured', { status: 500 });
-	}
-
-	try {
-		// Fetch a small sample to see the structure
-		const houseMembers = await fetchCongressMembers('house', env.CONGRESS_API_KEY);
-		const senateMembers = await fetchCongressMembers('senate', env.CONGRESS_API_KEY);
-		
-		// Try converting one to see what happens
-		const testHouseConversion = houseMembers.length > 0 ? convertCongressMember(houseMembers[0], 'house') : [];
-		const testSenateConversion = senateMembers.length > 0 ? convertCongressMember(senateMembers[0], 'senate') : [];
-		
-		return new Response(JSON.stringify({
-			houseSample: houseMembers.length > 0 ? houseMembers[0] : null,
-			senateSample: senateMembers.length > 0 ? senateMembers[0] : null,
-			houseCount: houseMembers.length,
-			senateCount: senateMembers.length,
-			houseKeys: houseMembers.length > 0 ? Object.keys(houseMembers[0]) : [],
-			senateKeys: senateMembers.length > 0 ? Object.keys(senateMembers[0]) : [],
-			testHouseConversion: testHouseConversion,
-			testSenateConversion: testSenateConversion,
-		}, null, 2), {
-			headers: { "content-type": "application/json" },
-		});
-	} catch (error: any) {
-		return new Response(JSON.stringify({ 
-			error: error.message,
-			stack: error.stack
-		}), {
-			status: 500,
-			headers: { "content-type": "application/json" },
-		});
-	}
+function escapeHtml(text: string | null | undefined): string {
+	if (!text) return '';
+	const map: Record<string, string> = {
+		'&': '&amp;',
+		'<': '&lt;',
+		'>': '&gt;',
+		'"': '&quot;',
+		"'": '&#039;'
+	};
+	return text.replace(/[&<>"']/g, (m) => map[m]);
 }
