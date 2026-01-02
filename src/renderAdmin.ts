@@ -471,7 +471,10 @@ export function renderAdminDashboard(data: any): string {
 		<div class="card">
 			<div class="card-header">
 				<h2 class="card-title">Voter Data</h2>
-				<button class="btn" onclick="openModal('voter-modal')">+ Add Voter Data</button>
+				<div style="display: flex; gap: 1rem;">
+					<button class="btn" onclick="openModal('voter-modal')">+ Add Voter Data</button>
+					<button class="btn btn-secondary" onclick="openModal('import-voter-modal')">📊 Import from Excel</button>
+				</div>
 			</div>
 			<table class="table">
 				<thead>
@@ -517,12 +520,12 @@ export function renderAdminDashboard(data: any): string {
 					<strong>Legal Notice:</strong> Electoral vote results are matters of public record. This data reflects official election results from state-certified sources.
 				</p>
 			</div>
-			<table class="table">
+					<table class="table">
 				<thead>
 					<tr>
 						<th>State</th>
+						<th>Electoral Votes</th>
 						<th>Winner</th>
-						<th>Year</th>
 						<th>Margin (%)</th>
 						<th>Actions</th>
 					</tr>
@@ -530,13 +533,13 @@ export function renderAdminDashboard(data: any): string {
 				<tbody>
 					${states.map((s) => {
 						const winnerDisplay = s.electoral_winner || '-';
-						const yearDisplay = s.electoral_year || '-';
+						const votesDisplay = s.electoral_votes || '-';
 						const marginDisplay = s.electoral_margin ? s.electoral_margin.toFixed(1) + '%' : '-';
 						return `
 						<tr>
 							<td><strong>${escapeHtml(s.code)}</strong> - ${escapeHtml(s.name)}</td>
+							<td>${votesDisplay}</td>
 							<td>${escapeHtml(winnerDisplay)}</td>
-							<td>${yearDisplay}</td>
 							<td>${marginDisplay}</td>
 							<td>
 								<button class="btn btn-small" onclick="editElectoral('${s.code}')">Edit</button>
@@ -796,7 +799,75 @@ export function renderAdminDashboard(data: any): string {
 			</form>
 		</div>
 	</div>
-	
+
+	<!-- Import Voter Data Modal -->
+	<div id="import-voter-modal" class="modal">
+		<div class="modal-content">
+			<h2 style="margin-bottom: 1rem;">Import Voter Data from Excel</h2>
+			<div style="background: #f0f9ff; border-left: 4px solid #3b82f6; padding: 1rem; margin-bottom: 1.5rem; border-radius: 4px;">
+				<p style="margin: 0 0 0.5rem 0; font-size: 0.9rem; color: #1e40af;">
+					<strong>📊 Import from vote04a_2024.xlsx:</strong> This tool helps you import voter turnout and registration data from your Excel file.
+				</p>
+				<p style="margin: 0; font-size: 0.85rem; color: #1e40af;">
+					<strong>Expected Excel Format:</strong> state_code (or State), total_registered_voters (or Registered), voting_age_population (or Voting_Age), voter_turnout_percentage (or Turnout), etc.
+				</p>
+			</div>
+			<form id="import-voter-form" onsubmit="importVoterData(event)">
+				<div class="form-group" style="margin-bottom: 1.5rem;">
+					<label>Paste Excel Data (JSON format) *</label>
+					<textarea id="excel-data" name="excelData" rows="15" placeholder='Paste your Excel data as JSON array, e.g.:
+[
+  {
+    "state_code": "CA",
+    "state_name": "California",
+    "total_registered_voters": 21900000,
+    "voting_age_population": 28500000,
+    "voter_turnout_percentage": 62.5,
+    "total_population": 39500000
+  },
+  {
+    "state_code": "TX",
+    "state_name": "Texas",
+    "total_registered_voters": 18500000,
+    "voting_age_population": 22000000,
+    "voter_turnout_percentage": 58.2,
+    "total_population": 30000000
+  }
+]' required></textarea>
+					<small style="color: #666; font-size: 0.85rem;">
+						Paste the data from your Excel file converted to JSON format. Each object represents one state's voter data.
+					</small>
+				</div>
+				<div style="background: #fef3c7; border-left: 4px solid #f59e0b; padding: 1rem; margin-bottom: 1.5rem; border-radius: 4px;">
+					<p style="margin: 0 0 0.5rem 0; font-size: 0.85rem; color: #92400e;">
+						<strong>📋 Excel to JSON Conversion:</strong>
+					</p>
+					<ol style="margin: 0; padding-left: 1.5rem; font-size: 0.85rem; color: #92400e;">
+						<li>Open your Excel file</li>
+						<li>Copy the data you want to import</li>
+						<li>Use an online Excel-to-JSON converter (search "excel to json converter")</li>
+						<li>Paste the resulting JSON array above</li>
+					</ol>
+				</div>
+				<div style="background: #fee2e2; border-left: 4px solid #dc2626; padding: 1rem; margin-bottom: 1.5rem; border-radius: 4px;">
+					<p style="margin: 0; font-size: 0.85rem; color: #991b1b;">
+						<strong>⚠️ Data Validation:</strong> Only import data from official government sources. The system will validate state codes and skip invalid records.
+					</p>
+				</div>
+				<div style="display: flex; gap: 1rem; margin-top: 1.5rem;">
+					<button type="submit" class="btn btn-success">📊 Import Data</button>
+					<button type="button" class="btn btn-secondary" onclick="closeModal('import-voter-modal')">Cancel</button>
+				</div>
+				<div id="import-progress" style="margin-top: 1rem; display: none;">
+					<div style="background: #f3f4f6; padding: 1rem; border-radius: 4px; font-size: 0.9rem;">
+						<div id="import-status">Importing...</div>
+						<div id="import-details" style="margin-top: 0.5rem; color: #666;"></div>
+					</div>
+				</div>
+			</form>
+		</div>
+	</div>
+
 	<!-- Electoral Data Modal -->
 	<div id="electoral-modal" class="modal">
 		<div class="modal-content">
@@ -834,6 +905,11 @@ export function renderAdminDashboard(data: any): string {
 							<option value="Democrat">Democrat</option>
 						</select>
 						<small style="color: #666; font-size: 0.85rem;">Which party won this state's electoral votes</small>
+					</div>
+					<div class="form-group">
+						<label>Electoral Votes *</label>
+						<input type="number" name="electoral_votes" min="0" max="55" placeholder="e.g., 11" required />
+						<small style="color: #666; font-size: 0.85rem;">Number of electoral votes allocated to this state</small>
 					</div>
 					<div class="form-group">
 						<label>Margin of Victory (%)</label>
@@ -1073,7 +1149,64 @@ export function renderAdminDashboard(data: any): string {
 				alert('Error: ' + (error.message || 'Unknown error'));
 			}
 		}
-		
+
+		async function importVoterData(e) {
+			e.preventDefault();
+			const formData = new FormData(e.target);
+			const excelDataStr = formData.get('excelData') as string;
+
+			if (!excelDataStr || !excelDataStr.trim()) {
+				alert('Please paste your Excel data in JSON format');
+				return;
+			}
+
+			let excelData;
+			try {
+				excelData = JSON.parse(excelDataStr.trim());
+				if (!Array.isArray(excelData)) {
+					throw new Error('Data must be a JSON array');
+				}
+			} catch (error) {
+				alert('Invalid JSON format. Please check your Excel-to-JSON conversion.');
+				return;
+			}
+
+			// Show progress
+			const progressDiv = document.getElementById('import-progress');
+			const statusDiv = document.getElementById('import-status');
+			const detailsDiv = document.getElementById('import-details');
+
+			if (progressDiv) progressDiv.style.display = 'block';
+			if (statusDiv) statusDiv.textContent = 'Importing voter data...';
+			if (detailsDiv) detailsDiv.textContent = `Processing ${excelData.length} records...`;
+
+			try {
+				const response = await fetch('/api/admin/import-voter-data', {
+					method: 'POST',
+					headers: { 'Content-Type': 'application/json' },
+					body: JSON.stringify({ data: excelData })
+				});
+
+				const result = await response.json();
+
+				if (response.ok && result.success) {
+					if (statusDiv) statusDiv.textContent = '✅ Import Complete!';
+					if (detailsDiv) detailsDiv.textContent = result.message;
+
+					// Reload page after 3 seconds
+					setTimeout(() => {
+						location.reload();
+					}, 3000);
+				} else {
+					if (statusDiv) statusDiv.textContent = '❌ Import Failed';
+					if (detailsDiv) detailsDiv.textContent = result.error || 'Unknown error occurred';
+				}
+			} catch (error) {
+				if (statusDiv) statusDiv.textContent = '❌ Import Error';
+				if (detailsDiv) detailsDiv.textContent = error.message || 'Network error occurred';
+			}
+		}
+
 		async function editVoterData(stateCode, dataYear) {
 			const voterData = currentData.voterData.find(function(v) { 
 				return v.state_code === stateCode && v.data_year === dataYear; 
@@ -1113,14 +1246,18 @@ export function renderAdminDashboard(data: any): string {
 			e.preventDefault();
 			const formData = new FormData(e.target);
 			const data = Object.fromEntries(formData);
-			
+
 			// Convert numeric fields
+			if (data.electoral_votes) data.electoral_votes = parseInt(data.electoral_votes);
 			if (data.electoral_year) data.electoral_year = parseInt(data.electoral_year);
 			if (data.electoral_margin) data.electoral_margin = parseFloat(data.electoral_margin);
-			
+
 			// Handle empty values
 			if (!data.electoral_winner || data.electoral_winner === '') {
 				data.electoral_winner = null;
+			}
+			if (!data.electoral_votes || data.electoral_votes === '') {
+				data.electoral_votes = null;
 			}
 			if (!data.electoral_year || data.electoral_year === '') {
 				data.electoral_year = null;
@@ -1128,14 +1265,14 @@ export function renderAdminDashboard(data: any): string {
 			if (!data.electoral_margin || data.electoral_margin === '') {
 				data.electoral_margin = null;
 			}
-			
+
 			try {
 				const response = await fetch('/api/admin/electoral', {
 					method: 'POST',
 					headers: { 'Content-Type': 'application/json' },
 					body: JSON.stringify(data)
 				});
-				
+
 				if (response.ok) {
 					location.reload();
 				} else {
@@ -1149,23 +1286,25 @@ export function renderAdminDashboard(data: any): string {
 		async function editElectoral(stateCode) {
 			const state = currentData.states.find(function(s) { return s.code === stateCode; });
 			if (!state) return;
-			
+
 			const form = document.getElementById('electoral-form');
 			if (!form) return;
-			
+
 			// Populate form fields
 			const stateSelect = form.querySelector('[name="state_code"]');
+			const votesInput = form.querySelector('[name="electoral_votes"]');
 			const yearInput = form.querySelector('[name="electoral_year"]');
 			const winnerSelect = form.querySelector('[name="electoral_winner"]');
 			const marginInput = form.querySelector('[name="electoral_margin"]');
 			const originalInput = form.querySelector('[name="state_code_original"]');
-			
+
 			if (stateSelect) stateSelect.value = state.code;
+			if (votesInput) votesInput.value = state.electoral_votes || '';
 			if (yearInput) yearInput.value = state.electoral_year || '';
 			if (winnerSelect) winnerSelect.value = state.electoral_winner || '';
 			if (marginInput) marginInput.value = state.electoral_margin || '';
 			if (originalInput) originalInput.value = state.code;
-			
+
 			openModal('electoral-modal');
 		}
 		
@@ -1173,8 +1312,6 @@ export function renderAdminDashboard(data: any): string {
 			fetch('/admin/logout', { method: 'POST' }).then(function() {
 				window.location.href = '/admin/login';
 			});
-		}
-			openModal('voter-modal');
 		}
 		
 		async function saveStance(e) {
@@ -1238,72 +1375,6 @@ export function renderAdminDashboard(data: any): string {
 			const idInput = form.querySelector('[name="id"]');
 			if (idInput) idInput.value = id.toString();
 			openModal('stance-modal');
-		}
-		
-		async function saveElectoralData(e) {
-			e.preventDefault();
-			const formData = new FormData(e.target);
-			const data = Object.fromEntries(formData);
-			
-			// Convert numeric fields
-			if (data.electoral_year) data.electoral_year = parseInt(data.electoral_year);
-			if (data.electoral_margin) data.electoral_margin = parseFloat(data.electoral_margin);
-			
-			// Handle empty values
-			if (!data.electoral_winner || data.electoral_winner === '') {
-				data.electoral_winner = null;
-			}
-			if (!data.electoral_year || data.electoral_year === '') {
-				data.electoral_year = null;
-			}
-			if (!data.electoral_margin || data.electoral_margin === '') {
-				data.electoral_margin = null;
-			}
-			
-			try {
-				const response = await fetch('/api/admin/electoral', {
-					method: 'POST',
-					headers: { 'Content-Type': 'application/json' },
-					body: JSON.stringify(data)
-				});
-				
-				if (response.ok) {
-					location.reload();
-				} else {
-					alert('Error saving electoral data');
-				}
-			} catch (error) {
-				alert('Error: ' + (error.message || 'Unknown error'));
-			}
-		}
-		
-		async function editElectoral(stateCode) {
-			const state = currentData.states.find(function(s) { return s.code === stateCode; });
-			if (!state) return;
-			
-			const form = document.getElementById('electoral-form');
-			if (!form) return;
-			
-			// Populate form fields
-			const stateSelect = form.querySelector('[name="state_code"]');
-			const yearInput = form.querySelector('[name="electoral_year"]');
-			const winnerSelect = form.querySelector('[name="electoral_winner"]');
-			const marginInput = form.querySelector('[name="electoral_margin"]');
-			const originalInput = form.querySelector('[name="state_code_original"]');
-			
-			if (stateSelect) stateSelect.value = state.code;
-			if (yearInput) yearInput.value = state.electoral_year || '';
-			if (winnerSelect) winnerSelect.value = state.electoral_winner || '';
-			if (marginInput) marginInput.value = state.electoral_margin || '';
-			if (originalInput) originalInput.value = state.code;
-			
-			openModal('electoral-modal');
-		}
-		
-		function logout() {
-			fetch('/admin/logout', { method: 'POST' }).then(function() {
-				window.location.href = '/admin/login';
-			});
 		}
 		
 		function escapeHtml(text) {

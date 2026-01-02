@@ -5,6 +5,7 @@ import { renderPoliticianProfile } from "./renderHtml";
 import { renderAdminLogin, renderAdminDashboard } from "./renderAdmin";
 import { renderSenatorHub } from "./renderSenators";
 import { renderHouseHub } from "./renderHouse";
+import { renderElectionHub } from "./renderElection";
 import { 
 	getAllStates, 
 	getStateByCode,
@@ -53,6 +54,10 @@ export default {
 
 		if (path === '/house' || path === '/house-hub') {
 			return handleHouseHub(request, env);
+		}
+
+		if (path === '/election' || path === '/election-hub') {
+			return handleElectionHub(request, env);
 		}
 
 		if (path.startsWith('/representative/')) {
@@ -108,6 +113,14 @@ async function handleHouseHub(request: Request, env: Env): Promise<Response> {
 	const houseMembers = await getAllHouseMembers(env.DB);
 
 	return new Response(renderHouseHub(houseMembers), {
+		headers: { "content-type": "text/html" },
+	});
+}
+
+async function handleElectionHub(request: Request, env: Env): Promise<Response> {
+	const states = await getAllStates(env.DB);
+
+	return new Response(renderElectionHub(states), {
 		headers: { "content-type": "text/html" },
 	});
 }
@@ -333,9 +346,73 @@ async function handleAdminApi(request: Request, env: Env, path: string): Promise
 			body.state_code,
 			body.electoral_winner || null,
 			body.electoral_year || null,
-			body.electoral_margin || null
+			body.electoral_margin || null,
+			body.electoral_votes || null
 		);
 		return Response.json({ success: true });
+	}
+
+	// Import voter data from Excel (2024 election data)
+	if (path === '/api/admin/import-voter-data' && request.method === 'POST') {
+		const body = await request.json() as any;
+		if (!body.data || !Array.isArray(body.data)) {
+			return Response.json({ success: false, error: 'Invalid data format. Expected array of voter data records.' });
+		}
+
+		let imported = 0;
+		let skipped = 0;
+
+		for (const record of body.data) {
+			try {
+				// Map Excel data to our database format
+				// Expected Excel format: state_code, state_name, total_registered_voters, voting_age_population, voter_turnout_percentage, etc.
+				const voterData = {
+					state_code: record.state_code || record.State || record.state,
+					total_registered_voters: record.total_registered_voters || record.registered_voters || record.Registered || null,
+					voting_age_population: record.voting_age_population || record.voting_age || record.Voting_Age || null,
+					total_population: record.total_population || record.total_pop || record.Population || null,
+					voter_turnout_percentage: record.voter_turnout_percentage || record.turnout_percentage || record.Turnout || record['Turnout (%)'] || null,
+					last_election_date: record.last_election_date || '2024-11-05',
+					data_source: record.data_source || '2024 Election Data (vote04a_2024.xlsx)',
+					data_year: record.data_year || 2024,
+					notes: record.notes || 'Imported from vote04a_2024.xlsx'
+				};
+
+				// Validate required fields
+				if (!voterData.state_code) {
+					skipped++;
+					continue;
+				}
+
+				// Convert state names to codes if needed
+				if (voterData.state_code.length > 2) {
+					// If it's a state name, try to convert to code
+					const stateCode = getStateCodeFromName(voterData.state_code);
+					if (stateCode) {
+						voterData.state_code = stateCode;
+					} else {
+						skipped++;
+						continue;
+					}
+				}
+
+				// Ensure state code is uppercase
+				voterData.state_code = voterData.state_code.toUpperCase();
+
+				await upsertVoterData(env.DB, voterData);
+				imported++;
+			} catch (error) {
+				console.error('Error importing voter data record:', error, record);
+				skipped++;
+			}
+		}
+
+		return Response.json({
+			success: true,
+			message: `Imported ${imported} voter data records, skipped ${skipped} records.`,
+			imported,
+			skipped
+		});
 	}
 
 	// Legacy vote endpoint
@@ -567,12 +644,72 @@ function formatFullDate(dateString: string | null | undefined): string {
 	if (!dateString) return '';
 	try {
 		const date = new Date(dateString);
-		return date.toLocaleDateString('en-US', { 
-			year: 'numeric', 
-			month: 'long', 
-			day: 'numeric' 
+		return date.toLocaleDateString('en-US', {
+			year: 'numeric',
+			month: 'long',
+			day: 'numeric'
 		});
 	} catch {
 		return dateString;
 	}
+}
+
+// Helper function to convert state names to state codes
+function getStateCodeFromName(stateName: string): string | null {
+	const stateMap: Record<string, string> = {
+		'Alabama': 'AL',
+		'Alaska': 'AK',
+		'Arizona': 'AZ',
+		'Arkansas': 'AR',
+		'California': 'CA',
+		'Colorado': 'CO',
+		'Connecticut': 'CT',
+		'Delaware': 'DE',
+		'Florida': 'FL',
+		'Georgia': 'GA',
+		'Hawaii': 'HI',
+		'Idaho': 'ID',
+		'Illinois': 'IL',
+		'Indiana': 'IN',
+		'Iowa': 'IA',
+		'Kansas': 'KS',
+		'Kentucky': 'KY',
+		'Louisiana': 'LA',
+		'Maine': 'ME',
+		'Maryland': 'MD',
+		'Massachusetts': 'MA',
+		'Michigan': 'MI',
+		'Minnesota': 'MN',
+		'Mississippi': 'MS',
+		'Missouri': 'MO',
+		'Montana': 'MT',
+		'Nebraska': 'NE',
+		'Nevada': 'NV',
+		'New Hampshire': 'NH',
+		'New Jersey': 'NJ',
+		'New Mexico': 'NM',
+		'New York': 'NY',
+		'North Carolina': 'NC',
+		'North Dakota': 'ND',
+		'Ohio': 'OH',
+		'Oklahoma': 'OK',
+		'Oregon': 'OR',
+		'Pennsylvania': 'PA',
+		'Rhode Island': 'RI',
+		'South Carolina': 'SC',
+		'South Dakota': 'SD',
+		'Tennessee': 'TN',
+		'Texas': 'TX',
+		'Utah': 'UT',
+		'Vermont': 'VT',
+		'Virginia': 'VA',
+		'Washington': 'WA',
+		'West Virginia': 'WV',
+		'Wisconsin': 'WI',
+		'Wyoming': 'WY',
+		'District of Columbia': 'DC'
+	};
+
+	const normalizedName = stateName.trim();
+	return stateMap[normalizedName] || null;
 }

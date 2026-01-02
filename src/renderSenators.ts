@@ -230,6 +230,7 @@ export function renderSenatorHub(senators: Representative[]): string {
 			<nav>
 				<a href="/">← Back to Map</a>
 				<a href="/house">House Hub</a>
+				<a href="/election">Election Hub</a>
 			</nav>
 			
 			<div class="pdf-notice">

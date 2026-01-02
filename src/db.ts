@@ -246,18 +246,20 @@ export async function updateStateElectoralData(
 	stateCode: string,
 	electoralWinner: string | null,
 	electoralYear: number | null,
-	electoralMargin: number | null
+	electoralMargin: number | null,
+	electoralVotes: number | null
 ): Promise<void> {
 	await db
 		.prepare(`
-			UPDATE states 
-			SET electoral_winner = ?, 
-				electoral_year = ?, 
+			UPDATE states
+			SET electoral_winner = ?,
+				electoral_year = ?,
 				electoral_margin = ?,
+				electoral_votes = ?,
 				updated_at = CURRENT_TIMESTAMP
 			WHERE code = ?
 		`)
-		.bind(electoralWinner, electoralYear, electoralMargin, stateCode)
+		.bind(electoralWinner, electoralYear, electoralMargin, electoralVotes, stateCode)
 		.run();
 }
 

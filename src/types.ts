@@ -12,6 +12,7 @@ export interface State {
 	electoral_winner: string | null; // 'Republican', 'Democrat', or null
 	electoral_year: number | null;
 	electoral_margin: number | null;
+	electoral_votes: number | null; // Number of electoral votes for this state
 	created_at: string;
 	updated_at: string;
 }

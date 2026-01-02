@@ -67,7 +67,7 @@ export function renderHomePage(states: State[]): string {
 			color: #666;
 			font-size: 1.1rem;
 		}
-		
+
 		.map-container {
 			background: white;
 			border-radius: 12px;
@@ -77,12 +77,55 @@ export function renderHomePage(states: State[]): string {
 			display: flex;
 			flex-direction: column;
 			align-items: center;
+			position: relative;
 		}
 		
 		.map-wrapper {
 			width: 100%;
 			max-width: 1000px;
 			position: relative;
+		}
+
+		.map-legend {
+			position: absolute;
+			top: 10px;
+			right: 10px;
+			background: white;
+			border-radius: 8px;
+			padding: 1rem;
+			box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+			border: 1px solid #e5e7eb;
+			z-index: 10;
+		}
+
+		.legend-title {
+			font-weight: 600;
+			margin-bottom: 0.5rem;
+			font-size: 0.9rem;
+			color: #333;
+		}
+
+		.legend-item {
+			display: flex;
+			align-items: center;
+			gap: 0.5rem;
+			margin-bottom: 0.25rem;
+			font-size: 0.85rem;
+		}
+
+		.legend-color {
+			width: 16px;
+			height: 16px;
+			border-radius: 2px;
+			border: 1px solid #ccc;
+		}
+
+		.legend-color.republican {
+			background: #fecaca;
+		}
+
+		.legend-color.democrat {
+			background: #bfdbfe;
 		}
 		
 		#us-map {
@@ -306,6 +349,18 @@ export function renderHomePage(states: State[]): string {
 			padding: 2rem;
 			color: #666;
 		}
+
+		@media (max-width: 768px) {
+			.map-legend {
+				position: static;
+				margin-bottom: 1rem;
+				align-self: flex-start;
+			}
+
+			.map-container {
+				padding: 1rem;
+			}
+		}
 		
 		.chamber-tabs {
 			display: flex;
@@ -341,6 +396,7 @@ export function renderHomePage(states: State[]): string {
 			<nav>
 				<a href="/senators">Senate Hub</a>
 				<a href="/house">House Hub</a>
+				<a href="/election">Election Hub</a>
 			</nav>
 		</header>
 		
@@ -350,6 +406,17 @@ export function renderHomePage(states: State[]): string {
 					${generateUSMapSVG(states)}
 				</svg>
 				<div id="state-info" class="state-info"></div>
+				<div class="map-legend">
+					<div class="legend-title">2024 Election</div>
+					<div class="legend-item">
+						<div class="legend-color republican"></div>
+						<span>Republican Win</span>
+					</div>
+					<div class="legend-item">
+						<div class="legend-color democrat"></div>
+						<span>Democratic Win</span>
+					</div>
+				</div>
 			</div>
 		</div>
 		
@@ -393,7 +460,20 @@ export function renderHomePage(states: State[]): string {
 		
 		function showStateTooltip(e, stateName) {
 			const tooltip = document.getElementById('state-info');
-			tooltip.textContent = stateName;
+			const state = stateData.find(s => s.name === stateName);
+
+			let tooltipText = stateName;
+			if (state && state.electoral_winner) {
+				const winner = state.electoral_winner;
+				const votes = state.electoral_votes || 0;
+				let marginText = '';
+				if (state.electoral_margin) {
+					marginText = ' (' + state.electoral_margin.toFixed(1) + '% margin)';
+				}
+				tooltipText = stateName + ': ' + winner + ' won ' + votes + ' electoral votes' + marginText;
+			}
+
+			tooltip.textContent = tooltipText;
 			tooltip.style.display = 'block';
 			updateTooltipPosition(e);
 		}
