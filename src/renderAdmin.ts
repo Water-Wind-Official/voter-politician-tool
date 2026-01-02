@@ -154,6 +154,9 @@ export function renderAdminDashboard(data: any): string {
 	<meta charset="UTF-8" />
 	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 	<title>Admin Dashboard</title>
+	<script>
+		window.adminData = ${JSON.stringify(data).replace(/<\/script>/gi, '</scr"+"ipt>')};
+	</script>
 	<style>
 		* {
 			margin: 0;
@@ -1042,7 +1045,7 @@ export function renderAdminDashboard(data: any): string {
 	</div>
 	
 	<script>
-		let currentData = ${JSON.stringify(data)};
+		let currentData = window.adminData;
 		
 		function showTab(tabName, event) {
 			document.querySelectorAll('.tab').forEach(function(t) { t.classList.remove('active'); });
@@ -1178,7 +1181,7 @@ export function renderAdminDashboard(data: any): string {
 
 			if (progressDiv) progressDiv.style.display = 'block';
 			if (statusDiv) statusDiv.textContent = 'Importing voter data...';
-			if (detailsDiv) detailsDiv.textContent = `Processing ${excelData.length} records...`;
+			if (detailsDiv) detailsDiv.textContent = 'Processing ' + excelData.length + ' records...';
 
 			try {
 				const response = await fetch('/api/admin/import-voter-data', {
