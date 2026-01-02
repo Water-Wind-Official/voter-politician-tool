@@ -477,7 +477,7 @@ export function renderAdminDashboard(data: any): string {
 				<div style="display: flex; gap: 1rem;">
 					<button class="btn" onclick="openModal('voter-modal')">+ Add Voter Data</button>
 					<button class="btn btn-secondary" onclick="openModal('import-voter-modal')">📊 Import from Excel</button>
-					<button class="btn btn-primary" onclick="populateVoterData()">📈 Populate 2024 Census Data</button>
+					<button class="btn btn-primary populate-voter-btn" onclick="populateVoterData()">📈 Populate 2024 Census Data</button>
 				</div>
 			</div>
 			<table class="table">
@@ -513,7 +513,7 @@ export function renderAdminDashboard(data: any): string {
 				<h2 class="card-title">Electoral Data</h2>
 				<div style="display: flex; gap: 1rem;">
 					<button class="btn" onclick="openModal('electoral-modal')">+ Add Electoral Data</button>
-					<button class="btn btn-primary" onclick="populateElectoralData()">📊 Populate 2024 Results</button>
+					<button class="btn btn-primary populate-electoral-btn" onclick="populateElectoralData()">📊 Populate 2024 Results</button>
 				</div>
 			</div>
 			<div style="background: #f0f9ff; border-left: 4px solid #3b82f6; padding: 1rem; margin-bottom: 1.5rem; border-radius: 4px;">
@@ -1049,7 +1049,9 @@ export function renderAdminDashboard(data: any): string {
 	</div>
 	
 	<script>
+		console.log('Admin dashboard JavaScript loading...');
 		let currentData = window.adminData;
+		console.log('currentData loaded:', currentData ? 'YES' : 'NO');
 		
 		function showTab(tabName, event) {
 			document.querySelectorAll('.tab').forEach(function(t) { t.classList.remove('active'); });
@@ -1291,13 +1293,15 @@ export function renderAdminDashboard(data: any): string {
 		}
 
 		async function populateElectoralData() {
+			console.log('populateElectoralData function called');
 			if (!confirm('This will populate electoral data for all 50 states + DC with official 2024 election results. Continue?')) {
 				return;
 			}
+			console.log('User confirmed, proceeding...');
 
 			// Show loading state
 			const originalText = '📊 Populate 2024 Results';
-			const btn = document.querySelector('button[onclick="populateElectoralData()"]');
+			const btn = document.querySelector('.populate-electoral-btn');
 			if (btn) {
 				btn.disabled = true;
 				btn.textContent = '⏳ Populating...';
@@ -1329,13 +1333,15 @@ export function renderAdminDashboard(data: any): string {
 		}
 
 		async function populateVoterData() {
+			console.log('populateVoterData function called');
 			if (!confirm('This will populate comprehensive voter registration and turnout data for all 50 states + DC from the 2024 Census Bureau Voting and Registration Supplement. Continue?')) {
 				return;
 			}
+			console.log('User confirmed voter data population, proceeding...');
 
 			// Show loading state
 			const originalText = '📈 Populate 2024 Census Data';
-			const btn = document.querySelector('button[onclick="populateVoterData()"]');
+			const btn = document.querySelector('.populate-voter-btn');
 			if (btn) {
 				btn.disabled = true;
 				btn.textContent = '⏳ Populating...';
