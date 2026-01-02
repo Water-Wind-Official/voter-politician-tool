@@ -63,6 +63,16 @@ export interface VoterData {
 	total_registered_voters: number | null;
 	total_population: number | null;
 	voting_age_population: number | null;
+	citizen_voting_age_population: number | null;
+	percent_registered_total: number | null;
+	percent_registered_total_margin: number | null;
+	percent_registered_citizen: number | null;
+	percent_registered_citizen_margin: number | null;
+	total_voted: number | null;
+	percent_voted_total: number | null;
+	percent_voted_total_margin: number | null;
+	percent_voted_citizen: number | null;
+	percent_voted_citizen_margin: number | null;
 	voter_turnout_percentage: number | null;
 	last_election_date: string | null;
 	data_source: string | null;

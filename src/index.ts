@@ -656,6 +656,117 @@ async function handleAdminApi(request: Request, env: Env, path: string): Promise
 		});
 	}
 
+	// Populate voter data from TSV
+	if (path === '/api/admin/populate-voter-data' && request.method === 'POST') {
+		console.log('Populate voter data endpoint called');
+
+		// 2024 Voter Data - numbers in thousands
+		const voterData: Record<string, {
+			voting_age_pop: number;
+			citizen_voting_age_pop: number;
+			registered: number;
+			pct_registered_total: number;
+			pct_registered_total_margin: number;
+			pct_registered_citizen: number;
+			pct_registered_citizen_margin: number;
+			total_voted: number;
+			pct_voted_total: number;
+			pct_voted_total_margin: number;
+			pct_voted_citizen: number;
+			pct_voted_citizen_margin: number;
+		}> = {
+			'AL': { voting_age_pop: 3931, citizen_voting_age_pop: 3779, registered: 2605, pct_registered_total: 66.3, pct_registered_total_margin: 3.8, pct_registered_citizen: 68.9, pct_registered_citizen_margin: 4.5, total_voted: 2219, pct_voted_total: 56.5, pct_voted_total_margin: 3.8, pct_voted_citizen: 58.7, pct_voted_citizen_margin: 4.5 },
+			'AK': { voting_age_pop: 536, citizen_voting_age_pop: 521, registered: 408, pct_registered_total: 76.1, pct_registered_total_margin: 3.4, pct_registered_citizen: 78.3, pct_registered_citizen_margin: 3.4, total_voted: 324, pct_voted_total: 60.4, pct_voted_total_margin: 3.9, pct_voted_citizen: 62.1, pct_voted_citizen_margin: 4.1 },
+			'AZ': { voting_age_pop: 5841, citizen_voting_age_pop: 5186, registered: 3578, pct_registered_total: 61.3, pct_registered_total_margin: 3.4, pct_registered_citizen: 69.0, pct_registered_citizen_margin: 3.2, total_voted: 3201, pct_voted_total: 54.8, pct_voted_total_margin: 3.3, pct_voted_citizen: 61.7, pct_voted_citizen_margin: 3.2 },
+			'AR': { voting_age_pop: 2371, citizen_voting_age_pop: 2274, registered: 1472, pct_registered_total: 62.1, pct_registered_total_margin: 2.4, pct_registered_citizen: 64.7, pct_registered_citizen_margin: 2.3, total_voted: 1200, pct_voted_total: 50.6, pct_voted_total_margin: 2.8, pct_voted_citizen: 52.8, pct_voted_citizen_margin: 2.7 },
+			'CA': { voting_age_pop: 30100, citizen_voting_age_pop: 25327, registered: 18471, pct_registered_total: 61.4, pct_registered_total_margin: 1.5, pct_registered_citizen: 72.9, pct_registered_citizen_margin: 1.5, total_voted: 16385, pct_voted_total: 54.4, pct_voted_total_margin: 1.5, pct_voted_citizen: 64.7, pct_voted_citizen_margin: 1.6 },
+			'CO': { voting_age_pop: 4630, citizen_voting_age_pop: 4277, registered: 3158, pct_registered_total: 68.2, pct_registered_total_margin: 4.8, pct_registered_citizen: 73.8, pct_registered_citizen_margin: 5.2, total_voted: 2997, pct_voted_total: 64.7, pct_voted_total_margin: 4.7, pct_voted_citizen: 70.1, pct_voted_citizen_margin: 5.0 },
+			'CT': { voting_age_pop: 2850, citizen_voting_age_pop: 2608, registered: 1882, pct_registered_total: 66.0, pct_registered_total_margin: 3.5, pct_registered_citizen: 72.2, pct_registered_citizen_margin: 3.4, total_voted: 1729, pct_voted_total: 60.7, pct_voted_total_margin: 3.5, pct_voted_citizen: 66.3, pct_voted_citizen_margin: 3.4 },
+			'DE': { voting_age_pop: 819, citizen_voting_age_pop: 746, registered: 577, pct_registered_total: 70.4, pct_registered_total_margin: 4.0, pct_registered_citizen: 77.4, pct_registered_citizen_margin: 3.6, total_voted: 521, pct_voted_total: 63.5, pct_voted_total_margin: 4.0, pct_voted_citizen: 69.8, pct_voted_citizen_margin: 3.7 },
+			'DC': { voting_age_pop: 557, citizen_voting_age_pop: 507, registered: 432, pct_registered_total: 77.5, pct_registered_total_margin: 3.0, pct_registered_citizen: 85.1, pct_registered_citizen_margin: 2.8, total_voted: 404, pct_voted_total: 72.5, pct_voted_total_margin: 3.4, pct_voted_citizen: 79.5, pct_voted_citizen_margin: 3.3 },
+			'FL': { voting_age_pop: 18333, citizen_voting_age_pop: 16092, registered: 10788, pct_registered_total: 58.8, pct_registered_total_margin: 2.0, pct_registered_citizen: 67.0, pct_registered_citizen_margin: 2.2, total_voted: 9703, pct_voted_total: 52.9, pct_voted_total_margin: 1.7, pct_voted_citizen: 60.3, pct_voted_citizen_margin: 1.9 },
+			'GA': { voting_age_pop: 8431, citizen_voting_age_pop: 7624, registered: 5401, pct_registered_total: 64.1, pct_registered_total_margin: 2.9, pct_registered_citizen: 70.8, pct_registered_citizen_margin: 2.8, total_voted: 4908, pct_voted_total: 58.2, pct_voted_total_margin: 2.7, pct_voted_citizen: 64.4, pct_voted_citizen_margin: 2.6 },
+			'HI': { voting_age_pop: 1077, citizen_voting_age_pop: 1004, registered: 679, pct_registered_total: 63.1, pct_registered_total_margin: 3.0, pct_registered_citizen: 67.6, pct_registered_citizen_margin: 3.0, total_voted: 587, pct_voted_total: 54.5, pct_voted_total_margin: 3.4, pct_voted_citizen: 58.5, pct_voted_citizen_margin: 3.4 },
+			'ID': { voting_age_pop: 1517, citizen_voting_age_pop: 1428, registered: 1017, pct_registered_total: 67.0, pct_registered_total_margin: 2.0, pct_registered_citizen: 71.2, pct_registered_citizen_margin: 2.1, total_voted: 932, pct_voted_total: 61.4, pct_voted_total_margin: 2.1, pct_voted_citizen: 65.2, pct_voted_citizen_margin: 2.2 },
+			'IL': { voting_age_pop: 9793, citizen_voting_age_pop: 8830, registered: 6780, pct_registered_total: 69.2, pct_registered_total_margin: 2.7, pct_registered_citizen: 76.8, pct_registered_citizen_margin: 2.6, total_voted: 5817, pct_voted_total: 59.4, pct_voted_total_margin: 3.0, pct_voted_citizen: 65.9, pct_voted_citizen_margin: 3.0 },
+			'IN': { voting_age_pop: 5191, citizen_voting_age_pop: 4801, registered: 3536, pct_registered_total: 68.1, pct_registered_total_margin: 3.7, pct_registered_citizen: 73.7, pct_registered_citizen_margin: 3.3, total_voted: 2912, pct_voted_total: 56.1, pct_voted_total_margin: 3.6, pct_voted_citizen: 60.7, pct_voted_citizen_margin: 3.4 },
+			'IA': { voting_age_pop: 2462, citizen_voting_age_pop: 2310, registered: 1861, pct_registered_total: 75.6, pct_registered_total_margin: 3.9, pct_registered_citizen: 80.6, pct_registered_citizen_margin: 3.7, total_voted: 1658, pct_voted_total: 67.4, pct_voted_total_margin: 4.7, pct_voted_citizen: 71.8, pct_voted_citizen_margin: 4.4 },
+			'KS': { voting_age_pop: 2203, citizen_voting_age_pop: 2041, registered: 1628, pct_registered_total: 73.9, pct_registered_total_margin: 5.1, pct_registered_citizen: 79.8, pct_registered_citizen_margin: 4.5, total_voted: 1443, pct_voted_total: 65.5, pct_voted_total_margin: 5.7, pct_voted_citizen: 70.7, pct_voted_citizen_margin: 5.6 },
+			'KY': { voting_age_pop: 3405, citizen_voting_age_pop: 3178, registered: 2558, pct_registered_total: 75.1, pct_registered_total_margin: 4.2, pct_registered_citizen: 80.5, pct_registered_citizen_margin: 3.2, total_voted: 2152, pct_voted_total: 63.2, pct_voted_total_margin: 4.3, pct_voted_citizen: 67.7, pct_voted_citizen_margin: 3.6 },
+			'LA': { voting_age_pop: 3400, citizen_voting_age_pop: 3273, registered: 2160, pct_registered_total: 63.5, pct_registered_total_margin: 3.6, pct_registered_citizen: 66.0, pct_registered_citizen_margin: 3.6, total_voted: 1897, pct_voted_total: 55.8, pct_voted_total_margin: 3.7, pct_voted_citizen: 58.0, pct_voted_citizen_margin: 3.6 },
+			'ME': { voting_age_pop: 1141, citizen_voting_age_pop: 1123, registered: 831, pct_registered_total: 72.8, pct_registered_total_margin: 4.0, pct_registered_citizen: 74.0, pct_registered_citizen_margin: 4.0, total_voted: 753, pct_voted_total: 66.0, pct_voted_total_margin: 3.5, pct_voted_citizen: 67.1, pct_voted_citizen_margin: 3.5 },
+			'MD': { voting_age_pop: 4785, citizen_voting_age_pop: 4350, registered: 3497, pct_registered_total: 73.1, pct_registered_total_margin: 3.5, pct_registered_citizen: 80.4, pct_registered_citizen_margin: 3.2, total_voted: 3091, pct_voted_total: 64.6, pct_voted_total_margin: 3.7, pct_voted_citizen: 71.1, pct_voted_citizen_margin: 3.6 },
+			'MA': { voting_age_pop: 5620, citizen_voting_age_pop: 4947, registered: 3728, pct_registered_total: 66.3, pct_registered_total_margin: 3.1, pct_registered_citizen: 75.4, pct_registered_citizen_margin: 3.0, total_voted: 3408, pct_voted_total: 60.6, pct_voted_total_margin: 3.0, pct_voted_citizen: 68.9, pct_voted_citizen_margin: 3.1 },
+			'MI': { voting_age_pop: 7850, citizen_voting_age_pop: 7534, registered: 6090, pct_registered_total: 77.6, pct_registered_total_margin: 2.7, pct_registered_citizen: 80.8, pct_registered_citizen_margin: 2.5, total_voted: 5444, pct_voted_total: 69.4, pct_voted_total_margin: 2.9, pct_voted_citizen: 72.3, pct_voted_citizen_margin: 2.9 },
+			'MN': { voting_age_pop: 4486, citizen_voting_age_pop: 4208, registered: 3519, pct_registered_total: 78.4, pct_registered_total_margin: 2.5, pct_registered_citizen: 83.6, pct_registered_citizen_margin: 2.3, total_voted: 3193, pct_voted_total: 71.2, pct_voted_total_margin: 2.9, pct_voted_citizen: 75.9, pct_voted_citizen_margin: 2.9 },
+			'MS': { voting_age_pop: 2201, citizen_voting_age_pop: 2162, registered: 1751, pct_registered_total: 79.5, pct_registered_total_margin: 2.5, pct_registered_citizen: 81.0, pct_registered_citizen_margin: 2.2, total_voted: 1490, pct_voted_total: 67.7, pct_voted_total_margin: 3.0, pct_voted_citizen: 68.9, pct_voted_citizen_margin: 2.8 },
+			'MO': { voting_age_pop: 4790, citizen_voting_age_pop: 4664, registered: 3707, pct_registered_total: 77.4, pct_registered_total_margin: 2.8, pct_registered_citizen: 79.5, pct_registered_citizen_margin: 2.7, total_voted: 3240, pct_voted_total: 67.6, pct_voted_total_margin: 3.2, pct_voted_citizen: 69.5, pct_voted_citizen_margin: 3.3 },
+			'MT': { voting_age_pop: 896, citizen_voting_age_pop: 881, registered: 651, pct_registered_total: 72.6, pct_registered_total_margin: 2.5, pct_registered_citizen: 73.8, pct_registered_citizen_margin: 2.5, total_voted: 610, pct_voted_total: 68.0, pct_voted_total_margin: 2.6, pct_voted_citizen: 69.2, pct_voted_citizen_margin: 2.5 },
+			'NE': { voting_age_pop: 1488, citizen_voting_age_pop: 1377, registered: 1016, pct_registered_total: 68.2, pct_registered_total_margin: 4.7, pct_registered_citizen: 73.8, pct_registered_citizen_margin: 4.0, total_voted: 928, pct_voted_total: 62.4, pct_voted_total_margin: 4.6, pct_voted_citizen: 67.4, pct_voted_citizen_margin: 4.0 },
+			'NV': { voting_age_pop: 2506, citizen_voting_age_pop: 2230, registered: 1640, pct_registered_total: 65.4, pct_registered_total_margin: 3.0, pct_registered_citizen: 73.5, pct_registered_citizen_margin: 2.6, total_voted: 1493, pct_voted_total: 59.6, pct_voted_total_margin: 3.1, pct_voted_citizen: 66.9, pct_voted_citizen_margin: 2.9 },
+			'NH': { voting_age_pop: 1144, citizen_voting_age_pop: 1096, registered: 856, pct_registered_total: 74.9, pct_registered_total_margin: 3.9, pct_registered_citizen: 78.1, pct_registered_citizen_margin: 3.4, total_voted: 788, pct_voted_total: 68.9, pct_voted_total_margin: 3.8, pct_voted_citizen: 71.9, pct_voted_citizen_margin: 3.4 },
+			'NJ': { voting_age_pop: 7282, citizen_voting_age_pop: 6323, registered: 5175, pct_registered_total: 71.1, pct_registered_total_margin: 3.2, pct_registered_citizen: 81.9, pct_registered_citizen_margin: 2.7, total_voted: 4581, pct_voted_total: 62.9, pct_voted_total_margin: 3.2, pct_voted_citizen: 72.5, pct_voted_citizen_margin: 2.8 },
+			'NM': { voting_age_pop: 1645, citizen_voting_age_pop: 1491, registered: 1135, pct_registered_total: 69.0, pct_registered_total_margin: 3.4, pct_registered_citizen: 76.1, pct_registered_citizen_margin: 3.3, total_voted: 984, pct_voted_total: 59.8, pct_voted_total_margin: 3.8, pct_voted_citizen: 66.0, pct_voted_citizen_margin: 3.7 },
+			'NY': { voting_age_pop: 15392, citizen_voting_age_pop: 13667, registered: 9051, pct_registered_total: 58.8, pct_registered_total_margin: 2.5, pct_registered_citizen: 66.2, pct_registered_citizen_margin: 2.7, total_voted: 8091, pct_voted_total: 52.6, pct_voted_total_margin: 2.4, pct_voted_citizen: 59.2, pct_voted_citizen_margin: 2.6 },
+			'NC': { voting_age_pop: 8496, citizen_voting_age_pop: 7695, registered: 5374, pct_registered_total: 63.3, pct_registered_total_margin: 2.9, pct_registered_citizen: 69.8, pct_registered_citizen_margin: 2.7, total_voted: 4971, pct_voted_total: 58.5, pct_voted_total_margin: 2.8, pct_voted_citizen: 64.6, pct_voted_citizen_margin: 2.7 },
+			'ND': { voting_age_pop: 582, citizen_voting_age_pop: 563, registered: 442, pct_registered_total: 76.0, pct_registered_total_margin: 2.7, pct_registered_citizen: 78.6, pct_registered_citizen_margin: 2.9, total_voted: 401, pct_voted_total: 68.9, pct_voted_total_margin: 2.7, pct_voted_citizen: 71.2, pct_voted_citizen_margin: 2.7 },
+			'OH': { voting_age_pop: 9113, citizen_voting_age_pop: 8782, registered: 6593, pct_registered_total: 72.4, pct_registered_total_margin: 2.3, pct_registered_citizen: 75.1, pct_registered_citizen_margin: 2.2, total_voted: 5922, pct_voted_total: 65.0, pct_voted_total_margin: 2.5, pct_voted_citizen: 67.4, pct_voted_citizen_margin: 2.5 },
+			'OK': { voting_age_pop: 3053, citizen_voting_age_pop: 2924, registered: 2062, pct_registered_total: 67.6, pct_registered_total_margin: 3.4, pct_registered_citizen: 70.5, pct_registered_citizen_margin: 3.0, total_voted: 1747, pct_voted_total: 57.2, pct_voted_total_margin: 3.3, pct_voted_citizen: 59.7, pct_voted_citizen_margin: 3.1 },
+			'OR': { voting_age_pop: 3365, citizen_voting_age_pop: 3138, registered: 2604, pct_registered_total: 77.4, pct_registered_total_margin: 2.9, pct_registered_citizen: 83.0, pct_registered_citizen_margin: 3.0, total_voted: 2362, pct_voted_total: 70.2, pct_voted_total_margin: 2.8, pct_voted_citizen: 75.3, pct_voted_citizen_margin: 2.8 },
+			'PA': { voting_age_pop: 10185, citizen_voting_age_pop: 9789, registered: 7413, pct_registered_total: 72.8, pct_registered_total_margin: 2.3, pct_registered_citizen: 75.7, pct_registered_citizen_margin: 2.3, total_voted: 6828, pct_voted_total: 67.0, pct_voted_total_margin: 2.4, pct_voted_citizen: 69.7, pct_voted_citizen_margin: 2.3 },
+			'RI': { voting_age_pop: 888, citizen_voting_age_pop: 811, registered: 645, pct_registered_total: 72.6, pct_registered_total_margin: 3.5, pct_registered_citizen: 79.5, pct_registered_citizen_margin: 3.2, total_voted: 568, pct_voted_total: 64.0, pct_voted_total_margin: 3.9, pct_voted_citizen: 70.0, pct_voted_citizen_margin: 4.0 },
+			'SC': { voting_age_pop: 4222, citizen_voting_age_pop: 4006, registered: 2935, pct_registered_total: 69.5, pct_registered_total_margin: 3.2, pct_registered_citizen: 73.3, pct_registered_citizen_margin: 3.0, total_voted: 2510, pct_voted_total: 59.5, pct_voted_total_margin: 3.2, pct_voted_citizen: 62.7, pct_voted_citizen_margin: 3.2 },
+			'SD': { voting_age_pop: 690, citizen_voting_age_pop: 669, registered: 473, pct_registered_total: 68.5, pct_registered_total_margin: 3.5, pct_registered_citizen: 70.7, pct_registered_citizen_margin: 3.7, total_voted: 394, pct_voted_total: 57.1, pct_voted_total_margin: 3.7, pct_voted_citizen: 58.9, pct_voted_citizen_margin: 3.8 },
+			'TN': { voting_age_pop: 5583, citizen_voting_age_pop: 5300, registered: 3980, pct_registered_total: 71.3, pct_registered_total_margin: 2.9, pct_registered_citizen: 75.1, pct_registered_citizen_margin: 2.6, total_voted: 3433, pct_voted_total: 61.5, pct_voted_total_margin: 2.8, pct_voted_citizen: 64.8, pct_voted_citizen_margin: 2.6 },
+			'TX': { voting_age_pop: 23139, citizen_voting_age_pop: 19754, registered: 13641, pct_registered_total: 59.0, pct_registered_total_margin: 2.2, pct_registered_citizen: 69.1, pct_registered_citizen_margin: 2.3, total_voted: 11442, pct_voted_total: 49.4, pct_voted_total_margin: 2.2, pct_voted_citizen: 57.9, pct_voted_citizen_margin: 2.3 },
+			'UT': { voting_age_pop: 2505, citizen_voting_age_pop: 2324, registered: 1736, pct_registered_total: 69.3, pct_registered_total_margin: 3.1, pct_registered_citizen: 74.7, pct_registered_citizen_margin: 3.1, total_voted: 1555, pct_voted_total: 62.1, pct_voted_total_margin: 3.2, pct_voted_citizen: 66.9, pct_voted_citizen_margin: 3.1 },
+			'VT': { voting_age_pop: 530, citizen_voting_age_pop: 520, registered: 401, pct_registered_total: 75.7, pct_registered_total_margin: 3.3, pct_registered_citizen: 77.2, pct_registered_citizen_margin: 3.4, total_voted: 373, pct_voted_total: 70.4, pct_voted_total_margin: 3.1, pct_voted_citizen: 71.7, pct_voted_citizen_margin: 3.1 },
+			'VA': { voting_age_pop: 6722, citizen_voting_age_pop: 6259, registered: 4981, pct_registered_total: 74.1, pct_registered_total_margin: 2.5, pct_registered_citizen: 79.6, pct_registered_citizen_margin: 2.2, total_voted: 4565, pct_voted_total: 67.9, pct_voted_total_margin: 2.7, pct_voted_citizen: 72.9, pct_voted_citizen_margin: 2.4 },
+			'WA': { voting_age_pop: 6155, citizen_voting_age_pop: 5516, registered: 4250, pct_registered_total: 69.1, pct_registered_total_margin: 3.7, pct_registered_citizen: 77.1, pct_registered_citizen_margin: 3.5, total_voted: 3863, pct_voted_total: 62.8, pct_voted_total_margin: 4.1, pct_voted_citizen: 70.0, pct_voted_citizen_margin: 4.0 },
+			'WV': { voting_age_pop: 1379, citizen_voting_age_pop: 1355, registered: 1001, pct_registered_total: 72.6, pct_registered_total_margin: 4.5, pct_registered_citizen: 73.8, pct_registered_citizen_margin: 4.4, total_voted: 807, pct_voted_total: 58.5, pct_voted_total_margin: 5.5, pct_voted_citizen: 59.5, pct_voted_citizen_margin: 5.5 },
+			'WI': { voting_age_pop: 4629, citizen_voting_age_pop: 4431, registered: 3380, pct_registered_total: 73.0, pct_registered_total_margin: 3.3, pct_registered_citizen: 76.3, pct_registered_citizen_margin: 3.2, total_voted: 3201, pct_voted_total: 69.2, pct_voted_total_margin: 3.6, pct_voted_citizen: 72.2, pct_voted_citizen_margin: 3.4 },
+			'WY': { voting_age_pop: 453, citizen_voting_age_pop: 443, registered: 307, pct_registered_total: 67.8, pct_registered_total_margin: 2.8, pct_registered_citizen: 69.3, pct_registered_citizen_margin: 2.5, total_voted: 283, pct_voted_total: 62.4, pct_voted_total_margin: 2.5, pct_voted_citizen: 63.8, pct_voted_citizen_margin: 2.4 }
+		};
+
+		let updated = 0;
+		let errors = 0;
+
+		for (const [stateCode, data] of Object.entries(voterData)) {
+			try {
+				await upsertVoterData(env.DB, {
+					state_code: stateCode,
+					voting_age_population: data.voting_age_pop * 1000, // Convert from thousands
+					citizen_voting_age_population: data.citizen_voting_age_pop * 1000,
+					total_registered_voters: data.registered * 1000,
+					percent_registered_total: data.pct_registered_total,
+					percent_registered_total_margin: data.pct_registered_total_margin,
+					percent_registered_citizen: data.pct_registered_citizen,
+					percent_registered_citizen_margin: data.pct_registered_citizen_margin,
+					total_voted: data.total_voted * 1000,
+					percent_voted_total: data.pct_voted_total,
+					percent_voted_total_margin: data.pct_voted_total_margin,
+					percent_voted_citizen: data.pct_voted_citizen,
+					percent_voted_citizen_margin: data.pct_voted_citizen_margin,
+					data_year: 2024,
+					data_source: 'Census Bureau Voting and Registration Supplement'
+				});
+				updated++;
+			} catch (error) {
+				console.error(`Error updating voter data for ${stateCode}:`, error);
+				errors++;
+			}
+		}
+
+		console.log(`Populate voter data complete: ${updated} updated, ${errors} errors`);
+
+		return Response.json({
+			success: true,
+			message: `Updated voter data for ${updated} states (${errors} errors)`,
+			updated,
+			errors
+		});
+	}
+
 	return new Response('Not found', { status: 404 });
 }
 

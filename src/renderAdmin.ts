@@ -477,6 +477,7 @@ export function renderAdminDashboard(data: any): string {
 				<div style="display: flex; gap: 1rem;">
 					<button class="btn" onclick="openModal('voter-modal')">+ Add Voter Data</button>
 					<button class="btn btn-secondary" onclick="openModal('import-voter-modal')">📊 Import from Excel</button>
+					<button class="btn btn-primary" onclick="populateVoterData()">📈 Populate 2024 Census Data</button>
 				</div>
 			</div>
 			<table class="table">
@@ -1315,6 +1316,44 @@ export function renderAdminDashboard(data: any): string {
 					location.reload();
 				} else {
 					alert('❌ Error: ' + (result.message || 'Failed to populate electoral data'));
+				}
+			} catch (error) {
+				alert('❌ Error: ' + (error.message || 'Network error'));
+			} finally {
+				// Reset button
+				if (btn) {
+					btn.disabled = false;
+					btn.textContent = originalText;
+				}
+			}
+		}
+
+		async function populateVoterData() {
+			if (!confirm('This will populate comprehensive voter registration and turnout data for all 50 states + DC from the 2024 Census Bureau Voting and Registration Supplement. Continue?')) {
+				return;
+			}
+
+			// Show loading state
+			const originalText = '📈 Populate 2024 Census Data';
+			const btn = document.querySelector('button[onclick="populateVoterData()"]');
+			if (btn) {
+				btn.disabled = true;
+				btn.textContent = '⏳ Populating...';
+			}
+
+			try {
+				const response = await fetch('/api/admin/populate-voter-data', {
+					method: 'POST',
+					headers: { 'Content-Type': 'application/json' }
+				});
+
+				const result = await response.json();
+
+				if (response.ok && result.success) {
+					alert('✅ Success! Updated comprehensive voter data for ' + result.updated + ' states. The data includes registration rates, turnout percentages, and demographic breakdowns from the Census Bureau.');
+					location.reload();
+				} else {
+					alert('❌ Error: ' + (result.message || 'Failed to populate voter data'));
 				}
 			} catch (error) {
 				alert('❌ Error: ' + (error.message || 'Network error'));
