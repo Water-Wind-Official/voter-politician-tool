@@ -510,7 +510,10 @@ export function renderAdminDashboard(data: any): string {
 		<div class="card">
 			<div class="card-header">
 				<h2 class="card-title">Electoral Data</h2>
-				<button class="btn" onclick="openModal('electoral-modal')">+ Add Electoral Data</button>
+				<div style="display: flex; gap: 1rem;">
+					<button class="btn" onclick="openModal('electoral-modal')">+ Add Electoral Data</button>
+					<button class="btn btn-primary" onclick="populateElectoralData()">📊 Populate 2024 Results</button>
+				</div>
 			</div>
 			<div style="background: #f0f9ff; border-left: 4px solid #3b82f6; padding: 1rem; margin-bottom: 1.5rem; border-radius: 4px;">
 				<p style="margin: 0; font-size: 0.9rem; color: #1e40af;">
@@ -1285,7 +1288,45 @@ export function renderAdminDashboard(data: any): string {
 				alert('Error: ' + (error.message || 'Unknown error'));
 			}
 		}
-		
+
+		async function populateElectoralData() {
+			if (!confirm('This will populate electoral data for all 50 states + DC with official 2024 election results. Continue?')) {
+				return;
+			}
+
+			// Show loading state
+			const originalText = '📊 Populate 2024 Results';
+			const btn = document.querySelector('button[onclick="populateElectoralData()"]');
+			if (btn) {
+				btn.disabled = true;
+				btn.textContent = '⏳ Populating...';
+			}
+
+			try {
+				const response = await fetch('/api/admin/populate-electoral-2024', {
+					method: 'POST',
+					headers: { 'Content-Type': 'application/json' }
+				});
+
+				const result = await response.json();
+
+				if (response.ok && result.success) {
+					alert('✅ Success! Updated electoral data for ' + result.updated + ' states. The map will now show pastel colors based on 2024 election results!');
+					location.reload();
+				} else {
+					alert('❌ Error: ' + (result.message || 'Failed to populate electoral data'));
+				}
+			} catch (error) {
+				alert('❌ Error: ' + (error.message || 'Network error'));
+			} finally {
+				// Reset button
+				if (btn) {
+					btn.disabled = false;
+					btn.textContent = originalText;
+				}
+			}
+		}
+
 		async function editElectoral(stateCode) {
 			const state = currentData.states.find(function(s) { return s.code === stateCode; });
 			if (!state) return;

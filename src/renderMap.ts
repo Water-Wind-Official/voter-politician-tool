@@ -121,11 +121,11 @@ export function renderHomePage(states: State[]): string {
 		}
 
 		.legend-color.republican {
-			background: #fecaca;
+			background: #ff6b6b;
 		}
 
 		.legend-color.democrat {
-			background: #bfdbfe;
+			background: #74b9ff;
 		}
 		
 		#us-map {
@@ -143,19 +143,19 @@ export function renderHomePage(states: State[]): string {
 		}
 		
 		.state-path.republican {
-			fill: #fecaca; /* Pastel red */
+			fill: #ff6b6b !important; /* Vibrant pastel red for Republican states */
 		}
-		
+
 		.state-path.democrat {
-			fill: #bfdbfe; /* Pastel blue */
+			fill: #74b9ff !important; /* Vibrant pastel blue for Democratic states */
 		}
-		
+
 		.state-path.republican:hover {
-			fill: #fca5a5; /* Slightly darker pastel red on hover */
+			fill: #ff5252 !important; /* Darker red on hover */
 		}
-		
+
 		.state-path.democrat:hover {
-			fill: #93c5fd; /* Slightly darker pastel blue on hover */
+			fill: #0984e3 !important; /* Darker blue on hover */
 		}
 		
 		.state-path:hover:not(.republican):not(.democrat) {

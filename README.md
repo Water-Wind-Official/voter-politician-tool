@@ -15,7 +15,8 @@ A web application that displays information about U.S. politicians, their voting
 This website is designed to comply with legal requirements:
 
 - ✅ **Voting Records**: Public facts about votes are freely republishable
-- ✅ **Data Source**: Uses GovTrack.us API (open data, no API key required)
+- ✅ **Data Source**: Uses Congress.gov API (official government API, free API key required)
+- ✅ **Electoral Map**: States colored in pastel red/blue based on 2024 electoral winners
 - ⚠️ **Tweets**: Does not store tweets directly. Links to official Twitter accounts and recommends using Twitter's official embed widgets
 - ⚠️ **Photos**: Use only public domain images (e.g., from .gov websites) or Creative Commons licensed images
 
