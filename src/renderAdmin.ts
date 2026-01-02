@@ -425,10 +425,10 @@ export function renderAdminDashboard(data: any): string {
 	</div>
 	
 	<div class="tabs">
-		<button class="tab active" onclick="showTab('representatives')">Representatives</button>
-		<button class="tab" onclick="showTab('voter-data')">Voter Data</button>
-		<button class="tab" onclick="showTab('votes')">Votes</button>
-		<button class="tab" onclick="showTab('districts')">Districts</button>
+		<button class="tab active" onclick="showTab('representatives', event)">Representatives</button>
+		<button class="tab" onclick="showTab('voter-data', event)">Voter Data</button>
+		<button class="tab" onclick="showTab('votes', event)">Votes</button>
+		<button class="tab" onclick="showTab('districts', event)">Districts</button>
 	</div>
 	
 	<div id="representatives" class="tab-content active">
@@ -448,7 +448,7 @@ export function renderAdminDashboard(data: any): string {
 					</tr>
 				</thead>
 				<tbody>
-					${representatives.map((r: any) => `
+					${representatives.map((r) => `
 						<tr>
 							<td>${escapeHtml(r.name)}</td>
 							<td>${r.state_code}</td>
@@ -482,7 +482,7 @@ export function renderAdminDashboard(data: any): string {
 					</tr>
 				</thead>
 				<tbody>
-					${voterData.map((v: any) => `
+					${voterData.map((v) => `
 						<tr>
 							<td>${v.state_code}</td>
 							<td>${v.total_registered_voters ? v.total_registered_voters.toLocaleString() : '-'}</td>
@@ -515,7 +515,7 @@ export function renderAdminDashboard(data: any): string {
 					</tr>
 				</thead>
 				<tbody>
-					${votes.map((v: any) => `
+					${votes.map((v) => `
 						<tr>
 							<td>${escapeHtml(v.bill_title || v.question || '-')}</td>
 							<td>${v.chamber}</td>
@@ -563,7 +563,7 @@ export function renderAdminDashboard(data: any): string {
 						<label>State Code *</label>
 						<select name="state_code" required>
 							<option value="">Select State</option>
-							${states.map((s: any) => `<option value="${s.code}">${s.name}</option>`).join('')}
+							${states.map((s) => `<option value="${s.code}">${s.name}</option>`).join('')}
 						</select>
 					</div>
 					<div class="form-group">
@@ -615,10 +615,12 @@ export function renderAdminDashboard(data: any): string {
 	<script>
 		let currentData = ${JSON.stringify(data)};
 		
-		function showTab(tabName) {
-			document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-			document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
-			event.target.classList.add('active');
+		function showTab(tabName, event) {
+			document.querySelectorAll('.tab').forEach(function(t) { t.classList.remove('active'); });
+			document.querySelectorAll('.tab-content').forEach(function(c) { c.classList.remove('active'); });
+			if (event && event.target) {
+				event.target.classList.add('active');
+			}
 			document.getElementById(tabName).classList.add('active');
 		}
 		
@@ -628,7 +630,8 @@ export function renderAdminDashboard(data: any): string {
 		
 		function closeModal(modalId) {
 			document.getElementById(modalId).classList.remove('active');
-			document.querySelector(\`#\${modalId} form\`).reset();
+			const form = document.querySelector('#' + modalId + ' form');
+			if (form) form.reset();
 		}
 		
 		async function saveRep(e) {
@@ -638,7 +641,8 @@ export function renderAdminDashboard(data: any): string {
 			const id = data.id;
 			
 			try {
-				const response = await fetch(\`/api/admin/representative\${id ? '/' + id : ''}\`, {
+				const url = '/api/admin/representative' + (id ? '/' + id : '');
+				const response = await fetch(url, {
 					method: id ? 'PUT' : 'POST',
 					headers: { 'Content-Type': 'application/json' },
 					body: JSON.stringify(data)
@@ -649,29 +653,32 @@ export function renderAdminDashboard(data: any): string {
 				} else {
 					alert('Error saving representative');
 				}
-			} catch (error: any) {
-				alert('Error: ' + error.message);
+			} catch (error) {
+				alert('Error: ' + (error.message || 'Unknown error'));
 			}
 		}
 		
-		async function editRep(id: number) {
-			const rep = currentData.representatives.find((r: any) => r.id === id);
+		async function editRep(id) {
+			const rep = currentData.representatives.find(function(r) { return r.id === id; });
 			if (!rep) return;
 			
-			const form = document.getElementById('rep-form') as HTMLFormElement;
-			Object.keys(rep).forEach(key => {
-				const input = form.querySelector(\`[name="\${key}"]\`) as HTMLInputElement;
+			const form = document.getElementById('rep-form');
+			if (!form) return;
+			
+			Object.keys(rep).forEach(function(key) {
+				const input = form.querySelector('[name="' + key + '"]');
 				if (input) input.value = rep[key] || '';
 			});
-			(form.querySelector('[name="id"]') as HTMLInputElement)!.value = id.toString();
+			const idInput = form.querySelector('[name="id"]');
+			if (idInput) idInput.value = id.toString();
 			openModal('rep-modal');
 		}
 		
-		async function deleteRep(id: number) {
+		async function deleteRep(id) {
 			if (!confirm('Are you sure you want to delete this representative?')) return;
 			
 			try {
-				const response = await fetch(\`/api/admin/representative/\${id}\`, {
+				const response = await fetch('/api/admin/representative/' + id, {
 					method: 'DELETE'
 				});
 				
@@ -680,13 +687,13 @@ export function renderAdminDashboard(data: any): string {
 				} else {
 					alert('Error deleting representative');
 				}
-			} catch (error: any) {
-				alert('Error: ' + error.message);
+			} catch (error) {
+				alert('Error: ' + (error.message || 'Unknown error'));
 			}
 		}
 		
 		function logout() {
-			fetch('/admin/logout', { method: 'POST' }).then(() => {
+			fetch('/admin/logout', { method: 'POST' }).then(function() {
 				window.location.href = '/admin/login';
 			});
 		}
@@ -700,7 +707,7 @@ export function renderAdminDashboard(data: any): string {
 				'"': '&quot;',
 				"'": '&#039;'
 			};
-			return text.toString().replace(/[&<>"']/g, m => map[m]);
+			return text.toString().replace(/[&<>"']/g, function(m) { return map[m]; });
 		}
 	</script>
 </body>
