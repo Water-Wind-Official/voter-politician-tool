@@ -177,15 +177,25 @@ async function handleSync(request: Request, env: Env): Promise<Response> {
 				const voteId = await upsertVote(env.DB, voteData);
 				houseVoteCount++;
 				
-				// Sync voting positions
-				for (const member of vote.members) {
-					const politicianId = `congress-${member.bioguideId}`;
-					const politician = await getPoliticianByProPublicaId(env.DB, politicianId);
-					if (politician) {
-						const position = mapCongressVote(member.vote);
-						await upsertVotingRecord(env.DB, politician.id, voteId, position);
-						houseVoteRecordCount++;
+				// Sync voting positions - need to fetch member votes for each vote
+				// Congress.gov API has a separate endpoint for member votes: /house-vote/{congress}/{session}/{rollCallVoteNumber}/members
+				if (vote.members && Array.isArray(vote.members)) {
+					for (const member of vote.members) {
+						const bioguideId = member.bioguideId;
+						if (bioguideId) {
+							const politicianId = `congress-${bioguideId}`;
+							const politician = await getPoliticianByProPublicaId(env.DB, politicianId);
+							if (politician) {
+								const votePosition = (member as any).vote || (member as any).votePosition || 'Not Voting';
+								const position = mapCongressVote(votePosition);
+								await upsertVotingRecord(env.DB, politician.id, voteId, position);
+								houseVoteRecordCount++;
+							}
+						}
 					}
+				} else {
+					// If members aren't in the vote object, we'd need to fetch from the members endpoint
+					// For now, skip individual member votes if not available
 				}
 			}
 		} catch (error: any) {
@@ -200,13 +210,19 @@ async function handleSync(request: Request, env: Env): Promise<Response> {
 				const voteId = await upsertVote(env.DB, voteData);
 				senateVoteCount++;
 				
-				for (const member of vote.members) {
-					const politicianId = `congress-${member.bioguideId}`;
-					const politician = await getPoliticianByProPublicaId(env.DB, politicianId);
-					if (politician) {
-						const position = mapCongressVote(member.vote);
-						await upsertVotingRecord(env.DB, politician.id, voteId, position);
-						senateVoteRecordCount++;
+				if (vote.members && Array.isArray(vote.members)) {
+					for (const member of vote.members) {
+						const bioguideId = member.bioguideId;
+						if (bioguideId) {
+							const politicianId = `congress-${bioguideId}`;
+							const politician = await getPoliticianByProPublicaId(env.DB, politicianId);
+							if (politician) {
+								const votePosition = (member as any).vote || (member as any).votePosition || 'Not Voting';
+								const position = mapCongressVote(votePosition);
+								await upsertVotingRecord(env.DB, politician.id, voteId, position);
+								senateVoteRecordCount++;
+							}
+						}
 					}
 				}
 			}

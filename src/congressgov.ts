@@ -208,7 +208,7 @@ export function convertCongressMember(member: any, knownChamber?: 'house' | 'sen
 }
 
 // Convert Congress.gov vote to our internal format
-export function convertCongressVote(vote: CongressVote): {
+export function convertCongressVote(vote: any): {
 	propublica_roll_id: string;
 	bill_id: string | null;
 	bill_title: string | null;
@@ -219,15 +219,20 @@ export function convertCongressVote(vote: CongressVote): {
 	chamber: string;
 	result: string | null;
 } {
+	const rollNumber = vote.rollNumber || vote.rollCallVoteNumber || vote.id || 'unknown';
+	const bill = vote.bill || vote.relatedBill || {};
+	const voteDate = vote.voteDate || vote.votedAt || vote.date || '';
+	const chamber = (vote.chamber || 'house').toLowerCase();
+	
 	return {
-		propublica_roll_id: `congress-${vote.rollNumber}`,
-		bill_id: vote.bill?.url || null,
-		bill_title: vote.bill?.title || null,
-		bill_number: vote.bill?.number || null,
+		propublica_roll_id: `congress-${rollNumber}`,
+		bill_id: bill.url || null,
+		bill_title: bill.title || null,
+		bill_number: bill.number || null,
 		description: vote.description || null,
 		question: vote.question || null,
-		date: vote.voteDate,
-		chamber: vote.chamber.toLowerCase(),
+		date: voteDate,
+		chamber: chamber,
 		result: vote.result || null,
 	};
 }
@@ -301,48 +306,70 @@ export async function fetchCongressVotes(
 	congress: number = 118,
 	limit: number = 50
 ): Promise<CongressVote[]> {
-	// Note: Congress.gov API v3 may not have a direct vote endpoint
-	// This function attempts to fetch votes, but may not be available
-	// Alternative: Votes might be available through bill endpoints or member-specific endpoints
+	// Congress.gov API v3 has beta endpoints for House votes (118th Congress onwards)
+	// Format: /house-vote for list, /house-vote/{congress}/{session}/{rollCallVoteNumber} for specific vote
+	// Senate votes may not be available yet
 	
-	// Try different possible vote endpoints
-	const endpoints = [
-		`${CONGRESS_API_BASE}/vote?chamber=${chamber === 'house' ? 'House' : 'Senate'}&api_key=${apiKey}&format=json&limit=${limit}`,
-		`${CONGRESS_API_BASE}/rollcall?chamber=${chamber === 'house' ? 'House' : 'Senate'}&api_key=${apiKey}&format=json&limit=${limit}`,
-		`${CONGRESS_API_BASE}/vote/${congress}/${chamber === 'house' ? 'house' : 'senate'}?api_key=${apiKey}&format=json&limit=${limit}`,
-	];
+	if (chamber === 'house') {
+		// Use the House vote endpoint
+		const url = `${CONGRESS_API_BASE}/house-vote?api_key=${apiKey}&format=json&limit=${limit}`;
+		
+		const response = await fetch(url, {
+			headers: {
+				'User-Agent': 'PoliticianVotingRecords/1.0',
+				'Accept': 'application/json',
+			},
+		});
 
-	for (const url of endpoints) {
-		try {
-			const response = await fetch(url, {
-				headers: {
-					'User-Agent': 'PoliticianVotingRecords/1.0',
-					'Accept': 'application/json',
-				},
-			});
-
-			if (response.ok) {
-				const data = await response.json();
-				// Try different response structures
-				if (data.votes && Array.isArray(data.votes)) {
-					return data.votes;
-				}
-				if (data.results && data.results.votes && Array.isArray(data.results.votes)) {
-					return data.results.votes;
-				}
-				if (data.rollCalls && Array.isArray(data.rollCalls)) {
-					return data.rollCalls;
-				}
-				if (Array.isArray(data)) {
-					return data;
-				}
-			}
-		} catch (e) {
-			// Try next endpoint
-			continue;
+		if (!response.ok) {
+			const errorText = await response.text().catch(() => '');
+			throw new Error(`Congress.gov API error: ${response.status} ${response.statusText}. ${errorText}`);
 		}
+
+		const data = await response.json();
+		// Congress.gov API returns votes in different possible structures
+		if (data.votes && Array.isArray(data.votes)) {
+			return data.votes;
+		}
+		if (data.results && data.results.votes && Array.isArray(data.results.votes)) {
+			return data.results.votes;
+		}
+		if (data.houseVotes && Array.isArray(data.houseVotes)) {
+			return data.houseVotes;
+		}
+		if (Array.isArray(data)) {
+			return data;
+		}
+		return [];
+	} else {
+		// Senate votes - try senate-vote endpoint (may not exist)
+		const url = `${CONGRESS_API_BASE}/senate-vote?api_key=${apiKey}&format=json&limit=${limit}`;
+		
+		const response = await fetch(url, {
+			headers: {
+				'User-Agent': 'PoliticianVotingRecords/1.0',
+				'Accept': 'application/json',
+			},
+		});
+
+		if (!response.ok) {
+			// Senate votes may not be available
+			throw new Error(`Senate votes not available in Congress.gov API (${response.status})`);
+		}
+
+		const data = await response.json();
+		if (data.votes && Array.isArray(data.votes)) {
+			return data.votes;
+		}
+		if (data.results && data.results.votes && Array.isArray(data.results.votes)) {
+			return data.results.votes;
+		}
+		if (data.senateVotes && Array.isArray(data.senateVotes)) {
+			return data.senateVotes;
+		}
+		if (Array.isArray(data)) {
+			return data;
+		}
+		return [];
 	}
-	
-	// If all endpoints fail, throw error
-	throw new Error('Congress.gov API does not have a vote endpoint available. Vote data cannot be synced through this API.');
 }
