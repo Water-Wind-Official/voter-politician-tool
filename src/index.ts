@@ -3,6 +3,8 @@
 import { renderHomePage } from "./renderMap";
 import { renderPoliticianProfile } from "./renderHtml";
 import { renderAdminLogin, renderAdminDashboard } from "./renderAdmin";
+import { renderSenatorHub } from "./renderSenators";
+import { renderHouseHub } from "./renderHouse";
 import { 
 	getAllStates, 
 	getStateByCode,
@@ -12,13 +14,17 @@ import {
 	getVoterDemographicsByState,
 	getPoliticianVotes,
 	getAllRepresentatives,
+	getAllSenators,
+	getAllHouseMembers,
 	createRepresentative,
 	updateRepresentative,
 	deleteRepresentative,
 	upsertVoterData,
 	getAllVotes,
 	createVote,
-	getDistrictsByState
+	updateVote,
+	getDistrictsByState,
+	updateStateElectoralData
 } from "./db";
 
 export default {
@@ -39,6 +45,14 @@ export default {
 		// Web pages
 		if (path === '/' || path === '/index.html') {
 			return handleHomePage(request, env);
+		}
+
+		if (path === '/senators' || path === '/senator-hub') {
+			return handleSenatorHub(request, env);
+		}
+
+		if (path === '/house' || path === '/house-hub') {
+			return handleHouseHub(request, env);
 		}
 
 		if (path.startsWith('/representative/')) {
@@ -76,8 +90,24 @@ export default {
 
 async function handleHomePage(request: Request, env: Env): Promise<Response> {
 	const states = await getAllStates(env.DB);
-	
+
 	return new Response(renderHomePage(states), {
+		headers: { "content-type": "text/html" },
+	});
+}
+
+async function handleSenatorHub(request: Request, env: Env): Promise<Response> {
+	const senators = await getAllSenators(env.DB);
+
+	return new Response(renderSenatorHub(senators), {
+		headers: { "content-type": "text/html" },
+	});
+}
+
+async function handleHouseHub(request: Request, env: Env): Promise<Response> {
+	const houseMembers = await getAllHouseMembers(env.DB);
+
+	return new Response(renderHouseHub(houseMembers), {
 		headers: { "content-type": "text/html" },
 	});
 }
@@ -185,8 +215,8 @@ async function handleAdminLogout(request: Request, env: Env): Promise<Response> 
 async function handleAdminDashboard(request: Request, env: Env): Promise<Response> {
 	if (!checkAdminAuth(request)) {
 		return Response.redirect(new URL('/admin/login', request.url).toString(), 302);
-	}
-
+		}
+		
 	const states = await getAllStates(env.DB);
 	const representatives = await getAllRepresentatives(env.DB);
 	const voterData = await Promise.all(
@@ -207,11 +237,30 @@ async function handleAdminDashboard(request: Request, env: Env): Promise<Respons
 async function handleAdminApi(request: Request, env: Env, path: string): Promise<Response> {
 	if (!checkAdminAuth(request)) {
 		return new Response('Unauthorized', { status: 401 });
-	}
-
+		}
+		
 	// Representative CRUD
 	if (path === '/api/admin/representative' && request.method === 'POST') {
 		const body = await request.json() as any;
+		
+		// Handle district number - find or note that district needs to be created
+		if (body.district_number && body.chamber === 'house') {
+			// Try to find existing district
+			const district = await env.DB
+				.prepare('SELECT id FROM districts WHERE state_code = ? AND district_number = ?')
+				.bind(body.state_code, parseInt(body.district_number))
+				.first<{ id: number }>();
+			
+			if (district) {
+				body.district_id = district.id;
+			}
+			// If district doesn't exist, district_id will remain null
+			// Districts can be managed separately if needed
+		}
+		
+		// Remove district_number from body as it's not a direct field
+		delete body.district_number;
+		
 		const id = await createRepresentative(env.DB, body);
 		return Response.json({ success: true, id });
 	}
@@ -222,6 +271,23 @@ async function handleAdminApi(request: Request, env: Env, path: string): Promise
 			return new Response('Invalid ID', { status: 400 });
 		}
 		const body = await request.json() as any;
+				
+		// Handle district number - find or note that district needs to be created
+		if (body.district_number && body.chamber === 'house') {
+			// Try to find existing district
+			const district = await env.DB
+				.prepare('SELECT id FROM districts WHERE state_code = ? AND district_number = ?')
+				.bind(body.state_code, parseInt(body.district_number))
+				.first<{ id: number }>();
+			
+			if (district) {
+				body.district_id = district.id;
+			}
+		}
+		
+		// Remove district_number from body as it's not a direct field
+		delete body.district_number;
+		
 		await updateRepresentative(env.DB, id, body);
 		return Response.json({ success: true });
 	}
@@ -242,7 +308,37 @@ async function handleAdminApi(request: Request, env: Env, path: string): Promise
 		return Response.json({ success: true, id });
 	}
 
-	// Votes
+	// Stances (votes)
+	if (path === '/api/admin/stance' && request.method === 'POST') {
+		const body = await request.json() as any;
+		const id = await createVote(env.DB, body);
+		return Response.json({ success: true, id });
+	}
+
+	if (path.startsWith('/api/admin/stance/') && request.method === 'PUT') {
+		const id = parseInt(path.split('/')[4]);
+		if (isNaN(id)) {
+			return new Response('Invalid ID', { status: 400 });
+		}
+		const body = await request.json() as any;
+		await updateVote(env.DB, id, body);
+		return Response.json({ success: true });
+	}
+
+	// Electoral data
+	if (path === '/api/admin/electoral' && request.method === 'POST') {
+		const body = await request.json() as any;
+		await updateStateElectoralData(
+			env.DB,
+			body.state_code,
+			body.electoral_winner || null,
+			body.electoral_year || null,
+			body.electoral_margin || null
+		);
+		return Response.json({ success: true });
+	}
+
+	// Legacy vote endpoint
 	if (path === '/api/admin/vote' && request.method === 'POST') {
 		const body = await request.json() as any;
 		const id = await createVote(env.DB, body);
@@ -276,7 +372,7 @@ function renderRepresentativeProfile(representative: any, votes: any[]): string 
 			padding: 2rem;
 			color: #333;
 		}
-		
+
 		.container {
 			max-width: 1000px;
 			margin: 0 auto;
@@ -374,7 +470,7 @@ function renderRepresentativeProfile(representative: any, votes: any[]): string 
 			color: #333;
 			font-weight: 600;
 			transition: background 0.2s;
-		}
+	}
 		
 		.social-link:hover {
 			background: #e5e7eb;
@@ -402,6 +498,12 @@ function renderRepresentativeProfile(representative: any, votes: any[]): string 
 				<div class="detail-item">
 					<div class="detail-label">District</div>
 					<div class="detail-value">${representative.district_number}</div>
+				</div>
+				` : ''}
+				${representative.term_start && representative.term_end ? `
+				<div class="detail-item">
+					<div class="detail-label">Term</div>
+					<div class="detail-value">${formatFullDate(representative.term_start)} - ${formatFullDate(representative.term_end)}</div>
 				</div>
 				` : ''}
 				${representative.office_phone ? `
@@ -459,4 +561,18 @@ function escapeHtml(text: string | null | undefined): string {
 		"'": '&#039;'
 	};
 	return text.replace(/[&<>"']/g, (m) => map[m]);
+}
+
+function formatFullDate(dateString: string | null | undefined): string {
+	if (!dateString) return '';
+	try {
+		const date = new Date(dateString);
+		return date.toLocaleDateString('en-US', { 
+			year: 'numeric', 
+			month: 'long', 
+			day: 'numeric' 
+		});
+	} catch {
+		return dateString;
+	}
 }

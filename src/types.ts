@@ -9,6 +9,9 @@ export interface State {
 	area_sq_miles: number | null;
 	timezone: string | null;
 	voter_data_available: boolean;
+	electoral_winner: string | null; // 'Republican', 'Democrat', or null
+	electoral_year: number | null;
+	electoral_margin: number | null;
 	created_at: string;
 	updated_at: string;
 }
@@ -36,6 +39,7 @@ export interface Representative {
 	state_code: string;
 	party: string | null;
 	chamber: 'house' | 'senate';
+	chamber_type: number | null; // 0 = house, 1 = senate
 	district_id: number | null;
 	office_address: string | null;
 	office_phone: string | null;
@@ -99,13 +103,21 @@ export interface Vote {
 	id: number;
 	propublica_roll_id: string; // Using this field name for backward compatibility
 	bill_id: string | null;
-	bill_title: string | null;
+	bill_title: string | null; // Used for "bill" field
 	bill_number: string | null;
 	description: string | null;
-	question: string | null;
+	question: string | null; // Used for "vote" field
 	date: string;
 	chamber: string;
 	result: string | null;
+	stance: string | null; // The stance/position on the issue
+	party_in_opposition: string | null; // Party that opposed
+	party_in_favor: string | null; // Party that favored
+	votes_in_favor: number | null; // Number of votes in favor
+	votes_opposed: number | null; // Number of votes opposed
+	total_votes: number | null; // Total votes cast
+	exact_terminology: string | null; // Exact text from the bill supporting the stance
+	page_line: string | null; // Page and line number citation (e.g., "Page 45, Line 12")
 }
 
 export interface VotingRecord {

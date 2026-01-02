@@ -427,8 +427,8 @@ export function renderAdminDashboard(data: any): string {
 	<div class="tabs">
 		<button class="tab active" onclick="showTab('representatives', event)">Representatives</button>
 		<button class="tab" onclick="showTab('voter-data', event)">Voter Data</button>
-		<button class="tab" onclick="showTab('votes', event)">Votes</button>
-		<button class="tab" onclick="showTab('districts', event)">Districts</button>
+		<button class="tab" onclick="showTab('electoral-data', event)">Electoral Data</button>
+		<button class="tab" onclick="showTab('stances', event)">Stances</button>
 	</div>
 	
 	<div id="representatives" class="tab-content active">
@@ -442,7 +442,8 @@ export function renderAdminDashboard(data: any): string {
 					<tr>
 						<th>Name</th>
 						<th>State</th>
-						<th>Chamber</th>
+						<th>Position</th>
+						<th>District</th>
 						<th>Party</th>
 						<th>Actions</th>
 					</tr>
@@ -452,7 +453,8 @@ export function renderAdminDashboard(data: any): string {
 						<tr>
 							<td>${escapeHtml(r.name)}</td>
 							<td>${r.state_code}</td>
-							<td>${r.chamber === 'house' ? 'House' : 'Senate'}</td>
+							<td>${r.chamber === 'house' ? 'House Representative' : 'Senator'}</td>
+							<td>${r.district_number ? 'District ' + r.district_number : (r.chamber === 'house' ? 'At-Large' : 'N/A')}</td>
 							<td>${r.party || '-'}</td>
 							<td>
 								<button class="btn btn-small" onclick="editRep(${r.id})">Edit</button>
@@ -498,114 +500,465 @@ export function renderAdminDashboard(data: any): string {
 		</div>
 	</div>
 	
-	<div id="votes" class="tab-content">
+	<div id="electoral-data" class="tab-content">
 		<div class="card">
 			<div class="card-header">
-				<h2 class="card-title">Votes</h2>
-				<button class="btn" onclick="openModal('vote-modal')">+ Add Vote</button>
+				<h2 class="card-title">Electoral Data</h2>
+				<button class="btn" onclick="openModal('electoral-modal')">+ Add Electoral Data</button>
+			</div>
+			<div style="background: #f0f9ff; border-left: 4px solid #3b82f6; padding: 1rem; margin-bottom: 1.5rem; border-radius: 4px;">
+				<p style="margin: 0; font-size: 0.9rem; color: #1e40af;">
+					<strong>🗳️ Official Electoral Data Sources:</strong> Use official government sources only:
+					<a href="https://www.fec.gov/introduction-campaign-finance/election-and-voting-information/" target="_blank" style="color: #3b82f6; text-decoration: underline;">FEC Election Information</a> | 
+					<a href="https://www.archives.gov/electoral-college" target="_blank" style="color: #3b82f6; text-decoration: underline;">National Archives Electoral College</a> | 
+					<a href="https://www.census.gov/data/tables/time-series/demo/voting-and-registration/voting-historical-time-series.html" target="_blank" style="color: #3b82f6; text-decoration: underline;">Census Bureau Voting Data</a> | 
+					<a href="https://www.eac.gov/research-and-data" target="_blank" style="color: #3b82f6; text-decoration: underline;">EAC Election Data</a>
+					<br><br>
+					<strong>Legal Notice:</strong> Electoral vote results are matters of public record. This data reflects official election results from state-certified sources.
+				</p>
 			</div>
 			<table class="table">
 				<thead>
 					<tr>
-						<th>Bill Title</th>
-						<th>Chamber</th>
-						<th>Date</th>
-						<th>Result</th>
+						<th>State</th>
+						<th>Winner</th>
+						<th>Year</th>
+						<th>Margin (%)</th>
 						<th>Actions</th>
 					</tr>
 				</thead>
 				<tbody>
-					${votes.map((v) => `
+					${states.map((s) => {
+						const winnerDisplay = s.electoral_winner || '-';
+						const yearDisplay = s.electoral_year || '-';
+						const marginDisplay = s.electoral_margin ? s.electoral_margin.toFixed(1) + '%' : '-';
+						return `
 						<tr>
-							<td>${escapeHtml(v.bill_title || v.question || '-')}</td>
-							<td>${v.chamber}</td>
-							<td>${v.date}</td>
-							<td>${v.result || '-'}</td>
+							<td><strong>${escapeHtml(s.code)}</strong> - ${escapeHtml(s.name)}</td>
+							<td>${escapeHtml(winnerDisplay)}</td>
+							<td>${yearDisplay}</td>
+							<td>${marginDisplay}</td>
 							<td>
-								<button class="btn btn-small" onclick="editVote(${v.id})">Edit</button>
+								<button class="btn btn-small" onclick="editElectoral('${s.code}')">Edit</button>
 							</td>
 						</tr>
-					`).join('')}
+					`;
+					}).join('')}
 				</tbody>
 			</table>
 		</div>
 	</div>
 	
-	<div id="districts" class="tab-content">
+	<div id="stances" class="tab-content">
 		<div class="card">
 			<div class="card-header">
-				<h2 class="card-title">Districts</h2>
-				<button class="btn" onclick="openModal('district-modal')">+ Add District</button>
+				<h2 class="card-title">Stances</h2>
+				<button class="btn" onclick="openModal('stance-modal')">+ Add Stance</button>
 			</div>
-			<div id="districts-list">Loading districts...</div>
+			<table class="table">
+				<thead>
+					<tr>
+						<th>Stance</th>
+						<th>Bill</th>
+						<th>Party in Favor</th>
+						<th>Party in Opposition</th>
+						<th>Vote Count</th>
+						<th>Citation</th>
+						<th>Date</th>
+						<th>Actions</th>
+					</tr>
+				</thead>
+				<tbody>
+					${votes.map((v) => {
+						let voteCount = '-';
+						if (v.votes_in_favor && v.total_votes) {
+							voteCount = v.votes_in_favor + '/' + v.total_votes;
+						} else if (v.votes_in_favor && v.votes_opposed) {
+							voteCount = v.votes_in_favor + '/' + (v.votes_in_favor + v.votes_opposed);
+						}
+						const citation = v.page_line ? (v.page_line + (v.exact_terminology ? ' - ' + v.exact_terminology.substring(0, 50) + '...' : '')) : (v.exact_terminology ? v.exact_terminology.substring(0, 50) + '...' : '-');
+						return `
+						<tr>
+							<td>${escapeHtml(v.stance || '-')}</td>
+							<td>${escapeHtml(v.bill_title || v.bill_number || '-')}</td>
+							<td>${escapeHtml(v.party_in_favor || '-')}</td>
+							<td>${escapeHtml(v.party_in_opposition || '-')}</td>
+							<td>${voteCount}</td>
+							<td style="max-width: 200px; font-size: 0.85rem;">${escapeHtml(citation)}</td>
+							<td>${v.date || '-'}</td>
+							<td>
+								<button class="btn btn-small" onclick="editStance(${v.id})">Edit</button>
+							</td>
+						</tr>
+					`;
+					}).join('')}
+				</tbody>
+			</table>
 		</div>
 	</div>
 	
 	<!-- Representative Modal -->
 	<div id="rep-modal" class="modal">
 		<div class="modal-content">
-			<h2 style="margin-bottom: 1.5rem;">Add/Edit Representative</h2>
+			<h2 style="margin-bottom: 1rem;">Add/Edit Representative (House or Senate)</h2>
+			<div style="background: #f0f9ff; border-left: 4px solid #3b82f6; padding: 1rem; margin-bottom: 1.5rem; border-radius: 4px;">
+				<p style="margin: 0; font-size: 0.9rem; color: #1e40af;">
+					<strong>📋 Official Sources:</strong> All information must be from public sources only. 
+					Find current representatives at: 
+					<a href="https://www.congress.gov/members" target="_blank" style="color: #3b82f6; text-decoration: underline;">Congress.gov</a> | 
+					<a href="https://www.house.gov/representatives" target="_blank" style="color: #3b82f6; text-decoration: underline;">House.gov</a> | 
+					<a href="https://www.senate.gov/senators" target="_blank" style="color: #3b82f6; text-decoration: underline;">Senate.gov</a> | 
+					<a href="https://openstates.org" target="_blank" style="color: #3b82f6; text-decoration: underline;">Open States</a>
+				</p>
+			</div>
 			<form id="rep-form" onsubmit="saveRep(event)">
 				<div class="form-grid">
-					<div class="form-group">
-						<label>Name *</label>
-						<input type="text" name="name" required />
+					<div class="form-group" style="grid-column: 1 / -1;">
+						<label>Full Name *</label>
+						<input type="text" name="name" required placeholder="e.g., John Smith" />
+						<small style="color: #666; font-size: 0.85rem;">The representative's full official name</small>
 					</div>
 					<div class="form-group">
 						<label>First Name</label>
-						<input type="text" name="first_name" />
+						<input type="text" name="first_name" placeholder="John" />
 					</div>
 					<div class="form-group">
 						<label>Last Name</label>
-						<input type="text" name="last_name" />
+						<input type="text" name="last_name" placeholder="Smith" />
 					</div>
 					<div class="form-group">
-						<label>State Code *</label>
+						<label>State *</label>
 						<select name="state_code" required>
 							<option value="">Select State</option>
 							${states.map((s) => `<option value="${s.code}">${s.name}</option>`).join('')}
 						</select>
 					</div>
 					<div class="form-group">
-						<label>Chamber *</label>
-						<select name="chamber" required>
-							<option value="house">House</option>
+						<label>Position *</label>
+						<select name="chamber" required id="chamber-select" onchange="toggleDistrictField()">
+							<option value="house">House of Representatives</option>
 							<option value="senate">Senate</option>
 						</select>
+						<small style="color: #666; font-size: 0.85rem;">House Representative or Senator</small>
+					</div>
+					<div class="form-group" id="district-field" style="display: none;">
+						<label>Congressional District</label>
+						<input type="number" name="district_number" min="1" max="53" placeholder="e.g., 5" />
+						<small style="color: #666; font-size: 0.85rem;">District number (only for House members - leave blank for at-large districts)</small>
 					</div>
 					<div class="form-group">
-						<label>Party</label>
+						<label>Political Party</label>
 						<select name="party">
 							<option value="">None</option>
 							<option value="Democrat">Democrat</option>
 							<option value="Republican">Republican</option>
 							<option value="Independent">Independent</option>
+							<option value="Libertarian">Libertarian</option>
 						</select>
 					</div>
-					<div class="form-group">
-						<label>Email</label>
-						<input type="email" name="email" />
+					<div class="form-group" style="grid-column: 1 / -1;">
+						<label>Washington Office Address</label>
+						<input type="text" name="office_address" placeholder="e.g., 1234 Longworth House Office Building, Washington, DC 20515" />
+						<small style="color: #666; font-size: 0.85rem;">Their office address in Washington, DC (public information)</small>
 					</div>
 					<div class="form-group">
-						<label>Phone</label>
-						<input type="tel" name="office_phone" />
+						<label>Office Phone Number</label>
+						<input type="tel" name="office_phone" placeholder="(202) 225-1234" />
+						<small style="color: #666; font-size: 0.85rem;">Their Washington office phone number (public information)</small>
 					</div>
 					<div class="form-group">
-						<label>Twitter Handle</label>
+						<label>Office Email Address</label>
+						<input type="email" name="email" placeholder="firstname.lastname@mail.house.gov or firstname.lastname@senate.gov" />
+						<small style="color: #666; font-size: 0.85rem;">Their official congressional email address (public information)</small>
+					</div>
+					<div class="form-group">
+						<label>Official Website</label>
+						<input type="url" name="website" placeholder="https://..." />
+						<small style="color: #666; font-size: 0.85rem;">Their official website URL</small>
+					</div>
+					<div class="form-group">
+						<label>Twitter Account</label>
 						<input type="text" name="twitter_handle" placeholder="@username" />
+						<small style="color: #666; font-size: 0.85rem;">Their official Twitter handle (without the @ symbol)</small>
 					</div>
 					<div class="form-group">
-						<label>Website</label>
-						<input type="url" name="website" />
+						<label>Facebook Page</label>
+						<input type="url" name="facebook_url" placeholder="https://facebook.com/..." />
+						<small style="color: #666; font-size: 0.85rem;">Link to their official Facebook page</small>
 					</div>
 					<div class="form-group" style="grid-column: 1 / -1;">
 						<label>Biography</label>
-						<textarea name="bio"></textarea>
+						<textarea name="bio" rows="4" placeholder="Brief biography or background information..."></textarea>
+						<small style="color: #666; font-size: 0.85rem;">Background information about the representative (from official sources only)</small>
+					</div>
+					<div class="form-group">
+						<label>Current Term Started</label>
+						<input type="date" name="term_start" />
+						<small style="color: #666; font-size: 0.85rem;">When their current term in office began</small>
+					</div>
+					<div class="form-group">
+						<label>Current Term Ends</label>
+						<input type="date" name="term_end" />
+						<small style="color: #666; font-size: 0.85rem;">When their current term in office ends</small>
 					</div>
 				</div>
+				<div style="background: #fef3c7; border-left: 4px solid #f59e0b; padding: 1rem; margin-top: 1.5rem; border-radius: 4px;">
+					<p style="margin: 0; font-size: 0.85rem; color: #92400e;">
+						<strong>⚠️ Important:</strong> Only enter information that is publicly available from official sources. 
+						This form works for both House Representatives and Senators. For House members, include the district number. 
+						For Senators, leave the district field blank. Do not include personal contact information or private addresses.
+					</p>
+				</div>
 				<div style="display: flex; gap: 1rem; margin-top: 1.5rem;">
-					<button type="submit" class="btn btn-success">Save</button>
+					<button type="submit" class="btn btn-success">Save Representative</button>
 					<button type="button" class="btn btn-secondary" onclick="closeModal('rep-modal')">Cancel</button>
+				</div>
+				<input type="hidden" name="id" />
+			</form>
+		</div>
+	</div>
+	
+	<!-- Voter Data Modal -->
+	<div id="voter-modal" class="modal">
+		<div class="modal-content">
+			<h2 style="margin-bottom: 1rem;">Add/Edit Voter Data</h2>
+			<div style="background: #f0f9ff; border-left: 4px solid #3b82f6; padding: 1rem; margin-bottom: 1.5rem; border-radius: 4px;">
+				<p style="margin: 0; font-size: 0.9rem; color: #1e40af;">
+					<strong>📊 Official Voter Data Sources:</strong> Use official government sources only:
+					<a href="https://www.census.gov/data/tables/time-series/demo/voting-and-registration/voting-historical-time-series.html" target="_blank" style="color: #3b82f6; text-decoration: underline;">Census Bureau</a> | 
+					<a href="https://www.eac.gov/research-and-data" target="_blank" style="color: #3b82f6; text-decoration: underline;">EAC Election Data</a> | 
+					<a href="https://www.fec.gov/introduction-campaign-finance/election-and-voting-information/" target="_blank" style="color: #3b82f6; text-decoration: underline;">FEC Election Info</a> | 
+					<a href="https://www.usa.gov/election-office" target="_blank" style="color: #3b82f6; text-decoration: underline;">State Election Offices</a>
+				</p>
+			</div>
+			<form id="voter-form" onsubmit="saveVoterData(event)">
+				<div class="form-grid">
+					<div class="form-group">
+						<label>State *</label>
+						<select name="state_code" required>
+							<option value="">Select State</option>
+							${states.map((s) => `<option value="${s.code}">${s.name}</option>`).join('')}
+						</select>
+					</div>
+					<div class="form-group">
+						<label>Data Year *</label>
+						<input type="number" name="data_year" required min="2000" max="2030" value="${new Date().getFullYear()}" />
+						<small style="color: #666; font-size: 0.85rem;">Year this data represents</small>
+					</div>
+					<div class="form-group">
+						<label>Total Registered Voters</label>
+						<input type="number" name="total_registered_voters" min="0" placeholder="e.g., 7500000" />
+						<small style="color: #666; font-size: 0.85rem;">Total number of registered voters (public record)</small>
+					</div>
+					<div class="form-group">
+						<label>Total Population</label>
+						<input type="number" name="total_population" min="0" placeholder="e.g., 10700000" />
+						<small style="color: #666; font-size: 0.85rem;">Total state population (Census data)</small>
+					</div>
+					<div class="form-group">
+						<label>Voting Age Population</label>
+						<input type="number" name="voting_age_population" min="0" placeholder="e.g., 8500000" />
+						<small style="color: #666; font-size: 0.85rem;">Population age 18+ (Census data)</small>
+					</div>
+					<div class="form-group">
+						<label>Voter Turnout Percentage</label>
+						<input type="number" name="voter_turnout_percentage" min="0" max="100" step="0.1" placeholder="e.g., 65.5" />
+						<small style="color: #666; font-size: 0.85rem;">Percentage of registered voters who voted (0-100)</small>
+					</div>
+					<div class="form-group">
+						<label>Last Election Date</label>
+						<input type="date" name="last_election_date" />
+						<small style="color: #666; font-size: 0.85rem;">Date of the most recent major election</small>
+					</div>
+					<div class="form-group">
+						<label>Data Source</label>
+						<input type="text" name="data_source" placeholder="e.g., U.S. Census Bureau, State Election Office" />
+						<small style="color: #666; font-size: 0.85rem;">Official source of this data</small>
+					</div>
+					<div class="form-group" style="grid-column: 1 / -1;">
+						<label>Notes</label>
+						<textarea name="notes" rows="3" placeholder="Additional notes about this voter data"></textarea>
+						<small style="color: #666; font-size: 0.85rem;">Any additional context or notes</small>
+					</div>
+				</div>
+				<div style="background: #fef3c7; border-left: 4px solid #f59e0b; padding: 1rem; margin-top: 1.5rem; border-radius: 4px;">
+					<p style="margin: 0; font-size: 0.85rem; color: #92400e;">
+						<strong>⚠️ Legal Notice:</strong> Only enter voter data from official government sources. 
+						Voter registration and turnout data are public records from state election offices, 
+						the Census Bureau, or the Election Assistance Commission.
+					</p>
+				</div>
+				<div style="display: flex; gap: 1rem; margin-top: 1.5rem;">
+					<button type="submit" class="btn btn-success">Save Voter Data</button>
+					<button type="button" class="btn btn-secondary" onclick="closeModal('voter-modal')">Cancel</button>
+				</div>
+				<input type="hidden" name="id" />
+			</form>
+		</div>
+	</div>
+	
+	<!-- Electoral Data Modal -->
+	<div id="electoral-modal" class="modal">
+		<div class="modal-content">
+			<h2 style="margin-bottom: 1rem;">Add/Edit Electoral Data</h2>
+			<div style="background: #f0f9ff; border-left: 4px solid #3b82f6; padding: 1rem; margin-bottom: 1.5rem; border-radius: 4px;">
+				<p style="margin: 0; font-size: 0.9rem; color: #1e40af;">
+					<strong>🗳️ Official Electoral Data Sources:</strong> Use official government sources only:
+					<a href="https://www.fec.gov/introduction-campaign-finance/election-and-voting-information/" target="_blank" style="color: #3b82f6; text-decoration: underline;">FEC Election Information</a> | 
+					<a href="https://www.archives.gov/electoral-college" target="_blank" style="color: #3b82f6; text-decoration: underline;">National Archives Electoral College</a> | 
+					<a href="https://www.census.gov/data/tables/time-series/demo/voting-and-registration/voting-historical-time-series.html" target="_blank" style="color: #3b82f6; text-decoration: underline;">Census Bureau Voting Data</a> | 
+					<a href="https://www.eac.gov/research-and-data" target="_blank" style="color: #3b82f6; text-decoration: underline;">EAC Election Data</a>
+					<br><br>
+					<strong>Recommended:</strong> <a href="https://www.archives.gov/electoral-college" target="_blank" style="color: #3b82f6; text-decoration: underline;">National Archives Electoral College Results</a> - Official certified results by state.
+				</p>
+			</div>
+			<form id="electoral-form" onsubmit="saveElectoralData(event)">
+				<div class="form-grid">
+					<div class="form-group">
+						<label>State *</label>
+						<select name="state_code" required>
+							<option value="">Select State</option>
+							${states.map((s) => `<option value="${s.code}">${s.name} (${s.code})</option>`).join('')}
+						</select>
+					</div>
+					<div class="form-group">
+						<label>Election Year *</label>
+						<input type="number" name="electoral_year" required min="2000" max="2030" placeholder="e.g., 2024" />
+						<small style="color: #666; font-size: 0.85rem;">Year of the presidential election</small>
+					</div>
+					<div class="form-group">
+						<label>Winning Party *</label>
+						<select name="electoral_winner" required>
+							<option value="">Select Party</option>
+							<option value="Republican">Republican</option>
+							<option value="Democrat">Democrat</option>
+						</select>
+						<small style="color: #666; font-size: 0.85rem;">Which party won this state's electoral votes</small>
+					</div>
+					<div class="form-group">
+						<label>Margin of Victory (%)</label>
+						<input type="number" name="electoral_margin" min="0" max="100" step="0.1" placeholder="e.g., 5.2" />
+						<small style="color: #666; font-size: 0.85rem;">Margin of victory percentage (optional)</small>
+					</div>
+				</div>
+				<div style="background: #fef3c7; border-left: 4px solid #f59e0b; padding: 1rem; margin-top: 1.5rem; border-radius: 4px;">
+					<p style="margin: 0; font-size: 0.85rem; color: #92400e;">
+						<strong>⚠️ Legal Notice:</strong> Electoral vote results are matters of public record. 
+						This data reflects official election results from state-certified sources. 
+						Use only official state election office results or certified federal sources.
+					</p>
+				</div>
+				<div style="display: flex; gap: 1rem; margin-top: 1.5rem;">
+					<button type="submit" class="btn btn-success">Save Electoral Data</button>
+					<button type="button" class="btn btn-secondary" onclick="closeModal('electoral-modal')">Cancel</button>
+				</div>
+				<input type="hidden" name="state_code_original" />
+			</form>
+		</div>
+	</div>
+	
+	<!-- Stance Modal -->
+	<div id="stance-modal" class="modal">
+		<div class="modal-content">
+			<h2 style="margin-bottom: 1rem;">Add/Edit Stance</h2>
+			<div style="background: #f0f9ff; border-left: 4px solid #3b82f6; padding: 1rem; margin-bottom: 1.5rem; border-radius: 4px;">
+				<p style="margin: 0; font-size: 0.9rem; color: #1e40af;">
+					<strong>📋 Official Vote Sources:</strong> Use official government sources:
+					<a href="https://www.congress.gov/votes" target="_blank" style="color: #3b82f6; text-decoration: underline;">Congress.gov Votes</a> | 
+					<a href="https://www.house.gov/the-house-explained/the-legislative-process/votes" target="_blank" style="color: #3b82f6; text-decoration: underline;">House Votes</a> | 
+					<a href="https://www.senate.gov/legislative/votes.htm" target="_blank" style="color: #3b82f6; text-decoration: underline;">Senate Votes</a>
+				</p>
+			</div>
+			<form id="stance-form" onsubmit="saveStance(event)">
+				<div class="form-grid">
+					<div class="form-group" style="grid-column: 1 / -1;">
+						<label>Stance *</label>
+						<input type="text" name="stance" required placeholder="e.g., Support for Healthcare Reform" />
+						<small style="color: #666; font-size: 0.85rem;">The stance/position on the issue</small>
+					</div>
+					<div class="form-group" style="grid-column: 1 / -1;">
+						<label>Bill *</label>
+						<input type="text" name="bill_title" required placeholder="e.g., H.R. 1234 - Healthcare Reform Act" />
+						<small style="color: #666; font-size: 0.85rem;">Bill name or number</small>
+					</div>
+					<div class="form-group" style="grid-column: 1 / -1;">
+						<label>Exact Terminology from Bill *</label>
+						<textarea name="exact_terminology" rows="4" required placeholder="Paste the exact text from the bill that supports this stance..."></textarea>
+						<small style="color: #666; font-size: 0.85rem;">The exact quote from the bill that supports this stance claim. This is required to back up the stance.</small>
+					</div>
+					<div class="form-group">
+						<label>Page + Line Number *</label>
+						<input type="text" name="page_line" required placeholder="e.g., Page 45, Line 12" />
+						<small style="color: #666; font-size: 0.85rem;">Citation location in the bill (e.g., "Page 45, Line 12" or "Section 3, Line 8")</small>
+					</div>
+					<div class="form-group">
+						<label>Chamber *</label>
+						<select name="chamber" required>
+							<option value="house">House of Representatives</option>
+							<option value="senate">Senate</option>
+						</select>
+					</div>
+					<div class="form-group">
+						<label>Date *</label>
+						<input type="date" name="date" required />
+					</div>
+					<div class="form-group">
+						<label>Party in Favor</label>
+						<select name="party_in_favor">
+							<option value="">None</option>
+							<option value="Democrat">Democrat</option>
+							<option value="Republican">Republican</option>
+							<option value="Both">Both</option>
+							<option value="Mixed">Mixed</option>
+						</select>
+						<small style="color: #666; font-size: 0.85rem;">Party that favored this stance</small>
+					</div>
+					<div class="form-group">
+						<label>Party in Opposition</label>
+						<select name="party_in_opposition">
+							<option value="">None</option>
+							<option value="Democrat">Democrat</option>
+							<option value="Republican">Republican</option>
+							<option value="Both">Both</option>
+							<option value="Mixed">Mixed</option>
+						</select>
+						<small style="color: #666; font-size: 0.85rem;">Party that opposed this stance</small>
+					</div>
+					<div class="form-group">
+						<label>Votes in Favor</label>
+						<input type="number" name="votes_in_favor" min="0" placeholder="e.g., 250" />
+						<small style="color: #666; font-size: 0.85rem;">Number of votes in favor</small>
+					</div>
+					<div class="form-group">
+						<label>Votes Opposed</label>
+						<input type="number" name="votes_opposed" min="0" placeholder="e.g., 185" />
+						<small style="color: #666; font-size: 0.85rem;">Number of votes opposed</small>
+					</div>
+					<div class="form-group">
+						<label>Total Votes</label>
+						<input type="number" name="total_votes" min="0" placeholder="e.g., 435" />
+						<small style="color: #666; font-size: 0.85rem;">Total votes cast (will auto-calculate if votes in favor + opposed provided)</small>
+					</div>
+					<div class="form-group">
+						<label>Result</label>
+						<select name="result">
+							<option value="">None</option>
+							<option value="Passed">Passed</option>
+							<option value="Failed">Failed</option>
+							<option value="Tied">Tied</option>
+						</select>
+					</div>
+				</div>
+				<div style="background: #fef3c7; border-left: 4px solid #f59e0b; padding: 1rem; margin-top: 1.5rem; border-radius: 4px;">
+					<p style="margin: 0; font-size: 0.85rem; color: #92400e;">
+						<strong>⚠️ Legal Notice:</strong> Only enter voting data from official government sources. 
+						All vote records are public information from Congress.gov, House.gov, or Senate.gov.
+						<strong>Citation Required:</strong> You must provide the exact terminology and page+line number to back up your stance claim.
+					</p>
+				</div>
+				<div style="display: flex; gap: 1rem; margin-top: 1.5rem;">
+					<button type="submit" class="btn btn-success">Save Stance</button>
+					<button type="button" class="btn btn-secondary" onclick="closeModal('stance-modal')">Cancel</button>
 				</div>
 				<input type="hidden" name="id" />
 			</form>
@@ -692,6 +1045,261 @@ export function renderAdminDashboard(data: any): string {
 			}
 		}
 		
+		async function saveVoterData(e) {
+			e.preventDefault();
+			const formData = new FormData(e.target);
+			const data = Object.fromEntries(formData);
+			
+			// Convert numeric fields
+			if (data.data_year) data.data_year = parseInt(data.data_year);
+			if (data.total_registered_voters) data.total_registered_voters = parseInt(data.total_registered_voters);
+			if (data.total_population) data.total_population = parseInt(data.total_population);
+			if (data.voting_age_population) data.voting_age_population = parseInt(data.voting_age_population);
+			if (data.voter_turnout_percentage) data.voter_turnout_percentage = parseFloat(data.voter_turnout_percentage);
+			
+			try {
+				const response = await fetch('/api/admin/voter-data', {
+					method: 'POST',
+					headers: { 'Content-Type': 'application/json' },
+					body: JSON.stringify(data)
+				});
+				
+				if (response.ok) {
+					location.reload();
+				} else {
+					alert('Error saving voter data');
+				}
+			} catch (error) {
+				alert('Error: ' + (error.message || 'Unknown error'));
+			}
+		}
+		
+		async function editVoterData(stateCode, dataYear) {
+			const voterData = currentData.voterData.find(function(v) { 
+				return v.state_code === stateCode && v.data_year === dataYear; 
+			});
+			if (!voterData) {
+				// If not found, create new entry for this state/year
+				const form = document.getElementById('voter-form');
+				if (form) {
+					const stateSelect = form.querySelector('[name="state_code"]');
+					const yearInput = form.querySelector('[name="data_year"]');
+					if (stateSelect) stateSelect.value = stateCode;
+					if (yearInput) yearInput.value = dataYear;
+					openModal('voter-modal');
+				}
+				return;
+			}
+			
+			const form = document.getElementById('voter-form');
+			if (!form) return;
+			
+			Object.keys(voterData).forEach(function(key) {
+				const input = form.querySelector('[name="' + key + '"]');
+				if (input) {
+					if (input.type === 'date' && voterData[key]) {
+						input.value = voterData[key].split('T')[0];
+					} else {
+						input.value = voterData[key] || '';
+					}
+				}
+			});
+			const idInput = form.querySelector('[name="id"]');
+			if (idInput) idInput.value = voterData.id ? voterData.id.toString() : '';
+			openModal('voter-modal');
+		}
+		
+		async function saveElectoralData(e) {
+			e.preventDefault();
+			const formData = new FormData(e.target);
+			const data = Object.fromEntries(formData);
+			
+			// Convert numeric fields
+			if (data.electoral_year) data.electoral_year = parseInt(data.electoral_year);
+			if (data.electoral_margin) data.electoral_margin = parseFloat(data.electoral_margin);
+			
+			// Handle empty values
+			if (!data.electoral_winner || data.electoral_winner === '') {
+				data.electoral_winner = null;
+			}
+			if (!data.electoral_year || data.electoral_year === '') {
+				data.electoral_year = null;
+			}
+			if (!data.electoral_margin || data.electoral_margin === '') {
+				data.electoral_margin = null;
+			}
+			
+			try {
+				const response = await fetch('/api/admin/electoral', {
+					method: 'POST',
+					headers: { 'Content-Type': 'application/json' },
+					body: JSON.stringify(data)
+				});
+				
+				if (response.ok) {
+					location.reload();
+				} else {
+					alert('Error saving electoral data');
+				}
+			} catch (error) {
+				alert('Error: ' + (error.message || 'Unknown error'));
+			}
+		}
+		
+		async function editElectoral(stateCode) {
+			const state = currentData.states.find(function(s) { return s.code === stateCode; });
+			if (!state) return;
+			
+			const form = document.getElementById('electoral-form');
+			if (!form) return;
+			
+			// Populate form fields
+			const stateSelect = form.querySelector('[name="state_code"]');
+			const yearInput = form.querySelector('[name="electoral_year"]');
+			const winnerSelect = form.querySelector('[name="electoral_winner"]');
+			const marginInput = form.querySelector('[name="electoral_margin"]');
+			const originalInput = form.querySelector('[name="state_code_original"]');
+			
+			if (stateSelect) stateSelect.value = state.code;
+			if (yearInput) yearInput.value = state.electoral_year || '';
+			if (winnerSelect) winnerSelect.value = state.electoral_winner || '';
+			if (marginInput) marginInput.value = state.electoral_margin || '';
+			if (originalInput) originalInput.value = state.code;
+			
+			openModal('electoral-modal');
+		}
+		
+		function logout() {
+			fetch('/admin/logout', { method: 'POST' }).then(function() {
+				window.location.href = '/admin/login';
+			});
+		}
+			openModal('voter-modal');
+		}
+		
+		async function saveStance(e) {
+			e.preventDefault();
+			const formData = new FormData(e.target);
+			const data = Object.fromEntries(formData);
+			const id = data.id;
+			
+			// Convert numeric fields
+			if (data.votes_in_favor) data.votes_in_favor = parseInt(data.votes_in_favor);
+			if (data.votes_opposed) data.votes_opposed = parseInt(data.votes_opposed);
+			if (data.total_votes) data.total_votes = parseInt(data.total_votes);
+			
+			// Auto-calculate total votes if not provided
+			if (!data.total_votes && data.votes_in_favor && data.votes_opposed) {
+				data.total_votes = parseInt(data.votes_in_favor) + parseInt(data.votes_opposed);
+			}
+			
+			// Generate a unique roll_id if not provided
+			if (!data.propublica_roll_id) {
+				data.propublica_roll_id = 'stance-' + Date.now();
+			}
+			
+			try {
+				const url = '/api/admin/stance' + (id ? '/' + id : '');
+				const response = await fetch(url, {
+					method: id ? 'PUT' : 'POST',
+					headers: { 'Content-Type': 'application/json' },
+					body: JSON.stringify(data)
+				});
+				
+				if (response.ok) {
+					location.reload();
+				} else {
+					alert('Error saving stance');
+				}
+			} catch (error) {
+				alert('Error: ' + (error.message || 'Unknown error'));
+			}
+		}
+		
+		async function editStance(id) {
+			const stance = currentData.votes.find(function(v) { return v.id === id; });
+			if (!stance) return;
+			
+			const form = document.getElementById('stance-form');
+			if (!form) return;
+			
+			Object.keys(stance).forEach(function(key) {
+				const input = form.querySelector('[name="' + key + '"]');
+				if (input) {
+					if (input.type === 'date' && stance[key]) {
+						input.value = stance[key].split('T')[0];
+					} else if (input.tagName === 'TEXTAREA' || input.tagName === 'SELECT') {
+						input.value = stance[key] || '';
+					} else {
+						input.value = stance[key] || '';
+					}
+				}
+			});
+			const idInput = form.querySelector('[name="id"]');
+			if (idInput) idInput.value = id.toString();
+			openModal('stance-modal');
+		}
+		
+		async function saveElectoralData(e) {
+			e.preventDefault();
+			const formData = new FormData(e.target);
+			const data = Object.fromEntries(formData);
+			
+			// Convert numeric fields
+			if (data.electoral_year) data.electoral_year = parseInt(data.electoral_year);
+			if (data.electoral_margin) data.electoral_margin = parseFloat(data.electoral_margin);
+			
+			// Handle empty values
+			if (!data.electoral_winner || data.electoral_winner === '') {
+				data.electoral_winner = null;
+			}
+			if (!data.electoral_year || data.electoral_year === '') {
+				data.electoral_year = null;
+			}
+			if (!data.electoral_margin || data.electoral_margin === '') {
+				data.electoral_margin = null;
+			}
+			
+			try {
+				const response = await fetch('/api/admin/electoral', {
+					method: 'POST',
+					headers: { 'Content-Type': 'application/json' },
+					body: JSON.stringify(data)
+				});
+				
+				if (response.ok) {
+					location.reload();
+				} else {
+					alert('Error saving electoral data');
+				}
+			} catch (error) {
+				alert('Error: ' + (error.message || 'Unknown error'));
+			}
+		}
+		
+		async function editElectoral(stateCode) {
+			const state = currentData.states.find(function(s) { return s.code === stateCode; });
+			if (!state) return;
+			
+			const form = document.getElementById('electoral-form');
+			if (!form) return;
+			
+			// Populate form fields
+			const stateSelect = form.querySelector('[name="state_code"]');
+			const yearInput = form.querySelector('[name="electoral_year"]');
+			const winnerSelect = form.querySelector('[name="electoral_winner"]');
+			const marginInput = form.querySelector('[name="electoral_margin"]');
+			const originalInput = form.querySelector('[name="state_code_original"]');
+			
+			if (stateSelect) stateSelect.value = state.code;
+			if (yearInput) yearInput.value = state.electoral_year || '';
+			if (winnerSelect) winnerSelect.value = state.electoral_winner || '';
+			if (marginInput) marginInput.value = state.electoral_margin || '';
+			if (originalInput) originalInput.value = state.code;
+			
+			openModal('electoral-modal');
+		}
+		
 		function logout() {
 			fetch('/admin/logout', { method: 'POST' }).then(function() {
 				window.location.href = '/admin/login';
@@ -709,6 +1317,19 @@ export function renderAdminDashboard(data: any): string {
 			};
 			return text.toString().replace(/[&<>"']/g, function(m) { return map[m]; });
 		}
+		
+		function toggleDistrictField() {
+			const chamberSelect = document.getElementById('chamber-select');
+			const districtField = document.getElementById('district-field');
+			if (chamberSelect && districtField) {
+				districtField.style.display = chamberSelect.value === 'house' ? 'block' : 'none';
+			}
+		}
+		
+		// Initialize district field visibility
+		document.addEventListener('DOMContentLoaded', function() {
+			toggleDistrictField();
+		});
 	</script>
 </body>
 </html>

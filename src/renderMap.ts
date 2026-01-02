@@ -7,7 +7,7 @@ export function renderHomePage(states: State[]): string {
 <head>
 	<meta charset="UTF-8" />
 	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-	<title>US Voter Information - Interactive Map</title>
+	<title>Voter Politician Tool</title>
 	<style>
 		* {
 			margin: 0;
@@ -35,6 +35,23 @@ export function renderHomePage(states: State[]): string {
 			margin-bottom: 2rem;
 			box-shadow: 0 4px 6px rgba(0,0,0,0.1);
 			text-align: center;
+		}
+		
+		nav {
+			margin-top: 1rem;
+			padding-top: 1rem;
+			border-top: 1px solid #e5e7eb;
+		}
+		
+		nav a {
+			color: #667eea;
+			text-decoration: none;
+			margin: 0 0.5rem;
+			font-weight: 500;
+		}
+		
+		nav a:hover {
+			text-decoration: underline;
 		}
 		
 		h1 {
@@ -82,7 +99,23 @@ export function renderHomePage(states: State[]): string {
 			cursor: pointer;
 		}
 		
-		.state-path:hover {
+		.state-path.republican {
+			fill: #fecaca; /* Pastel red */
+		}
+		
+		.state-path.democrat {
+			fill: #bfdbfe; /* Pastel blue */
+		}
+		
+		.state-path.republican:hover {
+			fill: #fca5a5; /* Slightly darker pastel red on hover */
+		}
+		
+		.state-path.democrat:hover {
+			fill: #93c5fd; /* Slightly darker pastel blue on hover */
+		}
+		
+		.state-path:hover:not(.republican):not(.democrat) {
 			fill: #667eea;
 			stroke-width: 2;
 		}
@@ -93,11 +126,11 @@ export function renderHomePage(states: State[]): string {
 		}
 		
 		.state-path.has-data {
-			fill: #10b981;
+			/* Keep electoral colors even with voter data */
 		}
 		
 		.state-path.has-data:hover {
-			fill: #059669;
+			opacity: 0.8;
 		}
 		
 		.state-info {
@@ -303,8 +336,12 @@ export function renderHomePage(states: State[]): string {
 <body>
 	<div class="container">
 		<header>
-			<h1>🗳️ US Voter Information</h1>
+			<h1>Voter Politician Tool</h1>
 			<p class="subtitle">Click on any state to view representatives and voter information</p>
+			<nav>
+				<a href="/senators">Senate Hub</a>
+				<a href="/house">House Hub</a>
+			</nav>
 		</header>
 		
 		<div class="map-container">
@@ -596,9 +633,17 @@ function generateUSMapSVG(states: State[]): string {
 		if (!coords) return '';
 		
 		const hasData = state?.voter_data_available ? 'has-data' : '';
+		// Add electoral color class based on winner
+		let electoralClass = '';
+		if (state?.electoral_winner === 'Republican') {
+			electoralClass = 'republican';
+		} else if (state?.electoral_winner === 'Democrat') {
+			electoralClass = 'democrat';
+		}
+		
 		// Create a rounded rectangle for each state
 		const path = `M ${coords.x} ${coords.y} L ${coords.x + coords.w} ${coords.y} L ${coords.x + coords.w} ${coords.y + coords.h} L ${coords.x} ${coords.y + coords.h} Z`;
 		
-		return `<path class="state-path ${hasData}" data-state="${code}" d="${path}" />`;
+		return `<path class="state-path ${electoralClass} ${hasData}" data-state="${code}" d="${path}" />`;
 	}).join('\n');
 }

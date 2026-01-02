@@ -241,6 +241,26 @@ export async function getStateByCode(db: D1Database, code: string): Promise<Stat
 	return result || null;
 }
 
+export async function updateStateElectoralData(
+	db: D1Database,
+	stateCode: string,
+	electoralWinner: string | null,
+	electoralYear: number | null,
+	electoralMargin: number | null
+): Promise<void> {
+	await db
+		.prepare(`
+			UPDATE states 
+			SET electoral_winner = ?, 
+				electoral_year = ?, 
+				electoral_margin = ?,
+				updated_at = CURRENT_TIMESTAMP
+			WHERE code = ?
+		`)
+		.bind(electoralWinner, electoralYear, electoralMargin, stateCode)
+		.run();
+}
+
 export async function getRepresentativesByState(
 	db: D1Database,
 	stateCode: string,
@@ -340,15 +360,41 @@ export async function getAllRepresentatives(db: D1Database): Promise<Representat
 	return result.results;
 }
 
+export async function getAllSenators(db: D1Database): Promise<Representative[]> {
+	const result = await db
+		.prepare(`
+			SELECT r.*, d.district_number, d.name as district_name
+			FROM representatives r
+			LEFT JOIN districts d ON r.district_id = d.id
+			WHERE r.chamber = 'senate' AND (r.chamber_type = 1 OR r.chamber_type IS NULL)
+			ORDER BY r.state_code, r.last_name
+		`)
+		.all<Representative>();
+	return result.results;
+}
+
+export async function getAllHouseMembers(db: D1Database): Promise<Representative[]> {
+	const result = await db
+		.prepare(`
+			SELECT r.*, d.district_number, d.name as district_name
+			FROM representatives r
+			LEFT JOIN districts d ON r.district_id = d.id
+			WHERE r.chamber = 'house' AND r.chamber_type = 0
+			ORDER BY r.state_code, d.district_number, r.last_name
+		`)
+		.all<Representative>();
+	return result.results;
+}
+
 export async function createRepresentative(db: D1Database, data: Partial<Representative>): Promise<number> {
 	const result = await db
 		.prepare(`
 			INSERT INTO representatives (
 				external_id, name, first_name, last_name, middle_name, suffix,
-				state_code, party, chamber, district_id, office_address, office_phone,
+				state_code, party, chamber, chamber_type, district_id, office_address, office_phone,
 				email, twitter_handle, facebook_url, website, photo_url, bio,
 				term_start, term_end, is_active
-			) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+			) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
 			RETURNING id
 		`)
 		.bind(
@@ -361,6 +407,7 @@ export async function createRepresentative(db: D1Database, data: Partial<Represe
 			data.state_code || '',
 			data.party || null,
 			data.chamber || 'house',
+			data.chamber === 'senate' ? 1 : 0,
 			data.district_id || null,
 			data.office_address || null,
 			data.office_phone || null,
@@ -490,6 +537,37 @@ export async function createDistrict(db: D1Database, data: Partial<District>): P
 	return result!.id;
 }
 
+export async function updateVote(db: D1Database, id: number, data: Partial<VoteData>): Promise<void> {
+	const updates: string[] = [];
+	const values: any[] = [];
+
+	if (data.bill_id !== undefined) { updates.push('bill_id = ?'); values.push(data.bill_id); }
+	if (data.bill_title !== undefined) { updates.push('bill_title = ?'); values.push(data.bill_title); }
+	if (data.bill_number !== undefined) { updates.push('bill_number = ?'); values.push(data.bill_number); }
+	if (data.description !== undefined) { updates.push('description = ?'); values.push(data.description); }
+	if (data.question !== undefined) { updates.push('question = ?'); values.push(data.question); }
+	if (data.date !== undefined) { updates.push('date = ?'); values.push(data.date); }
+	if (data.chamber !== undefined) { updates.push('chamber = ?'); values.push(data.chamber); }
+	if (data.result !== undefined) { updates.push('result = ?'); values.push(data.result); }
+	if ((data as any).stance !== undefined) { updates.push('stance = ?'); values.push((data as any).stance); }
+	if ((data as any).party_in_opposition !== undefined) { updates.push('party_in_opposition = ?'); values.push((data as any).party_in_opposition); }
+	if ((data as any).party_in_favor !== undefined) { updates.push('party_in_favor = ?'); values.push((data as any).party_in_favor); }
+	if ((data as any).votes_in_favor !== undefined) { updates.push('votes_in_favor = ?'); values.push((data as any).votes_in_favor); }
+	if ((data as any).votes_opposed !== undefined) { updates.push('votes_opposed = ?'); values.push((data as any).votes_opposed); }
+	if ((data as any).total_votes !== undefined) { updates.push('total_votes = ?'); values.push((data as any).total_votes); }
+	if ((data as any).exact_terminology !== undefined) { updates.push('exact_terminology = ?'); values.push((data as any).exact_terminology); }
+	if ((data as any).page_line !== undefined) { updates.push('page_line = ?'); values.push((data as any).page_line); }
+
+	if (updates.length === 0) return;
+
+	values.push(id);
+
+	await db
+		.prepare(`UPDATE votes SET ${updates.join(', ')} WHERE id = ?`)
+		.bind(...values)
+		.run();
+}
+
 export async function getAllVotes(db: D1Database): Promise<any[]> {
 	const result = await db
 		.prepare('SELECT * FROM votes ORDER BY date DESC LIMIT 100')
@@ -502,8 +580,10 @@ export async function createVote(db: D1Database, data: Partial<VoteData>): Promi
 		.prepare(`
 			INSERT INTO votes (
 				propublica_roll_id, bill_id, bill_title, bill_number, description,
-				question, date, chamber, result
-			) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+				question, date, chamber, result, stance, party_in_opposition,
+				party_in_favor, votes_in_favor, votes_opposed, total_votes,
+				exact_terminology, page_line
+			) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
 			ON CONFLICT(propublica_roll_id) DO UPDATE SET
 				bill_id = excluded.bill_id,
 				bill_title = excluded.bill_title,
@@ -512,7 +592,15 @@ export async function createVote(db: D1Database, data: Partial<VoteData>): Promi
 				question = excluded.question,
 				date = excluded.date,
 				chamber = excluded.chamber,
-				result = excluded.result
+				result = excluded.result,
+				stance = excluded.stance,
+				party_in_opposition = excluded.party_in_opposition,
+				party_in_favor = excluded.party_in_favor,
+				votes_in_favor = excluded.votes_in_favor,
+				votes_opposed = excluded.votes_opposed,
+				total_votes = excluded.total_votes,
+				exact_terminology = excluded.exact_terminology,
+				page_line = excluded.page_line
 			RETURNING id
 		`)
 		.bind(
@@ -524,7 +612,15 @@ export async function createVote(db: D1Database, data: Partial<VoteData>): Promi
 			data.question || null,
 			data.date || new Date().toISOString().split('T')[0],
 			data.chamber || 'house',
-			data.result || null
+			data.result || null,
+			(data as any).stance || null,
+			(data as any).party_in_opposition || null,
+			(data as any).party_in_favor || null,
+			(data as any).votes_in_favor || null,
+			(data as any).votes_opposed || null,
+			(data as any).total_votes || null,
+			(data as any).exact_terminology || null,
+			(data as any).page_line || null
 		)
 		.first<{ id: number }>();
 	return result!.id;
