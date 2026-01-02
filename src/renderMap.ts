@@ -720,6 +720,11 @@ function generateUSMapSVG(states: State[]): string {
 		} else if (state?.electoral_winner === 'Democrat') {
 			electoralClass = 'democrat';
 		}
+
+		// Debug: Log electoral winners for a few states
+		if (['CA', 'TX', 'FL', 'NY'].includes(code)) {
+			console.log(`${code}: electoral_winner = "${state?.electoral_winner}", class = "${electoralClass}"`);
+		}
 		
 		// Create a rounded rectangle for each state
 		const path = `M ${coords.x} ${coords.y} L ${coords.x + coords.w} ${coords.y} L ${coords.x + coords.w} ${coords.y + coords.h} L ${coords.x} ${coords.y + coords.h} Z`;
