@@ -126,16 +126,27 @@ async function handleElectionHub(request: Request, env: Env): Promise<Response> 
 
 async function handleRepresentativePage(request: Request, env: Env, id: number): Promise<Response> {
 	const representative = await getRepresentative(env.DB, id);
-	
+
 	if (!representative) {
 		return new Response('Representative not found', { status: 404 });
 	}
+
+	// Fetch state data for the representative's state
+	const state = await getStateByCode(env.DB, representative.state_code);
+	const stateRepresentatives = await getRepresentativesByState(env.DB, representative.state_code);
+	const voterData = await getVoterDataByState(env.DB, representative.state_code);
+	const demographics = await getVoterDemographicsByState(env.DB, representative.state_code);
 
 	// Try to get votes if voting_records table still references old politician_id
 	// For now, we'll show the profile without votes until we migrate the data
 	const votes: any[] = []; // TODO: Migrate voting records to use representative_id
 
-	return new Response(renderRepresentativeProfile(representative, votes), {
+	return new Response(renderRepresentativeProfile(representative, votes, {
+		state,
+		representatives: stateRepresentatives,
+		voterData,
+		demographics
+	}), {
 		headers: { "content-type": "text/html" },
 	});
 }
@@ -659,9 +670,125 @@ async function handleAdminApi(request: Request, env: Env, path: string): Promise
 	return new Response('Not found', { status: 404 });
 }
 
-function renderRepresentativeProfile(representative: any, votes: any[]): string {
+function renderRepresentativeProfile(representative: any, votes: any[], stateData?: {
+	state: any,
+	representatives: any[],
+	voterData: any,
+	demographics: any
+} | null): string {
 	const partyClass = representative.party?.toLowerCase() || 'independent';
 	
+function renderStateSection(stateData: {
+	state: any,
+	representatives: any[],
+	voterData: any,
+	demographics: any
+}): string {
+	const { state, representatives, voterData } = stateData;
+
+	let html = `
+		<div class="state-section">
+			<h2>About ${escapeHtml(state.name)}</h2>
+	`;
+
+	// Voter data section
+	if (voterData) {
+		html += `
+			<div class="state-data-grid">
+				${voterData.total_registered_voters ? `
+					<div class="state-data-card">
+						<div class="state-data-label">Registered Voters</div>
+						<div class="state-data-value">${formatNumber(voterData.total_registered_voters)}</div>
+					</div>
+				` : ''}
+				${voterData.voting_age_population ? `
+					<div class="state-data-card">
+						<div class="state-data-label">Voting Age Population</div>
+						<div class="state-data-value">${formatNumber(voterData.voting_age_population)}</div>
+					</div>
+				` : ''}
+				${voterData.total_voted && voterData.total_registered_voters ? `
+					<div class="state-data-card">
+						<div class="state-data-label">Registered Voter Turnout</div>
+						<div class="state-data-value">${(((voterData.total_voted / voterData.total_registered_voters) * 100).toFixed(1))}%</div>
+					</div>
+				` : ''}
+				${voterData.total_voted && voterData.voting_age_population ? `
+					<div class="state-data-card">
+						<div class="state-data-label">Citizen Turnout (18+)</div>
+						<div class="state-data-value">${(((voterData.total_voted / voterData.voting_age_population) * 100).toFixed(1))}%</div>
+					</div>
+				` : ''}
+			</div>
+		`;
+	} else {
+		html += `
+			<div class="state-empty-state">
+				<p>Voter data not yet available for this state. Starting with Georgia!</p>
+			</div>
+		`;
+	}
+
+	// Representatives section
+	if (representatives && representatives.length > 0) {
+		html += `
+			<div class="state-representatives-section">
+				<h3>All Representatives from ${escapeHtml(state.name)}</h3>
+				<div class="chamber-tabs">
+					<button class="tab active" onclick="showChamber('all')">All (${representatives.length})</button>
+					<button class="tab" onclick="showChamber('house')">House (${representatives.filter(r => r.chamber === 'house').length})</button>
+					<button class="tab" onclick="showChamber('senate')">Senate (${representatives.filter(r => r.chamber === 'senate').length})</button>
+				</div>
+				<div id="state-representatives-grid" class="state-representatives-grid">
+					${renderStateRepresentatives(representatives, 'all', representative.id)}
+				</div>
+			</div>
+		`;
+	} else {
+		html += `
+			<div class="state-representatives-section">
+				<h3>Representatives from ${escapeHtml(state.name)}</h3>
+				<div class="state-empty-state">
+					<p>No representatives found for this state.</p>
+				</div>
+			</div>
+		`;
+	}
+
+	html += `
+		</div>
+	`;
+
+	return html;
+}
+
+function renderStateRepresentatives(reps: any[], chamber: string, currentRepId: number): string {
+	const filtered = chamber === 'all' ? reps : reps.filter(r => r.chamber === chamber);
+
+	if (filtered.length === 0) {
+		return '<div class="state-empty-state"><p>No representatives found.</p></div>';
+	}
+
+	return filtered.map(rep => {
+		const partyClass = rep.party?.toLowerCase() || 'independent';
+		const isCurrent = rep.id === currentRepId;
+
+		return `
+			<a href="/representative/${rep.id}" class="state-representative-card ${isCurrent ? 'current' : ''}">
+				<div class="state-representative-name">${escapeHtml(rep.name)}${isCurrent ? ' (You)' : ''}</div>
+				<div class="state-representative-info">
+					<div class="state-info-item">
+						<strong>Chamber:</strong> ${rep.chamber === 'house' ? 'House of Representatives' : 'Senate'}
+					</div>
+					${rep.party ? `
+						<span class="state-badge state-badge-${partyClass}">${escapeHtml(rep.party)}</span>
+					` : ''}
+				</div>
+			</a>
+		`;
+	}).join('');
+}
+
 	return `
 <!DOCTYPE html>
 <html lang="en">
@@ -670,6 +797,7 @@ function renderRepresentativeProfile(representative: any, votes: any[]): string 
 	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 	<title>${escapeHtml(representative.name)} - Profile</title>
 	<style>
+
 		* {
 			margin: 0;
 			padding: 0;
@@ -786,6 +914,163 @@ function renderRepresentativeProfile(representative: any, votes: any[]): string 
 		.social-link:hover {
 			background: #e5e7eb;
 		}
+
+		/* State section styles */
+		.state-section {
+			background: white;
+			border-radius: 12px;
+			padding: 2rem;
+			margin-bottom: 2rem;
+			box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+		}
+
+		.state-section h2 {
+			font-size: 1.8rem;
+			margin-bottom: 1.5rem;
+			color: #333;
+			border-bottom: 2px solid #e5e7eb;
+			padding-bottom: 0.5rem;
+		}
+
+		.state-data-grid {
+			display: grid;
+			grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+			gap: 1rem;
+			margin-bottom: 2rem;
+		}
+
+		.state-data-card {
+			background: #f9fafb;
+			padding: 1rem;
+			border-radius: 8px;
+			border-left: 4px solid #667eea;
+		}
+
+		.state-data-label {
+			font-size: 0.85rem;
+			color: #666;
+			text-transform: uppercase;
+			letter-spacing: 0.5px;
+			margin-bottom: 0.25rem;
+		}
+
+		.state-data-value {
+			font-size: 1.5rem;
+			font-weight: 700;
+			color: #333;
+		}
+
+		.state-representatives-section {
+			margin-top: 2rem;
+		}
+
+		.state-representatives-section h3 {
+			font-size: 1.5rem;
+			margin-bottom: 1rem;
+			color: #333;
+		}
+
+		.chamber-tabs {
+			display: flex;
+			gap: 1rem;
+			margin-bottom: 1.5rem;
+		}
+
+		.tab {
+			padding: 0.75rem 1.5rem;
+			background: #e5e7eb;
+			border: none;
+			border-radius: 8px;
+			cursor: pointer;
+			font-weight: 600;
+			transition: all 0.2s;
+		}
+
+		.tab.active {
+			background: #667eea;
+			color: white;
+		}
+
+		.tab:hover:not(.active) {
+			background: #d1d5db;
+		}
+
+		.state-representatives-grid {
+			display: grid;
+			grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+			gap: 1.5rem;
+		}
+
+		.state-representative-card {
+			background: #f9fafb;
+			border-radius: 8px;
+			padding: 1.5rem;
+			border-left: 4px solid #667eea;
+			transition: transform 0.2s, box-shadow 0.2s;
+			cursor: pointer;
+			text-decoration: none;
+			color: inherit;
+			display: block;
+		}
+
+		.state-representative-card:hover {
+			transform: translateY(-4px);
+			box-shadow: 0 8px 16px rgba(0,0,0,0.15);
+		}
+
+		.state-representative-card.current {
+			border-left-color: #10b981;
+			background: #f0fdf4;
+		}
+
+		.state-representative-name {
+			font-size: 1.25rem;
+			font-weight: 700;
+			margin-bottom: 0.5rem;
+			color: #333;
+		}
+
+		.state-representative-info {
+			display: flex;
+			flex-direction: column;
+			gap: 0.5rem;
+			margin-top: 0.5rem;
+		}
+
+		.state-info-item {
+			font-size: 0.9rem;
+			color: #666;
+		}
+
+		.state-badge {
+			display: inline-block;
+			padding: 0.25rem 0.75rem;
+			border-radius: 20px;
+			font-size: 0.85rem;
+			font-weight: 600;
+			margin-top: 0.5rem;
+		}
+
+		.state-badge-democrat {
+			background: #3b82f6;
+			color: white;
+		}
+
+		.state-badge-republican {
+			background: #ef4444;
+			color: white;
+		}
+
+		.state-badge-independent {
+			background: #6b7280;
+			color: white;
+		}
+
+		.state-empty-state {
+			text-align: center;
+			padding: 3rem;
+			color: #666;
+		}
 	</style>
 </head>
 <body>
@@ -854,9 +1139,73 @@ function renderRepresentativeProfile(representative: any, votes: any[]): string 
 						🌐 Official Website
 					</a>
 				` : ''}
+				${stateData?.state?.webpage ? `
+					<a href="${generateCongressGovUrl(stateData.state.webpage, representative.chamber)}" target="_blank" class="social-link">
+						🏛️ Congress.gov
+					</a>
+				` : ''}
 			</div>
 		</div>
+
+		${stateData ? renderStateSection(stateData) : ''}
 	</div>
+
+	<script>
+		let currentStateRepresentatives = ${stateData ? JSON.stringify(stateData.representatives) : '[]'};
+		let currentRepresentativeId = ${representative.id};
+
+		function showChamber(chamber) {
+			document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
+			event.target.classList.add('active');
+
+			if (currentStateRepresentatives) {
+				document.getElementById('state-representatives-grid').innerHTML = renderStateRepresentatives(currentStateRepresentatives, chamber, currentRepresentativeId);
+			}
+		}
+
+		function renderStateRepresentatives(reps, chamber, currentRepId) {
+			const filtered = chamber === 'all' ? reps : reps.filter(r => r.chamber === chamber);
+
+			if (filtered.length === 0) {
+				return '<div class="state-empty-state"><p>No representatives found.</p></div>';
+			}
+
+			return filtered.map(rep => {
+				const partyClass = rep.party?.toLowerCase() || 'independent';
+				const isCurrent = rep.id === currentRepId;
+				const cardClass = 'state-representative-card' + (isCurrent ? ' current' : '');
+				const displayName = escapeHtml(rep.name) + (isCurrent ? ' (You)' : '');
+				const chamberName = rep.chamber === 'house' ? 'House of Representatives' : 'Senate';
+				const partyBadge = rep.party ? '<span class="state-badge state-badge-' + partyClass + '">' + escapeHtml(rep.party) + '</span>' : '';
+
+				return '<a href="/representative/' + rep.id + '" class="' + cardClass + '">' +
+					'<div class="state-representative-name">' + displayName + '</div>' +
+					'<div class="state-representative-info">' +
+						'<div class="state-info-item">' +
+							'<strong>Chamber:</strong> ' + chamberName +
+						'</div>' +
+						partyBadge +
+					'</div>' +
+				'</a>';
+			}).join('');
+		}
+
+		function formatNumber(num) {
+			return new Intl.NumberFormat('en-US').format(num);
+		}
+
+		function escapeHtml(text) {
+			if (!text) return '';
+			const map = {
+				'&': '&amp;',
+				'<': '&lt;',
+				'>': '&gt;',
+				'"': '&quot;',
+				"'": '&#039;'
+			};
+			return text.replace(/[&<>"']/g, m => map[m]);
+		}
+	</script>
 </body>
 </html>
 	`;
@@ -885,6 +1234,18 @@ function formatFullDate(dateString: string | null | undefined): string {
 		});
 	} catch {
 		return dateString;
+	}
+}
+
+function generateCongressGovUrl(stateName: string, chamber: string): string {
+	const congress = '118';
+	const chamberParam = chamber === 'house' ? 'House' : 'Senate';
+	const stateParam = stateName.replace(/ /g, '+');
+
+	if (chamber === 'senate') {
+		return `https://www.congress.gov/search?q=%7B%22source%22%3A%22members%22%2C%22chamber%22%3A%22Senate%22%2C%22congress%22%3A%22${congress}%22%2C%22member-state%22%3A%22${stateParam}%22%7D`;
+	} else {
+		return `https://www.congress.gov/search?q=%7B%22source%22%3A%22members%22%2C%22congress%22%3A%22${congress}%22%2C%22member-state%22%3A%22${stateParam}%22%2C%22chamber%22%3A%22House%22%7D`;
 	}
 }
 

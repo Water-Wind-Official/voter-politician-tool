@@ -13,6 +13,7 @@ export interface State {
 	electoral_year: number | null;
 	electoral_margin: number | null;
 	electoral_votes: number | null; // Number of electoral votes for this state
+	webpage: string | null; // Congress.gov search URL for state representatives
 	created_at: string;
 	updated_at: string;
 }
