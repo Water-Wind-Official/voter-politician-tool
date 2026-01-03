@@ -898,6 +898,9 @@ export function renderAdminDashboard(data: any): string {
 				event.target.classList.add('active');
 			}
 			document.getElementById(tabName).classList.add('active');
+
+			// Dispatch custom event for tab activation
+			document.dispatchEvent(new CustomEvent('tabActivated', { detail: tabName }));
 		};
 
 		window.openModal = function(modalId) {
