@@ -178,8 +178,8 @@ export function renderHouseHub(houseMembers: Representative[]): string {
 		}
 		
 		.state-party-icon {
-			width: 32px;
-			height: 32px;
+			width: 48px;
+			height: 48px;
 			flex-shrink: 0;
 			animation: bounce 2s infinite;
 		}
@@ -223,11 +223,22 @@ export function renderHouseHub(houseMembers: Representative[]): string {
 			border-radius: 12px;
 			padding: 1rem;
 			margin-bottom: 1rem;
-			border-left: 4px solid #60a5fa;
 			transition: all 0.3s ease;
 			box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 			position: relative;
 			z-index: 1;
+		}
+
+		.member-card.republican {
+			border-left: 4px solid #f87171;
+		}
+
+		.member-card.democrat {
+			border-left: 4px solid #60a5fa;
+		}
+
+		.member-card.independent {
+			border-left: 4px solid #94a3b8;
 		}
 
 		
@@ -478,14 +489,14 @@ export function renderHouseHub(houseMembers: Representative[]): string {
 							if (member.id) {
 								return `
 									<a href="/representative/${member.id}" class="member-card-link">
-										<div class="member-card">
+										<div class="member-card ${partyClass}">
 											${cardContent}
 										</div>
 									</a>
 								`;
 							} else {
 								return `
-									<div class="member-card">
+									<div class="member-card ${partyClass}">
 										${cardContent}
 									</div>
 								`;
