@@ -841,24 +841,23 @@ export function renderHomePage(states: State[]): string {
 				matches = [...matches, ...stateMatches];
 
 				// Find matching representatives and candidates
-					// Add presidential candidates
-					const candidates = [
-						{ id: 'trump', name: 'Donald J. Trump', party: 'Republican', chamber: 'Candidate', state_code: 'National' },
-						{ id: 'harris', name: 'Kamala Harris', party: 'Democrat', chamber: 'Candidate', state_code: 'National' }
-					];
+				// Add presidential candidates
+				const candidates = [
+					{ id: 'trump', name: 'Donald J. Trump', party: 'Republican', chamber: 'Candidate', state_code: 'National' },
+					{ id: 'harris', name: 'Kamala Harris', party: 'Democrat', chamber: 'Candidate', state_code: 'National' }
+				];
 
-					const candidateMatches = candidates.filter(c =>
-						c.name.toLowerCase().includes(query.toLowerCase()) ||
-						c.party.toLowerCase().includes(query.toLowerCase())
-					);
+				const candidateMatches = candidates.filter(c =>
+					c.name.toLowerCase().includes(query.toLowerCase()) ||
+					c.party.toLowerCase().includes(query.toLowerCase())
+				);
 
-					// Search for representatives via API
-					const response = await fetch('/api/search/representatives?q=' + encodeURIComponent(query));
-					const data = await response.json();
-					const repMatches = data.results || [];
+				// Search for representatives via API
+				const response = await fetch('/api/search/representatives?q=' + encodeURIComponent(query));
+				const data = await response.json();
+				const repMatches = data.results || [];
 
-					matches = [...candidateMatches, ...repMatches, ...matches];
-				}
+				matches = [...candidateMatches, ...repMatches, ...matches];
 
 				// Limit to top 6 results
 				matches = matches.slice(0, 6);
