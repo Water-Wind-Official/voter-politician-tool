@@ -444,6 +444,7 @@ export function renderHomePage(states: State[]): string {
 			<h1>Voter Politician Tool</h1>
 			<p class="subtitle">Click on any state to view representatives and voter information</p>
 			<nav>
+				<a href="/issues">Issues Hub</a>
 				<a href="/senators">Senate Hub</a>
 				<a href="/house">House Hub</a>
 				<a href="/election">Election Hub</a>

@@ -1,7 +1,7 @@
 // Database operations for state-based voter information system
 import type {
 	Politician, Vote, VotingRecord,
-	State, Representative, VoterData, VoterDemographic
+	State, Representative, VoterData, VoterDemographic, Issue
 } from './types';
 
 // Generic politician data interface
@@ -604,4 +604,95 @@ export async function createVote(db: D1Database, data: Partial<VoteData>): Promi
 		)
 		.first<{ id: number }>();
 	return result!.id;
+}
+
+// Issues management functions
+export async function getAllIssues(db: D1Database): Promise<Issue[]> {
+	const result = await db
+		.prepare('SELECT * FROM issues WHERE is_active = 1 ORDER BY priority DESC, created_at DESC')
+		.all();
+	return result.results as Issue[];
+}
+
+export async function getIssuesByParty(db: D1Database, party: string): Promise<Issue[]> {
+	const result = await db
+		.prepare('SELECT * FROM issues WHERE party = ? AND is_active = 1 ORDER BY priority DESC, created_at DESC')
+		.bind(party)
+		.all();
+	return result.results as Issue[];
+}
+
+export async function getIssue(db: D1Database, id: number): Promise<Issue | null> {
+	const result = await db
+		.prepare('SELECT * FROM issues WHERE id = ?')
+		.bind(id)
+		.first();
+	return result as Issue | null;
+}
+
+export async function createIssue(db: D1Database, data: Omit<Issue, 'id' | 'created_at' | 'updated_at'>): Promise<number> {
+	const result = await db
+		.prepare(`
+			INSERT INTO issues (title, description, party, category, priority, is_active)
+			VALUES (?, ?, ?, ?, ?, ?)
+		`)
+		.bind(
+			data.title,
+			data.description || null,
+			data.party,
+			data.category || null,
+			data.priority || 0,
+			data.is_active ? 1 : 0
+		)
+		.run();
+
+	// Get the inserted ID
+	const idResult = await db
+		.prepare('SELECT last_insert_rowid() as id')
+		.first<{ id: number }>();
+	return idResult!.id;
+}
+
+export async function updateIssue(db: D1Database, id: number, data: Partial<Omit<Issue, 'id' | 'created_at' | 'updated_at'>>): Promise<void> {
+	const updates: string[] = [];
+	const values: any[] = [];
+
+	if (data.title !== undefined) {
+		updates.push('title = ?');
+		values.push(data.title);
+	}
+	if (data.description !== undefined) {
+		updates.push('description = ?');
+		values.push(data.description);
+	}
+	if (data.party !== undefined) {
+		updates.push('party = ?');
+		values.push(data.party);
+	}
+	if (data.category !== undefined) {
+		updates.push('category = ?');
+		values.push(data.category);
+	}
+	if (data.priority !== undefined) {
+		updates.push('priority = ?');
+		values.push(data.priority);
+	}
+	if (data.is_active !== undefined) {
+		updates.push('is_active = ?');
+		values.push(data.is_active ? 1 : 0);
+	}
+
+	if (updates.length > 0) {
+		updates.push('updated_at = CURRENT_TIMESTAMP');
+		values.push(id);
+
+		await db
+			.prepare(`UPDATE issues SET ${updates.join(', ')} WHERE id = ?`)
+			.bind(...values)
+			.run();
+	}
+}
+
+export async function deleteIssue(db: D1Database, id: number): Promise<void> {
+	await db.prepare('DELETE FROM issues WHERE id = ?').bind(id).run();
 }

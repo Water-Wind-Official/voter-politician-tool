@@ -6,8 +6,9 @@ import { renderAdminLogin, renderAdminDashboard } from "./renderAdmin";
 import { renderSenatorHub } from "./renderSenators";
 import { renderHouseHub } from "./renderHouse";
 import { renderElectionHub } from "./renderElection";
-import { 
-	getAllStates, 
+import { renderIssuesPage } from "./renderIssues";
+import {
+	getAllStates,
 	getStateByCode,
 	getRepresentativesByState,
 	getRepresentative,
@@ -24,7 +25,13 @@ import {
 	getAllVotes,
 	createVote,
 	updateVote,
-	updateStateElectoralData
+	updateStateElectoralData,
+	getAllIssues,
+	getIssuesByParty,
+	getIssue,
+	createIssue,
+	updateIssue,
+	deleteIssue
 } from "./db";
 
 export default {
@@ -57,6 +64,10 @@ export default {
 
 		if (path === '/election' || path === '/election-hub') {
 			return handleElectionHub(request, env);
+		}
+
+		if (path === '/issues') {
+			return handleIssuesPage(request, env);
 		}
 
 		if (path.startsWith('/representative/')) {
@@ -120,6 +131,18 @@ async function handleElectionHub(request: Request, env: Env): Promise<Response> 
 	const states = await getAllStates(env.DB);
 
 	return new Response(renderElectionHub(states), {
+		headers: { "content-type": "text/html" },
+	});
+}
+
+async function handleIssuesPage(request: Request, env: Env): Promise<Response> {
+	const [democratIssues, republicanIssues, bothIssues] = await Promise.all([
+		getIssuesByParty(env.DB, 'Democrat'),
+		getIssuesByParty(env.DB, 'Republican'),
+		getIssuesByParty(env.DB, 'Both')
+	]);
+
+	return new Response(renderIssuesPage(democratIssues, republicanIssues, bothIssues), {
 		headers: { "content-type": "text/html" },
 	});
 }
@@ -246,12 +269,14 @@ async function handleAdminDashboard(request: Request, env: Env): Promise<Respons
 		states.map(s => getVoterDataByState(env.DB, s.code))
 	).then(results => results.filter(r => r !== null));
 	const votes = await getAllVotes(env.DB);
+	const issues = await getAllIssues(env.DB);
 
 	return new Response(renderAdminDashboard({
 		states,
 		representatives,
 		voterData,
-		votes
+		votes,
+		issues
 	}), {
 		headers: { 'Content-Type': 'text/html' }
 	});
@@ -359,6 +384,37 @@ async function handleAdminApi(request: Request, env: Env, path: string): Promise
 			body.electoral_margin || null,
 			body.electoral_votes || null
 		);
+		return Response.json({ success: true });
+	}
+
+	// Issues management
+	if (path === '/api/admin/issues' && request.method === 'GET') {
+		const issues = await getAllIssues(env.DB);
+		return Response.json({ issues });
+	}
+
+	if (path === '/api/admin/issue' && request.method === 'POST') {
+		const body = await request.json() as any;
+		const id = await createIssue(env.DB, body);
+		return Response.json({ success: true, id });
+	}
+
+	if (path.startsWith('/api/admin/issue/') && request.method === 'PUT') {
+		const id = parseInt(path.split('/')[4]);
+		if (isNaN(id)) {
+			return new Response('Invalid ID', { status: 400 });
+		}
+		const body = await request.json() as any;
+		await updateIssue(env.DB, id, body);
+		return Response.json({ success: true });
+	}
+
+	if (path.startsWith('/api/admin/issue/') && request.method === 'DELETE') {
+		const id = parseInt(path.split('/')[4]);
+		if (isNaN(id)) {
+			return new Response('Invalid ID', { status: 400 });
+		}
+		await deleteIssue(env.DB, id);
 		return Response.json({ success: true });
 	}
 
@@ -1075,7 +1131,15 @@ function renderStateRepresentatives(reps: any[], chamber: string, currentRepId: 
 </head>
 <body>
 	<div class="container">
-		<a href="/" class="back-link">← Back to Map</a>
+		<div style="text-align: center; margin-bottom: 1rem;">
+			<a href="/" class="back-link">← Back to Map</a>
+			<nav style="display: inline-block; margin-left: 2rem;">
+				<a href="/issues" style="color: #667eea; text-decoration: none; margin: 0 0.5rem; font-weight: 500;">Issues Hub</a>
+				<a href="/senators" style="color: #667eea; text-decoration: none; margin: 0 0.5rem; font-weight: 500;">Senate Hub</a>
+				<a href="/house" style="color: #667eea; text-decoration: none; margin: 0 0.5rem; font-weight: 500;">House Hub</a>
+				<a href="/election" style="color: #667eea; text-decoration: none; margin: 0 0.5rem; font-weight: 500;">Election Hub</a>
+			</nav>
+		</div>
 		
 		<div class="profile-header">
 			<h1 class="profile-name">${escapeHtml(representative.name)}</h1>

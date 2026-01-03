@@ -145,7 +145,7 @@ export function renderAdminLogin(): string {
 }
 
 export function renderAdminDashboard(data: any): string {
-	const { states, representatives, voterData, votes } = data;
+	const { states, representatives, voterData, votes, issues } = data;
 	
 	return `
 <!DOCTYPE html>
@@ -425,6 +425,10 @@ export function renderAdminDashboard(data: any): string {
 			<div class="stat-value">${votes.length}</div>
 			<div class="stat-label">Votes</div>
 		</div>
+		<div class="stat-card">
+			<div class="stat-value">${issues ? issues.length : 0}</div>
+			<div class="stat-label">Issues</div>
+		</div>
 	</div>
 	
 	<div class="tabs">
@@ -432,6 +436,7 @@ export function renderAdminDashboard(data: any): string {
 		<button class="tab" onclick="showTab('voter-data', event)">Voter Data</button>
 		<button class="tab" onclick="showTab('electoral-data', event)">Electoral Data</button>
 		<button class="tab" onclick="showTab('stances', event)">Stances</button>
+		<button class="tab" onclick="showTab('issues', event)">Issues</button>
 	</div>
 	
 	<div id="representatives" class="tab-content active">
@@ -606,7 +611,31 @@ export function renderAdminDashboard(data: any): string {
 			</table>
 		</div>
 	</div>
-	
+
+	<div id="issues" class="tab-content">
+		<div class="card">
+			<div class="card-header">
+				<h2 class="card-title">Political Issues</h2>
+				<button class="btn" onclick="openModal('issue-modal')">+ Add Issue</button>
+			</div>
+			<table class="table">
+				<thead>
+					<tr>
+						<th>Title</th>
+						<th>Party</th>
+						<th>Category</th>
+						<th>Priority</th>
+						<th>Status</th>
+						<th>Actions</th>
+					</tr>
+				</thead>
+				<tbody id="issues-table-body">
+					<!-- Issues will be loaded dynamically -->
+				</tbody>
+			</table>
+		</div>
+	</div>
+
 	<!-- Representative Modal -->
 	<div id="rep-modal" class="modal">
 		<div class="modal-content">
@@ -975,7 +1004,51 @@ export function renderAdminDashboard(data: any): string {
 			</form>
 		</div>
 	</div>
-	
+
+	<!-- Issue Modal -->
+	<div id="issue-modal" class="modal">
+		<div class="modal-content">
+			<h2 style="margin-bottom: 1rem;">Add/Edit Issue</h2>
+			<form id="issue-form" onsubmit="saveIssue(event)">
+				<div class="form-grid">
+					<div class="form-group" style="grid-column: 1 / -1;">
+						<label>Title *</label>
+						<input type="text" name="title" required>
+					</div>
+					<div class="form-group" style="grid-column: 1 / -1;">
+						<label>Description</label>
+						<textarea name="description" rows="3"></textarea>
+					</div>
+					<div class="form-group">
+						<label>Party *</label>
+						<select name="party" required>
+							<option value="">Select Party</option>
+							<option value="Democrat">Democrat</option>
+							<option value="Republican">Republican</option>
+							<option value="Both">Both Parties</option>
+						</select>
+					</div>
+					<div class="form-group">
+						<label>Category</label>
+						<input type="text" name="category" placeholder="e.g., Economy, Healthcare">
+					</div>
+					<div class="form-group">
+						<label>Priority</label>
+						<input type="number" name="priority" value="0" min="0">
+					</div>
+					<div class="form-group">
+						<label>Active</label>
+						<input type="checkbox" name="is_active" checked>
+					</div>
+				</div>
+				<div style="margin-top: 1.5rem; display: flex; gap: 1rem; justify-content: flex-end;">
+					<button type="button" class="btn btn-secondary" onclick="closeModal('issue-modal')">Cancel</button>
+					<button type="submit" class="btn">Save Issue</button>
+				</div>
+			</form>
+		</div>
+	</div>
+
 	<script>
 		let currentData = window.adminData;
 		
@@ -1305,7 +1378,127 @@ export function renderAdminDashboard(data: any): string {
 			};
 			return text.toString().replace(/[&<>"']/g, function(m) { return map[m]; });
 		}
-		
+
+		// Issues functions
+		async function loadIssues() {
+			try {
+				const response = await fetch('/api/admin/issues');
+				const data = await response.json();
+				const tbody = document.getElementById('issues-table-body');
+				if (!tbody) return;
+
+				tbody.innerHTML = data.issues.map(function(issue) {
+					var partyClass = 'party-' + issue.party.toLowerCase();
+					var statusClass = issue.is_active ? 'active' : 'inactive';
+					var statusText = issue.is_active ? 'Active' : 'Inactive';
+					return '<tr>' +
+						'<td>' + escapeHtml(issue.title) + '</td>' +
+						'<td><span class="party-badge ' + partyClass + '">' + issue.party + '</span></td>' +
+						'<td>' + escapeHtml(issue.category || '-') + '</td>' +
+						'<td>' + issue.priority + '</td>' +
+						'<td><span class="status ' + statusClass + '">' + statusText + '</span></td>' +
+						'<td>' +
+							'<button class="btn btn-small" onclick="editIssue(' + issue.id + ')">Edit</button> ' +
+							'<button class="btn btn-small btn-danger" onclick="deleteIssue(' + issue.id + ')">Delete</button>' +
+						'</td>' +
+					'</tr>';
+				}).join('');
+			} catch (error) {
+				console.error('Error loading issues:', error);
+			}
+		}
+
+		async function saveIssue(e) {
+			e.preventDefault();
+			const formData = new FormData(e.target);
+			const data = Object.fromEntries(formData);
+
+			// Handle checkbox
+			data.is_active = formData.has('is_active') ? 1 : 0;
+			data.priority = parseInt(data.priority) || 0;
+
+			const id = data.id;
+
+			try {
+				const url = '/api/admin/issue' + (id ? '/' + id : '');
+				const response = await fetch(url, {
+					method: id ? 'PUT' : 'POST',
+					headers: { 'Content-Type': 'application/json' },
+					body: JSON.stringify(data)
+				});
+
+				if (response.ok) {
+					location.reload();
+				} else {
+					alert('Error saving issue');
+				}
+			} catch (error) {
+				alert('Error: ' + (error.message || 'Unknown error'));
+			}
+		}
+
+		window.editIssue = async function(id) {
+			try {
+				const response = await fetch('/api/admin/issues');
+				const data = await response.json();
+				const issue = data.issues.find(i => i.id === id);
+				if (!issue) return;
+
+				const form = document.getElementById('issue-form');
+				if (!form) return;
+
+				Object.keys(issue).forEach(key => {
+					const input = form.querySelector(`[name="${key}"]`);
+					if (input) {
+						if (input.type === 'checkbox') {
+							input.checked = issue[key];
+						} else {
+							input.value = issue[key] || '';
+						}
+					}
+				});
+
+				// Add hidden ID field
+				let idField = form.querySelector('input[name="id"]');
+				if (!idField) {
+					idField = document.createElement('input');
+					idField.type = 'hidden';
+					idField.name = 'id';
+					form.appendChild(idField);
+				}
+				idField.value = issue.id;
+
+				openModal('issue-modal');
+			} catch (error) {
+				console.error('Error loading issue for edit:', error);
+			}
+		};
+
+		window.deleteIssue = async function(id) {
+			if (!confirm('Are you sure you want to delete this issue?')) return;
+
+			try {
+				const response = await fetch('/api/admin/issue/' + id, {
+					method: 'DELETE'
+				});
+
+				if (response.ok) {
+					loadIssues();
+				} else {
+					alert('Error deleting issue');
+				}
+			} catch (error) {
+				alert('Error: ' + (error.message || 'Unknown error'));
+			}
+		};
+
+		// Load issues when issues tab is activated
+		document.addEventListener('tabActivated', function(e) {
+			if (e.detail === 'issues') {
+				loadIssues();
+			}
+		});
+
 		function toggleDistrictField() {
 			const chamberSelect = document.getElementById('chamber-select');
 			const districtField = document.getElementById('district-field');

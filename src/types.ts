@@ -18,6 +18,18 @@ export interface State {
 	updated_at: string;
 }
 
+export interface Issue {
+	id: number;
+	title: string;
+	description: string | null;
+	party: 'Democrat' | 'Republican' | 'Both';
+	category: string | null;
+	priority: number;
+	is_active: boolean;
+	created_at: string;
+	updated_at: string;
+}
+
 
 export interface Representative {
 	id: number;
