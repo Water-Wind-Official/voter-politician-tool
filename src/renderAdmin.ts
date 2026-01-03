@@ -583,6 +583,50 @@ export function renderAdminDashboard(data: any): string {
 		</div>
 	</div>
 
+	<!-- Issue Modal -->
+	<div id="issue-modal" class="modal">
+		<div class="modal-content">
+			<h2 style="margin-bottom: 1rem;">Add/Edit Issue</h2>
+			<form id="issue-form" onsubmit="saveIssue(event)">
+				<div class="form-grid">
+					<div class="form-group" style="grid-column: 1 / -1;">
+						<label>Title *</label>
+						<input type="text" name="title" required>
+					</div>
+					<div class="form-group" style="grid-column: 1 / -1;">
+						<label>Description</label>
+						<textarea name="description" rows="3"></textarea>
+					</div>
+					<div class="form-group">
+						<label>Party *</label>
+						<select name="party" required>
+							<option value="">Select Party</option>
+							<option value="Democrat">Democrat</option>
+							<option value="Republican">Republican</option>
+							<option value="Both">Both Parties</option>
+						</select>
+					</div>
+					<div class="form-group">
+						<label>Category</label>
+						<input type="text" name="category" placeholder="e.g., Economy, Healthcare">
+					</div>
+					<div class="form-group">
+						<label>Priority</label>
+						<input type="number" name="priority" value="0" min="0">
+					</div>
+					<div class="form-group">
+						<label>Active</label>
+						<input type="checkbox" name="is_active" checked>
+					</div>
+				</div>
+				<div style="margin-top: 1.5rem; display: flex; gap: 1rem; justify-content: flex-end;">
+					<button type="button" class="btn btn-secondary" onclick="closeModal('issue-modal')">Cancel</button>
+					<button type="submit" class="btn">Save Issue</button>
+				</div>
+			</form>
+		</div>
+	</div>
+
 	<!-- Representative Modal -->
 	<div id="rep-modal" class="modal">
 		<div class="modal-content">
@@ -844,49 +888,6 @@ export function renderAdminDashboard(data: any): string {
 		</div>
 	</div>
 
-	<!-- Issue Modal -->
-	<div id="issue-modal" class="modal">
-		<div class="modal-content">
-			<h2 style="margin-bottom: 1rem;">Add/Edit Issue</h2>
-			<form id="issue-form" onsubmit="saveIssue(event)">
-				<div class="form-grid">
-					<div class="form-group" style="grid-column: 1 / -1;">
-						<label>Title *</label>
-						<input type="text" name="title" required>
-					</div>
-					<div class="form-group" style="grid-column: 1 / -1;">
-						<label>Description</label>
-						<textarea name="description" rows="3"></textarea>
-					</div>
-					<div class="form-group">
-						<label>Party *</label>
-						<select name="party" required>
-							<option value="">Select Party</option>
-							<option value="Democrat">Democrat</option>
-							<option value="Republican">Republican</option>
-							<option value="Both">Both Parties</option>
-						</select>
-					</div>
-					<div class="form-group">
-						<label>Category</label>
-						<input type="text" name="category" placeholder="e.g., Economy, Healthcare">
-					</div>
-					<div class="form-group">
-						<label>Priority</label>
-						<input type="number" name="priority" value="0" min="0">
-					</div>
-					<div class="form-group">
-						<label>Active</label>
-						<input type="checkbox" name="is_active" checked>
-					</div>
-				</div>
-				<div style="margin-top: 1.5rem; display: flex; gap: 1rem; justify-content: flex-end;">
-					<button type="button" class="btn btn-secondary" onclick="closeModal('issue-modal')">Cancel</button>
-					<button type="submit" class="btn">Save Issue</button>
-				</div>
-			</form>
-		</div>
-	</div>
 
 	<script>
 		let currentData = window.adminData;
@@ -1146,46 +1147,77 @@ export function renderAdminDashboard(data: any): string {
 			});
 		}
 
-		function escapeHtml(text) {
-			if (!text) return '';
-			const map = {
-				'&': '&amp;',
-				'<': '&lt;',
-				'>': '&gt;',
-				'"': '&quot;',
-				"'": '&#039;'
-			};
-			return text.toString().replace(/[&<>"']/g, function(m) { return map[m]; });
-		}
-
 		// Issues functions
 		async function loadIssues() {
 			try {
+				console.log('Loading issues...');
 				const response = await fetch('/api/admin/issues');
+				console.log('Response status:', response.status);
+				if (!response.ok) {
+					console.error('API request failed:', response.status, response.statusText);
+					const tbody = document.getElementById('issues-table-body');
+					if (tbody) {
+						tbody.innerHTML = '<tr><td colspan="6">Error: API request failed</td></tr>';
+					}
+					return;
+				}
 				const data = await response.json();
+				console.log('Data received:', data);
 				const tbody = document.getElementById('issues-table-body');
-				if (!tbody) return;
+				if (!tbody) {
+					console.error('issues-table-body element not found');
+					return;
+				}
+
+				if (!data.issues || !Array.isArray(data.issues)) {
+					console.error('Invalid issues data:', data);
+					tbody.innerHTML = '<tr><td colspan="6">Error: Invalid data format</td></tr>';
+					return;
+				}
+
+				if (data.issues.length === 0) {
+					tbody.innerHTML = '<tr><td colspan="6">No issues found</td></tr>';
+					return;
+				}
 
 				tbody.innerHTML = data.issues.map(function(issue) {
-					var partyClass = 'party-' + issue.party.toLowerCase();
+					if (!issue || typeof issue !== 'object') {
+						console.error('Invalid issue object:', issue);
+						return '<tr><td colspan="6">Error: Invalid issue data</td></tr>';
+					}
+					var partyClass = 'party-' + (issue.party ? issue.party.toLowerCase() : 'unknown');
 					var statusClass = issue.is_active ? 'active' : 'inactive';
 					var statusText = issue.is_active ? 'Active' : 'Inactive';
 					return '<tr>' +
-						'<td>' + escapeHtml(issue.title) + '</td>' +
-						'<td><span class="party-badge ' + partyClass + '">' + issue.party + '</span></td>' +
-						'<td>' + escapeHtml(issue.category || '-') + '</td>' +
-						'<td>' + issue.priority + '</td>' +
+						'<td>' + (issue.title ? escapeHtml(issue.title) : 'No title') + '</td>' +
+						'<td><span class="party-badge ' + partyClass + '">' + (issue.party || 'Unknown') + '</span></td>' +
+						'<td>' + (issue.category ? escapeHtml(issue.category) : '-') + '</td>' +
+						'<td>' + (issue.priority || 0) + '</td>' +
 						'<td><span class="status ' + statusClass + '">' + statusText + '</span></td>' +
 						'<td>' +
-							'<button class="btn btn-small" onclick="editIssue(' + issue.id + ')">Edit</button> ' +
-							'<button class="btn btn-small btn-danger" onclick="deleteIssue(' + issue.id + ')">Delete</button>' +
+							'<button class="btn btn-small" onclick="editIssue(' + (issue.id || 0) + ')">Edit</button> ' +
+							'<button class="btn btn-small btn-danger" onclick="deleteIssue(' + (issue.id || 0) + ')">Delete</button>' +
 						'</td>' +
 					'</tr>';
 				}).join('');
+				console.log('Issues loaded successfully');
 			} catch (error) {
 				console.error('Error loading issues:', error);
+				const tbody = document.getElementById('issues-table-body');
+				if (tbody) {
+					tbody.innerHTML = '<tr><td colspan="6">Error loading issues: ' + (error.message || 'Unknown error') + '</td></tr>';
+				}
 			}
 		}
+
+		// Load issues when issues tab is activated
+		document.addEventListener('tabActivated', function(e) {
+			console.log('Tab activated event received:', e);
+			if (e && e.detail === 'issues') {
+				console.log('Loading issues tab');
+				loadIssues();
+			}
+		});
 
 		async function saveIssue(e) {
 			e.preventDefault();
@@ -1226,8 +1258,8 @@ export function renderAdminDashboard(data: any): string {
 				const form = document.getElementById('issue-form');
 				if (!form) return;
 
-				Object.keys(issue).forEach(key => {
-					const input = form.querySelector(`[name="${key}"]`);
+				Object.keys(issue).forEach(function(key) {
+					const input = form.querySelector('[name="' + key + '"]');
 					if (input) {
 						if (input.type === 'checkbox') {
 							input.checked = issue[key];
@@ -1271,12 +1303,18 @@ export function renderAdminDashboard(data: any): string {
 			}
 		};
 
-		// Load issues when issues tab is activated
-		document.addEventListener('tabActivated', function(e) {
-			if (e.detail === 'issues') {
-				loadIssues();
-			}
-		});
+		function escapeHtml(text) {
+			if (!text) return '';
+			const map = {
+				'&': '&amp;',
+				'<': '&lt;',
+				'>': '&gt;',
+				'"': '&quot;',
+				"'": '&#039;'
+			};
+			return text.toString().replace(/[&<>"']/g, function(m) { return map[m]; });
+		}
+
 
 		function toggleDistrictField() {
 			const chamberSelect = document.getElementById('chamber-select');

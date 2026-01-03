@@ -365,37 +365,6 @@ async function handleAdminApi(request: Request, env: Env, path: string): Promise
 		return Response.json({ success: true });
 	}
 
-	// Issues management
-	if (path === '/api/admin/issues' && request.method === 'GET') {
-		const issues = await getAllIssues(env.DB);
-		return Response.json({ issues });
-	}
-
-	if (path === '/api/admin/issue' && request.method === 'POST') {
-		const body = await request.json() as any;
-		const id = await createIssue(env.DB, body);
-		return Response.json({ success: true, id });
-	}
-
-	if (path.startsWith('/api/admin/issue/') && request.method === 'PUT') {
-		const id = parseInt(path.split('/')[4]);
-		if (isNaN(id)) {
-			return new Response('Invalid ID', { status: 400 });
-		}
-		const body = await request.json() as any;
-		await updateIssue(env.DB, id, body);
-		return Response.json({ success: true });
-	}
-
-	if (path.startsWith('/api/admin/issue/') && request.method === 'DELETE') {
-		const id = parseInt(path.split('/')[4]);
-		if (isNaN(id)) {
-			return new Response('Invalid ID', { status: 400 });
-		}
-		await deleteIssue(env.DB, id);
-		return Response.json({ success: true });
-	}
-
 	// Populate 2024 electoral data
 	if (path === '/api/admin/populate-electoral-2024' && request.method === 'POST') {
 		console.log('Populate electoral data endpoint called');
@@ -700,6 +669,36 @@ async function handleAdminApi(request: Request, env: Env, path: string): Promise
 		});
 	}
 
+	// Issues management
+	if (path === '/api/admin/issues' && request.method === 'GET') {
+		const issues = await getAllIssues(env.DB);
+		return Response.json({ issues });
+	}
+
+	if (path === '/api/admin/issue' && request.method === 'POST') {
+		const body = await request.json() as any;
+		const id = await createIssue(env.DB, body);
+		return Response.json({ success: true, id });
+	}
+
+	if (path.startsWith('/api/admin/issue/') && request.method === 'PUT') {
+		const id = parseInt(path.split('/')[4]);
+		if (isNaN(id)) {
+			return new Response('Invalid ID', { status: 400 });
+		}
+		const body = await request.json() as any;
+		await updateIssue(env.DB, id, body);
+		return Response.json({ success: true });
+	}
+
+	if (path.startsWith('/api/admin/issue/') && request.method === 'DELETE') {
+		const id = parseInt(path.split('/')[4]);
+		if (isNaN(id)) {
+			return new Response('Invalid ID', { status: 400 });
+		}
+		await deleteIssue(env.DB, id);
+		return Response.json({ success: true });
+	}
 
 	return new Response('Not found', { status: 404 });
 }
