@@ -476,7 +476,6 @@ export function renderAdminDashboard(data: any): string {
 				<h2 class="card-title">Voter Data</h2>
 				<div style="display: flex; gap: 1rem;">
 					<button class="btn" onclick="openModal('voter-modal')">+ Add Voter Data</button>
-					<button class="btn btn-secondary" onclick="openModal('import-voter-modal')">📊 Import from Excel</button>
 					<button class="btn btn-primary populate-voter-btn" onclick="populateVoterData()">📈 Populate 2024 Census Data</button>
 				</div>
 			</div>
@@ -807,73 +806,6 @@ export function renderAdminDashboard(data: any): string {
 		</div>
 	</div>
 
-	<!-- Import Voter Data Modal -->
-	<div id="import-voter-modal" class="modal">
-		<div class="modal-content">
-			<h2 style="margin-bottom: 1rem;">Import Voter Data from Excel</h2>
-			<div style="background: #f0f9ff; border-left: 4px solid #3b82f6; padding: 1rem; margin-bottom: 1.5rem; border-radius: 4px;">
-				<p style="margin: 0 0 0.5rem 0; font-size: 0.9rem; color: #1e40af;">
-					<strong>📊 Import from vote04a_2024.xlsx:</strong> This tool helps you import voter turnout and registration data from your Excel file.
-				</p>
-				<p style="margin: 0; font-size: 0.85rem; color: #1e40af;">
-					<strong>Expected Excel Format:</strong> state_code (or State), total_registered_voters (or Registered), voting_age_population (or Voting_Age), voter_turnout_percentage (or Turnout), etc.
-				</p>
-			</div>
-			<form id="import-voter-form" onsubmit="importVoterData(event)">
-				<div class="form-group" style="margin-bottom: 1.5rem;">
-					<label>Paste Excel Data (JSON format) *</label>
-					<textarea id="excel-data" name="excelData" rows="15" placeholder='Paste your Excel data as JSON array, e.g.:
-[
-  {
-    "state_code": "CA",
-    "state_name": "California",
-    "total_registered_voters": 21900000,
-    "voting_age_population": 28500000,
-    "voter_turnout_percentage": 62.5,
-    "total_population": 39500000
-  },
-  {
-    "state_code": "TX",
-    "state_name": "Texas",
-    "total_registered_voters": 18500000,
-    "voting_age_population": 22000000,
-    "voter_turnout_percentage": 58.2,
-    "total_population": 30000000
-  }
-]' required></textarea>
-					<small style="color: #666; font-size: 0.85rem;">
-						Paste the data from your Excel file converted to JSON format. Each object represents one state's voter data.
-					</small>
-				</div>
-				<div style="background: #fef3c7; border-left: 4px solid #f59e0b; padding: 1rem; margin-bottom: 1.5rem; border-radius: 4px;">
-					<p style="margin: 0 0 0.5rem 0; font-size: 0.85rem; color: #92400e;">
-						<strong>📋 Excel to JSON Conversion:</strong>
-					</p>
-					<ol style="margin: 0; padding-left: 1.5rem; font-size: 0.85rem; color: #92400e;">
-						<li>Open your Excel file</li>
-						<li>Copy the data you want to import</li>
-						<li>Use an online Excel-to-JSON converter (search "excel to json converter")</li>
-						<li>Paste the resulting JSON array above</li>
-					</ol>
-				</div>
-				<div style="background: #fee2e2; border-left: 4px solid #dc2626; padding: 1rem; margin-bottom: 1.5rem; border-radius: 4px;">
-					<p style="margin: 0; font-size: 0.85rem; color: #991b1b;">
-						<strong>⚠️ Data Validation:</strong> Only import data from official government sources. The system will validate state codes and skip invalid records.
-					</p>
-				</div>
-				<div style="display: flex; gap: 1rem; margin-top: 1.5rem;">
-					<button type="submit" class="btn btn-success">📊 Import Data</button>
-					<button type="button" class="btn btn-secondary" onclick="closeModal('import-voter-modal')">Cancel</button>
-				</div>
-				<div id="import-progress" style="margin-top: 1rem; display: none;">
-					<div style="background: #f3f4f6; padding: 1rem; border-radius: 4px; font-size: 0.9rem;">
-						<div id="import-status">Importing...</div>
-						<div id="import-details" style="margin-top: 0.5rem; color: #666;"></div>
-					</div>
-				</div>
-			</form>
-		</div>
-	</div>
 
 	<!-- Electoral Data Modal -->
 	<div id="electoral-modal" class="modal">
@@ -1049,28 +981,26 @@ export function renderAdminDashboard(data: any): string {
 	</div>
 	
 	<script>
-		console.log('Admin dashboard JavaScript loading...');
 		let currentData = window.adminData;
-		console.log('currentData loaded:', currentData ? 'YES' : 'NO');
 		
-		function showTab(tabName, event) {
+		window.showTab = function(tabName, event) {
 			document.querySelectorAll('.tab').forEach(function(t) { t.classList.remove('active'); });
 			document.querySelectorAll('.tab-content').forEach(function(c) { c.classList.remove('active'); });
 			if (event && event.target) {
 				event.target.classList.add('active');
 			}
 			document.getElementById(tabName).classList.add('active');
-		}
-		
-		function openModal(modalId) {
+		};
+
+		window.openModal = function(modalId) {
 			document.getElementById(modalId).classList.add('active');
-		}
-		
-		function closeModal(modalId) {
+		};
+
+		window.closeModal = function(modalId) {
 			document.getElementById(modalId).classList.remove('active');
 			const form = document.querySelector('#' + modalId + ' form');
 			if (form) form.reset();
-		}
+		};
 		
 		async function saveRep(e) {
 			e.preventDefault();
@@ -1096,7 +1026,7 @@ export function renderAdminDashboard(data: any): string {
 			}
 		}
 		
-		async function editRep(id) {
+		window.editRep = async function(id) {
 			const rep = currentData.representatives.find(function(r) { return r.id === id; });
 			if (!rep) return;
 			
@@ -1112,7 +1042,7 @@ export function renderAdminDashboard(data: any): string {
 			openModal('rep-modal');
 		}
 		
-		async function deleteRep(id) {
+		window.deleteRep = async function(id) {
 			if (!confirm('Are you sure you want to delete this representative?')) return;
 			
 			try {
@@ -1159,64 +1089,8 @@ export function renderAdminDashboard(data: any): string {
 			}
 		}
 
-		async function importVoterData(e) {
-			e.preventDefault();
-			const formData = new FormData(e.target);
-			const excelDataStr = formData.get('excelData') as string;
 
-			if (!excelDataStr || !excelDataStr.trim()) {
-				alert('Please paste your Excel data in JSON format');
-				return;
-			}
-
-			let excelData;
-			try {
-				excelData = JSON.parse(excelDataStr.trim());
-				if (!Array.isArray(excelData)) {
-					throw new Error('Data must be a JSON array');
-				}
-			} catch (error) {
-				alert('Invalid JSON format. Please check your Excel-to-JSON conversion.');
-				return;
-			}
-
-			// Show progress
-			const progressDiv = document.getElementById('import-progress');
-			const statusDiv = document.getElementById('import-status');
-			const detailsDiv = document.getElementById('import-details');
-
-			if (progressDiv) progressDiv.style.display = 'block';
-			if (statusDiv) statusDiv.textContent = 'Importing voter data...';
-			if (detailsDiv) detailsDiv.textContent = 'Processing ' + excelData.length + ' records...';
-
-			try {
-				const response = await fetch('/api/admin/import-voter-data', {
-					method: 'POST',
-					headers: { 'Content-Type': 'application/json' },
-					body: JSON.stringify({ data: excelData })
-				});
-
-				const result = await response.json();
-
-				if (response.ok && result.success) {
-					if (statusDiv) statusDiv.textContent = '✅ Import Complete!';
-					if (detailsDiv) detailsDiv.textContent = result.message;
-
-					// Reload page after 3 seconds
-					setTimeout(() => {
-						location.reload();
-					}, 3000);
-				} else {
-					if (statusDiv) statusDiv.textContent = '❌ Import Failed';
-					if (detailsDiv) detailsDiv.textContent = result.error || 'Unknown error occurred';
-				}
-			} catch (error) {
-				if (statusDiv) statusDiv.textContent = '❌ Import Error';
-				if (detailsDiv) detailsDiv.textContent = error.message || 'Network error occurred';
-			}
-		}
-
-		async function editVoterData(stateCode, dataYear) {
+		window.editVoterData = async function(stateCode, dataYear) {
 			const voterData = currentData.voterData.find(function(v) { 
 				return v.state_code === stateCode && v.data_year === dataYear; 
 			});
@@ -1292,12 +1166,10 @@ export function renderAdminDashboard(data: any): string {
 			}
 		}
 
-		async function populateElectoralData() {
-			console.log('populateElectoralData function called');
+		window.populateElectoralData = async function() {
 			if (!confirm('This will populate electoral data for all 50 states + DC with official 2024 election results. Continue?')) {
 				return;
 			}
-			console.log('User confirmed, proceeding...');
 
 			// Show loading state
 			const originalText = '📊 Populate 2024 Results';
@@ -1332,12 +1204,10 @@ export function renderAdminDashboard(data: any): string {
 			}
 		}
 
-		async function populateVoterData() {
-			console.log('populateVoterData function called');
+		window.populateVoterData = async function() {
 			if (!confirm('This will populate comprehensive voter registration and turnout data for all 50 states + DC from the 2024 Census Bureau Voting and Registration Supplement. Continue?')) {
 				return;
 			}
-			console.log('User confirmed voter data population, proceeding...');
 
 			// Show loading state
 			const originalText = '📈 Populate 2024 Census Data';
@@ -1372,7 +1242,7 @@ export function renderAdminDashboard(data: any): string {
 			}
 		}
 
-		async function editElectoral(stateCode) {
+		window.editElectoral = async function(stateCode) {
 			const state = currentData.states.find(function(s) { return s.code === stateCode; });
 			if (!state) return;
 
@@ -1397,7 +1267,7 @@ export function renderAdminDashboard(data: any): string {
 			openModal('electoral-modal');
 		}
 		
-		function logout() {
+		window.logout = function() {
 			fetch('/admin/logout', { method: 'POST' }).then(function() {
 				window.location.href = '/admin/login';
 			});
@@ -1442,7 +1312,7 @@ export function renderAdminDashboard(data: any): string {
 			}
 		}
 		
-		async function editStance(id) {
+		window.editStance = async function(id) {
 			const stance = currentData.votes.find(function(v) { return v.id === id; });
 			if (!stance) return;
 			

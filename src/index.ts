@@ -656,103 +656,172 @@ async function handleAdminApi(request: Request, env: Env, path: string): Promise
 		});
 	}
 
-	// Populate voter data from TSV
+	// Populate voter data directly
 	if (path === '/api/admin/populate-voter-data' && request.method === 'POST') {
 		console.log('Populate voter data endpoint called');
 
-		// 2024 Voter Data - numbers in thousands
-		const voterData: Record<string, {
-			voting_age_pop: number;
-			citizen_voting_age_pop: number;
-			registered: number;
-			pct_registered_total: number;
-			pct_registered_total_margin: number;
-			pct_registered_citizen: number;
-			pct_registered_citizen_margin: number;
-			total_voted: number;
-			pct_voted_total: number;
-			pct_voted_total_margin: number;
-			pct_voted_citizen: number;
-			pct_voted_citizen_margin: number;
-		}> = {
-			'AL': { voting_age_pop: 3931, citizen_voting_age_pop: 3779, registered: 2605, pct_registered_total: 66.3, pct_registered_total_margin: 3.8, pct_registered_citizen: 68.9, pct_registered_citizen_margin: 4.5, total_voted: 2219, pct_voted_total: 56.5, pct_voted_total_margin: 3.8, pct_voted_citizen: 58.7, pct_voted_citizen_margin: 4.5 },
-			'AK': { voting_age_pop: 536, citizen_voting_age_pop: 521, registered: 408, pct_registered_total: 76.1, pct_registered_total_margin: 3.4, pct_registered_citizen: 78.3, pct_registered_citizen_margin: 3.4, total_voted: 324, pct_voted_total: 60.4, pct_voted_total_margin: 3.9, pct_voted_citizen: 62.1, pct_voted_citizen_margin: 4.1 },
-			'AZ': { voting_age_pop: 5841, citizen_voting_age_pop: 5186, registered: 3578, pct_registered_total: 61.3, pct_registered_total_margin: 3.4, pct_registered_citizen: 69.0, pct_registered_citizen_margin: 3.2, total_voted: 3201, pct_voted_total: 54.8, pct_voted_total_margin: 3.3, pct_voted_citizen: 61.7, pct_voted_citizen_margin: 3.2 },
-			'AR': { voting_age_pop: 2371, citizen_voting_age_pop: 2274, registered: 1472, pct_registered_total: 62.1, pct_registered_total_margin: 2.4, pct_registered_citizen: 64.7, pct_registered_citizen_margin: 2.3, total_voted: 1200, pct_voted_total: 50.6, pct_voted_total_margin: 2.8, pct_voted_citizen: 52.8, pct_voted_citizen_margin: 2.7 },
-			'CA': { voting_age_pop: 30100, citizen_voting_age_pop: 25327, registered: 18471, pct_registered_total: 61.4, pct_registered_total_margin: 1.5, pct_registered_citizen: 72.9, pct_registered_citizen_margin: 1.5, total_voted: 16385, pct_voted_total: 54.4, pct_voted_total_margin: 1.5, pct_voted_citizen: 64.7, pct_voted_citizen_margin: 1.6 },
-			'CO': { voting_age_pop: 4630, citizen_voting_age_pop: 4277, registered: 3158, pct_registered_total: 68.2, pct_registered_total_margin: 4.8, pct_registered_citizen: 73.8, pct_registered_citizen_margin: 5.2, total_voted: 2997, pct_voted_total: 64.7, pct_voted_total_margin: 4.7, pct_voted_citizen: 70.1, pct_voted_citizen_margin: 5.0 },
-			'CT': { voting_age_pop: 2850, citizen_voting_age_pop: 2608, registered: 1882, pct_registered_total: 66.0, pct_registered_total_margin: 3.5, pct_registered_citizen: 72.2, pct_registered_citizen_margin: 3.4, total_voted: 1729, pct_voted_total: 60.7, pct_voted_total_margin: 3.5, pct_voted_citizen: 66.3, pct_voted_citizen_margin: 3.4 },
-			'DE': { voting_age_pop: 819, citizen_voting_age_pop: 746, registered: 577, pct_registered_total: 70.4, pct_registered_total_margin: 4.0, pct_registered_citizen: 77.4, pct_registered_citizen_margin: 3.6, total_voted: 521, pct_voted_total: 63.5, pct_voted_total_margin: 4.0, pct_voted_citizen: 69.8, pct_voted_citizen_margin: 3.7 },
-			'DC': { voting_age_pop: 557, citizen_voting_age_pop: 507, registered: 432, pct_registered_total: 77.5, pct_registered_total_margin: 3.0, pct_registered_citizen: 85.1, pct_registered_citizen_margin: 2.8, total_voted: 404, pct_voted_total: 72.5, pct_voted_total_margin: 3.4, pct_voted_citizen: 79.5, pct_voted_citizen_margin: 3.3 },
-			'FL': { voting_age_pop: 18333, citizen_voting_age_pop: 16092, registered: 10788, pct_registered_total: 58.8, pct_registered_total_margin: 2.0, pct_registered_citizen: 67.0, pct_registered_citizen_margin: 2.2, total_voted: 9703, pct_voted_total: 52.9, pct_voted_total_margin: 1.7, pct_voted_citizen: 60.3, pct_voted_citizen_margin: 1.9 },
-			'GA': { voting_age_pop: 8431, citizen_voting_age_pop: 7624, registered: 5401, pct_registered_total: 64.1, pct_registered_total_margin: 2.9, pct_registered_citizen: 70.8, pct_registered_citizen_margin: 2.8, total_voted: 4908, pct_voted_total: 58.2, pct_voted_total_margin: 2.7, pct_voted_citizen: 64.4, pct_voted_citizen_margin: 2.6 },
-			'HI': { voting_age_pop: 1077, citizen_voting_age_pop: 1004, registered: 679, pct_registered_total: 63.1, pct_registered_total_margin: 3.0, pct_registered_citizen: 67.6, pct_registered_citizen_margin: 3.0, total_voted: 587, pct_voted_total: 54.5, pct_voted_total_margin: 3.4, pct_voted_citizen: 58.5, pct_voted_citizen_margin: 3.4 },
-			'ID': { voting_age_pop: 1517, citizen_voting_age_pop: 1428, registered: 1017, pct_registered_total: 67.0, pct_registered_total_margin: 2.0, pct_registered_citizen: 71.2, pct_registered_citizen_margin: 2.1, total_voted: 932, pct_voted_total: 61.4, pct_voted_total_margin: 2.1, pct_voted_citizen: 65.2, pct_voted_citizen_margin: 2.2 },
-			'IL': { voting_age_pop: 9793, citizen_voting_age_pop: 8830, registered: 6780, pct_registered_total: 69.2, pct_registered_total_margin: 2.7, pct_registered_citizen: 76.8, pct_registered_citizen_margin: 2.6, total_voted: 5817, pct_voted_total: 59.4, pct_voted_total_margin: 3.0, pct_voted_citizen: 65.9, pct_voted_citizen_margin: 3.0 },
-			'IN': { voting_age_pop: 5191, citizen_voting_age_pop: 4801, registered: 3536, pct_registered_total: 68.1, pct_registered_total_margin: 3.7, pct_registered_citizen: 73.7, pct_registered_citizen_margin: 3.3, total_voted: 2912, pct_voted_total: 56.1, pct_voted_total_margin: 3.6, pct_voted_citizen: 60.7, pct_voted_citizen_margin: 3.4 },
-			'IA': { voting_age_pop: 2462, citizen_voting_age_pop: 2310, registered: 1861, pct_registered_total: 75.6, pct_registered_total_margin: 3.9, pct_registered_citizen: 80.6, pct_registered_citizen_margin: 3.7, total_voted: 1658, pct_voted_total: 67.4, pct_voted_total_margin: 4.7, pct_voted_citizen: 71.8, pct_voted_citizen_margin: 4.4 },
-			'KS': { voting_age_pop: 2203, citizen_voting_age_pop: 2041, registered: 1628, pct_registered_total: 73.9, pct_registered_total_margin: 5.1, pct_registered_citizen: 79.8, pct_registered_citizen_margin: 4.5, total_voted: 1443, pct_voted_total: 65.5, pct_voted_total_margin: 5.7, pct_voted_citizen: 70.7, pct_voted_citizen_margin: 5.6 },
-			'KY': { voting_age_pop: 3405, citizen_voting_age_pop: 3178, registered: 2558, pct_registered_total: 75.1, pct_registered_total_margin: 4.2, pct_registered_citizen: 80.5, pct_registered_citizen_margin: 3.2, total_voted: 2152, pct_voted_total: 63.2, pct_voted_total_margin: 4.3, pct_voted_citizen: 67.7, pct_voted_citizen_margin: 3.6 },
-			'LA': { voting_age_pop: 3400, citizen_voting_age_pop: 3273, registered: 2160, pct_registered_total: 63.5, pct_registered_total_margin: 3.6, pct_registered_citizen: 66.0, pct_registered_citizen_margin: 3.6, total_voted: 1897, pct_voted_total: 55.8, pct_voted_total_margin: 3.7, pct_voted_citizen: 58.0, pct_voted_citizen_margin: 3.6 },
-			'ME': { voting_age_pop: 1141, citizen_voting_age_pop: 1123, registered: 831, pct_registered_total: 72.8, pct_registered_total_margin: 4.0, pct_registered_citizen: 74.0, pct_registered_citizen_margin: 4.0, total_voted: 753, pct_voted_total: 66.0, pct_voted_total_margin: 3.5, pct_voted_citizen: 67.1, pct_voted_citizen_margin: 3.5 },
-			'MD': { voting_age_pop: 4785, citizen_voting_age_pop: 4350, registered: 3497, pct_registered_total: 73.1, pct_registered_total_margin: 3.5, pct_registered_citizen: 80.4, pct_registered_citizen_margin: 3.2, total_voted: 3091, pct_voted_total: 64.6, pct_voted_total_margin: 3.7, pct_voted_citizen: 71.1, pct_voted_citizen_margin: 3.6 },
-			'MA': { voting_age_pop: 5620, citizen_voting_age_pop: 4947, registered: 3728, pct_registered_total: 66.3, pct_registered_total_margin: 3.1, pct_registered_citizen: 75.4, pct_registered_citizen_margin: 3.0, total_voted: 3408, pct_voted_total: 60.6, pct_voted_total_margin: 3.0, pct_voted_citizen: 68.9, pct_voted_citizen_margin: 3.1 },
-			'MI': { voting_age_pop: 7850, citizen_voting_age_pop: 7534, registered: 6090, pct_registered_total: 77.6, pct_registered_total_margin: 2.7, pct_registered_citizen: 80.8, pct_registered_citizen_margin: 2.5, total_voted: 5444, pct_voted_total: 69.4, pct_voted_total_margin: 2.9, pct_voted_citizen: 72.3, pct_voted_citizen_margin: 2.9 },
-			'MN': { voting_age_pop: 4486, citizen_voting_age_pop: 4208, registered: 3519, pct_registered_total: 78.4, pct_registered_total_margin: 2.5, pct_registered_citizen: 83.6, pct_registered_citizen_margin: 2.3, total_voted: 3193, pct_voted_total: 71.2, pct_voted_total_margin: 2.9, pct_voted_citizen: 75.9, pct_voted_citizen_margin: 2.9 },
-			'MS': { voting_age_pop: 2201, citizen_voting_age_pop: 2162, registered: 1751, pct_registered_total: 79.5, pct_registered_total_margin: 2.5, pct_registered_citizen: 81.0, pct_registered_citizen_margin: 2.2, total_voted: 1490, pct_voted_total: 67.7, pct_voted_total_margin: 3.0, pct_voted_citizen: 68.9, pct_voted_citizen_margin: 2.8 },
-			'MO': { voting_age_pop: 4790, citizen_voting_age_pop: 4664, registered: 3707, pct_registered_total: 77.4, pct_registered_total_margin: 2.8, pct_registered_citizen: 79.5, pct_registered_citizen_margin: 2.7, total_voted: 3240, pct_voted_total: 67.6, pct_voted_total_margin: 3.2, pct_voted_citizen: 69.5, pct_voted_citizen_margin: 3.3 },
-			'MT': { voting_age_pop: 896, citizen_voting_age_pop: 881, registered: 651, pct_registered_total: 72.6, pct_registered_total_margin: 2.5, pct_registered_citizen: 73.8, pct_registered_citizen_margin: 2.5, total_voted: 610, pct_voted_total: 68.0, pct_voted_total_margin: 2.6, pct_voted_citizen: 69.2, pct_voted_citizen_margin: 2.5 },
-			'NE': { voting_age_pop: 1488, citizen_voting_age_pop: 1377, registered: 1016, pct_registered_total: 68.2, pct_registered_total_margin: 4.7, pct_registered_citizen: 73.8, pct_registered_citizen_margin: 4.0, total_voted: 928, pct_voted_total: 62.4, pct_voted_total_margin: 4.6, pct_voted_citizen: 67.4, pct_voted_citizen_margin: 4.0 },
-			'NV': { voting_age_pop: 2506, citizen_voting_age_pop: 2230, registered: 1640, pct_registered_total: 65.4, pct_registered_total_margin: 3.0, pct_registered_citizen: 73.5, pct_registered_citizen_margin: 2.6, total_voted: 1493, pct_voted_total: 59.6, pct_voted_total_margin: 3.1, pct_voted_citizen: 66.9, pct_voted_citizen_margin: 2.9 },
-			'NH': { voting_age_pop: 1144, citizen_voting_age_pop: 1096, registered: 856, pct_registered_total: 74.9, pct_registered_total_margin: 3.9, pct_registered_citizen: 78.1, pct_registered_citizen_margin: 3.4, total_voted: 788, pct_voted_total: 68.9, pct_voted_total_margin: 3.8, pct_voted_citizen: 71.9, pct_voted_citizen_margin: 3.4 },
-			'NJ': { voting_age_pop: 7282, citizen_voting_age_pop: 6323, registered: 5175, pct_registered_total: 71.1, pct_registered_total_margin: 3.2, pct_registered_citizen: 81.9, pct_registered_citizen_margin: 2.7, total_voted: 4581, pct_voted_total: 62.9, pct_voted_total_margin: 3.2, pct_voted_citizen: 72.5, pct_voted_citizen_margin: 2.8 },
-			'NM': { voting_age_pop: 1645, citizen_voting_age_pop: 1491, registered: 1135, pct_registered_total: 69.0, pct_registered_total_margin: 3.4, pct_registered_citizen: 76.1, pct_registered_citizen_margin: 3.3, total_voted: 984, pct_voted_total: 59.8, pct_voted_total_margin: 3.8, pct_voted_citizen: 66.0, pct_voted_citizen_margin: 3.7 },
-			'NY': { voting_age_pop: 15392, citizen_voting_age_pop: 13667, registered: 9051, pct_registered_total: 58.8, pct_registered_total_margin: 2.5, pct_registered_citizen: 66.2, pct_registered_citizen_margin: 2.7, total_voted: 8091, pct_voted_total: 52.6, pct_voted_total_margin: 2.4, pct_voted_citizen: 59.2, pct_voted_citizen_margin: 2.6 },
-			'NC': { voting_age_pop: 8496, citizen_voting_age_pop: 7695, registered: 5374, pct_registered_total: 63.3, pct_registered_total_margin: 2.9, pct_registered_citizen: 69.8, pct_registered_citizen_margin: 2.7, total_voted: 4971, pct_voted_total: 58.5, pct_voted_total_margin: 2.8, pct_voted_citizen: 64.6, pct_voted_citizen_margin: 2.7 },
-			'ND': { voting_age_pop: 582, citizen_voting_age_pop: 563, registered: 442, pct_registered_total: 76.0, pct_registered_total_margin: 2.7, pct_registered_citizen: 78.6, pct_registered_citizen_margin: 2.9, total_voted: 401, pct_voted_total: 68.9, pct_voted_total_margin: 2.7, pct_voted_citizen: 71.2, pct_voted_citizen_margin: 2.7 },
-			'OH': { voting_age_pop: 9113, citizen_voting_age_pop: 8782, registered: 6593, pct_registered_total: 72.4, pct_registered_total_margin: 2.3, pct_registered_citizen: 75.1, pct_registered_citizen_margin: 2.2, total_voted: 5922, pct_voted_total: 65.0, pct_voted_total_margin: 2.5, pct_voted_citizen: 67.4, pct_voted_citizen_margin: 2.5 },
-			'OK': { voting_age_pop: 3053, citizen_voting_age_pop: 2924, registered: 2062, pct_registered_total: 67.6, pct_registered_total_margin: 3.4, pct_registered_citizen: 70.5, pct_registered_citizen_margin: 3.0, total_voted: 1747, pct_voted_total: 57.2, pct_voted_total_margin: 3.3, pct_voted_citizen: 59.7, pct_voted_citizen_margin: 3.1 },
-			'OR': { voting_age_pop: 3365, citizen_voting_age_pop: 3138, registered: 2604, pct_registered_total: 77.4, pct_registered_total_margin: 2.9, pct_registered_citizen: 83.0, pct_registered_citizen_margin: 3.0, total_voted: 2362, pct_voted_total: 70.2, pct_voted_total_margin: 2.8, pct_voted_citizen: 75.3, pct_voted_citizen_margin: 2.8 },
-			'PA': { voting_age_pop: 10185, citizen_voting_age_pop: 9789, registered: 7413, pct_registered_total: 72.8, pct_registered_total_margin: 2.3, pct_registered_citizen: 75.7, pct_registered_citizen_margin: 2.3, total_voted: 6828, pct_voted_total: 67.0, pct_voted_total_margin: 2.4, pct_voted_citizen: 69.7, pct_voted_citizen_margin: 2.3 },
-			'RI': { voting_age_pop: 888, citizen_voting_age_pop: 811, registered: 645, pct_registered_total: 72.6, pct_registered_total_margin: 3.5, pct_registered_citizen: 79.5, pct_registered_citizen_margin: 3.2, total_voted: 568, pct_voted_total: 64.0, pct_voted_total_margin: 3.9, pct_voted_citizen: 70.0, pct_voted_citizen_margin: 4.0 },
-			'SC': { voting_age_pop: 4222, citizen_voting_age_pop: 4006, registered: 2935, pct_registered_total: 69.5, pct_registered_total_margin: 3.2, pct_registered_citizen: 73.3, pct_registered_citizen_margin: 3.0, total_voted: 2510, pct_voted_total: 59.5, pct_voted_total_margin: 3.2, pct_voted_citizen: 62.7, pct_voted_citizen_margin: 3.2 },
-			'SD': { voting_age_pop: 690, citizen_voting_age_pop: 669, registered: 473, pct_registered_total: 68.5, pct_registered_total_margin: 3.5, pct_registered_citizen: 70.7, pct_registered_citizen_margin: 3.7, total_voted: 394, pct_voted_total: 57.1, pct_voted_total_margin: 3.7, pct_voted_citizen: 58.9, pct_voted_citizen_margin: 3.8 },
-			'TN': { voting_age_pop: 5583, citizen_voting_age_pop: 5300, registered: 3980, pct_registered_total: 71.3, pct_registered_total_margin: 2.9, pct_registered_citizen: 75.1, pct_registered_citizen_margin: 2.6, total_voted: 3433, pct_voted_total: 61.5, pct_voted_total_margin: 2.8, pct_voted_citizen: 64.8, pct_voted_citizen_margin: 2.6 },
-			'TX': { voting_age_pop: 23139, citizen_voting_age_pop: 19754, registered: 13641, pct_registered_total: 59.0, pct_registered_total_margin: 2.2, pct_registered_citizen: 69.1, pct_registered_citizen_margin: 2.3, total_voted: 11442, pct_voted_total: 49.4, pct_voted_total_margin: 2.2, pct_voted_citizen: 57.9, pct_voted_citizen_margin: 2.3 },
-			'UT': { voting_age_pop: 2505, citizen_voting_age_pop: 2324, registered: 1736, pct_registered_total: 69.3, pct_registered_total_margin: 3.1, pct_registered_citizen: 74.7, pct_registered_citizen_margin: 3.1, total_voted: 1555, pct_voted_total: 62.1, pct_voted_total_margin: 3.2, pct_voted_citizen: 66.9, pct_voted_citizen_margin: 3.1 },
-			'VT': { voting_age_pop: 530, citizen_voting_age_pop: 520, registered: 401, pct_registered_total: 75.7, pct_registered_total_margin: 3.3, pct_registered_citizen: 77.2, pct_registered_citizen_margin: 3.4, total_voted: 373, pct_voted_total: 70.4, pct_voted_total_margin: 3.1, pct_voted_citizen: 71.7, pct_voted_citizen_margin: 3.1 },
-			'VA': { voting_age_pop: 6722, citizen_voting_age_pop: 6259, registered: 4981, pct_registered_total: 74.1, pct_registered_total_margin: 2.5, pct_registered_citizen: 79.6, pct_registered_citizen_margin: 2.2, total_voted: 4565, pct_voted_total: 67.9, pct_voted_total_margin: 2.7, pct_voted_citizen: 72.9, pct_voted_citizen_margin: 2.4 },
-			'WA': { voting_age_pop: 6155, citizen_voting_age_pop: 5516, registered: 4250, pct_registered_total: 69.1, pct_registered_total_margin: 3.7, pct_registered_citizen: 77.1, pct_registered_citizen_margin: 3.5, total_voted: 3863, pct_voted_total: 62.8, pct_voted_total_margin: 4.1, pct_voted_citizen: 70.0, pct_voted_citizen_margin: 4.0 },
-			'WV': { voting_age_pop: 1379, citizen_voting_age_pop: 1355, registered: 1001, pct_registered_total: 72.6, pct_registered_total_margin: 4.5, pct_registered_citizen: 73.8, pct_registered_citizen_margin: 4.4, total_voted: 807, pct_voted_total: 58.5, pct_voted_total_margin: 5.5, pct_voted_citizen: 59.5, pct_voted_citizen_margin: 5.5 },
-			'WI': { voting_age_pop: 4629, citizen_voting_age_pop: 4431, registered: 3380, pct_registered_total: 73.0, pct_registered_total_margin: 3.3, pct_registered_citizen: 76.3, pct_registered_citizen_margin: 3.2, total_voted: 3201, pct_voted_total: 69.2, pct_voted_total_margin: 3.6, pct_voted_citizen: 72.2, pct_voted_citizen_margin: 3.4 },
-			'WY': { voting_age_pop: 453, citizen_voting_age_pop: 443, registered: 307, pct_registered_total: 67.8, pct_registered_total_margin: 2.8, pct_registered_citizen: 69.3, pct_registered_citizen_margin: 2.5, total_voted: 283, pct_voted_total: 62.4, pct_voted_total_margin: 2.5, pct_voted_citizen: 63.8, pct_voted_citizen_margin: 2.4 }
-		};
+		// Raw TSV data - parse it directly
+		const rawData = `ALABAMA	3,931	3,779	2,605	66.3	3.8	68.9	4.5	2,219	56.5	3.8	58.7	4.5
+ALASKA	536	521	408	76.1	3.4	78.3	3.4	324	60.4	3.9	62.1	4.1
+ARIZONA	5,841	5,186	3,578	61.3	3.4	69.0	3.2	3,201	54.8	3.3	61.7	3.2
+ARKANSAS	2,371	2,274	1,472	62.1	2.4	64.7	2.3	1,200	50.6	2.8	52.8	2.7
+CALIFORNIA	30,100	25,327	18,471	61.4	1.5	72.9	1.5	16,385	54.4	1.5	64.7	1.6
+COLORADO	4,630	4,277	3,158	68.2	4.8	73.8	5.2	2,997	64.7	4.7	70.1	5.0
+CONNECTICUT	2,850	2,608	1,882	66.0	3.5	72.2	3.4	1,729	60.7	3.5	66.3	3.4
+DELAWARE	819	746	577	70.4	4.0	77.4	3.6	521	63.5	4.0	69.8	3.7
+DISTRICT OF COLUMBIA	557	507	432	77.5	3.0	85.1	2.8	404	72.5	3.4	79.5	3.3
+FLORIDA	18,333	16,092	10,788	58.8	2.0	67.0	2.2	9,703	52.9	1.7	60.3	1.9
+GEORGIA	8,431	7,624	5,401	64.1	2.9	70.8	2.8	4,908	58.2	2.7	64.4	2.6
+HAWAII	1,077	1,004	679	63.1	3.0	67.6	3.0	587	54.5	3.4	58.5	3.4
+IDAHO	1,517	1,428	1,017	67.0	2.0	71.2	2.1	932	61.4	2.1	65.2	2.2
+ILLINOIS	9,793	8,830	6,780	69.2	2.7	76.8	2.6	5,817	59.4	3.0	65.9	3.0
+INDIANA	5,191	4,801	3,536	68.1	3.7	73.7	3.3	2,912	56.1	3.6	60.7	3.4
+IOWA	2,462	2,310	1,861	75.6	3.9	80.6	3.7	1,658	67.4	4.7	71.8	4.4
+KANSAS	2,203	2,041	1,628	73.9	5.1	79.8	4.5	1,443	65.5	5.7	70.7	5.6
+KENTUCKY	3,405	3,178	2,558	75.1	4.2	80.5	3.2	2,152	63.2	4.3	67.7	3.6
+LOUISIANA	3,400	3,273	2,160	63.5	3.6	66.0	3.6	1,897	55.8	3.7	58.0	3.6
+MAINE	1,141	1,123	831	72.8	4.0	74.0	4.0	753	66.0	3.5	67.1	3.5
+MARYLAND	4,785	4,350	3,497	73.1	3.5	80.4	3.2	3,091	64.6	3.7	71.1	3.6
+MASSACHUSETTS	5,620	4,947	3,728	66.3	3.1	75.4	3.0	3,408	60.6	3.0	68.9	3.1
+MICHIGAN	7,850	7,534	6,090	77.6	2.7	80.8	2.5	5,444	69.4	2.9	72.3	2.9
+MINNESOTA	4,486	4,208	3,519	78.4	2.5	83.6	2.3	3,193	71.2	2.9	75.9	2.9
+MISSISSIPPI	2,201	2,162	1,751	79.5	2.5	81.0	2.2	1,490	67.7	3.0	68.9	2.8
+MISSOURI	4,790	4,664	3,707	77.4	2.8	79.5	2.7	3,240	67.6	3.2	69.5	3.3
+MONTANA	896	881	651	72.6	2.5	73.8	2.5	610	68.0	2.6	69.2	2.5
+NEBRASKA	1,488	1,377	1,016	68.2	4.7	73.8	4.0	928	62.4	4.6	67.4	4.0
+NEVADA	2,506	2,230	1,640	65.4	3.0	73.5	2.6	1,493	59.6	3.1	66.9	2.9
+NEW HAMPSHIRE	1,144	1,096	856	74.9	3.9	78.1	3.4	788	68.9	3.8	71.9	3.4
+NEW JERSEY	7,282	6,323	5,175	71.1	3.2	81.9	2.7	4,581	62.9	3.2	72.5	2.8
+NEW MEXICO	1,645	1,491	1,135	69.0	3.4	76.1	3.3	984	59.8	3.8	66.0	3.7
+NEW YORK	15,392	13,667	9,051	58.8	2.5	66.2	2.7	8,091	52.6	2.4	59.2	2.6
+NORTH CAROLINA	8,496	7,695	5,374	63.3	2.9	69.8	2.7	4,971	58.5	2.8	64.6	2.7
+NORTH DAKOTA	582	563	442	76.0	2.7	78.6	2.9	401	68.9	2.7	71.2	2.7
+OHIO	9,113	8,782	6,593	72.4	2.3	75.1	2.2	5,922	65.0	2.5	67.4	2.5
+OKLAHOMA	3,053	2,924	2,062	67.6	3.4	70.5	3.0	1,747	57.2	3.3	59.7	3.1
+OREGON	3,365	3,138	2,604	77.4	2.9	83.0	3.0	2,362	70.2	2.8	75.3	2.8
+PENNSYLVANIA	10,185	9,789	7,413	72.8	2.3	75.7	2.3	6,828	67.0	2.4	69.7	2.3
+RHODE ISLAND	888	811	645	72.6	3.5	79.5	3.2	568	64.0	3.9	70.0	4.0
+SOUTH CAROLINA	4,222	4,006	2,935	69.5	3.2	73.3	3.0	2,510	59.5	3.2	62.7	3.2
+SOUTH DAKOTA	690	669	473	68.5	3.5	70.7	3.7	394	57.1	3.7	58.9	3.8
+TENNESSEE	5,583	5,300	3,980	71.3	2.9	75.1	2.6	3,433	61.5	2.8	64.8	2.6
+TEXAS	23,139	19,754	13,641	59.0	2.2	69.1	2.3	11,442	49.4	2.2	57.9	2.3
+UTAH	2,505	2,324	1,736	69.3	3.1	74.7	3.1	1,555	62.1	3.2	66.9	3.1
+VERMONT	530	520	401	75.7	3.3	77.2	3.4	373	70.4	3.1	71.7	3.1
+VIRGINIA	6,722	6,259	4,981	74.1	2.5	79.6	2.2	4,565	67.9	2.7	72.9	2.4
+WASHINGTON	6,155	5,516	4,250	69.1	3.7	77.1	3.5	3,863	62.8	4.1	70.0	4.0
+WEST VIRGINIA	1,379	1,355	1,001	72.6	4.5	73.8	4.4	807	58.5	5.5	59.5	5.5
+WISCONSIN	4,629	4,431	3,380	73.0	3.3	76.3	3.2	3,201	69.2	3.6	72.2	3.4
+WYOMING	453	443	307	67.8	2.8	69.3	2.5	283	62.4	2.5	63.8	2.4`;
 
+		// Parse TSV data
+		const lines = rawData.trim().split('\n');
 		let updated = 0;
 		let errors = 0;
 
-		for (const [stateCode, data] of Object.entries(voterData)) {
+		for (const line of lines) {
 			try {
+				const parts = line.split('\t');
+				if (parts.length < 13) continue;
+
+				// Extract data - columns are:
+				// 0: state name, 1: voting_age_pop, 2: citizen_voting_age_pop, 3: registered,
+				// 4: pct_registered_total, 5: pct_registered_total_margin,
+				// 6: pct_registered_citizen, 7: pct_registered_citizen_margin,
+				// 8: total_voted, 9: pct_voted_total, 10: pct_voted_total_margin,
+				// 11: pct_voted_citizen, 12: pct_voted_citizen_margin
+
+				const stateName = parts[0].toUpperCase();
+				let stateCode = '';
+
+				// Map state names to codes
+				if (stateName === 'ALABAMA') stateCode = 'AL';
+				else if (stateName === 'ALASKA') stateCode = 'AK';
+				else if (stateName === 'ARIZONA') stateCode = 'AZ';
+				else if (stateName === 'ARKANSAS') stateCode = 'AR';
+				else if (stateName === 'CALIFORNIA') stateCode = 'CA';
+				else if (stateName === 'COLORADO') stateCode = 'CO';
+				else if (stateName === 'CONNECTICUT') stateCode = 'CT';
+				else if (stateName === 'DELAWARE') stateCode = 'DE';
+				else if (stateName === 'DISTRICT OF COLUMBIA') stateCode = 'DC';
+				else if (stateName === 'FLORIDA') stateCode = 'FL';
+				else if (stateName === 'GEORGIA') stateCode = 'GA';
+				else if (stateName === 'HAWAII') stateCode = 'HI';
+				else if (stateName === 'IDAHO') stateCode = 'ID';
+				else if (stateName === 'ILLINOIS') stateCode = 'IL';
+				else if (stateName === 'INDIANA') stateCode = 'IN';
+				else if (stateName === 'IOWA') stateCode = 'IA';
+				else if (stateName === 'KANSAS') stateCode = 'KS';
+				else if (stateName === 'KENTUCKY') stateCode = 'KY';
+				else if (stateName === 'LOUISIANA') stateCode = 'LA';
+				else if (stateName === 'MAINE') stateCode = 'ME';
+				else if (stateName === 'MARYLAND') stateCode = 'MD';
+				else if (stateName === 'MASSACHUSETTS') stateCode = 'MA';
+				else if (stateName === 'MICHIGAN') stateCode = 'MI';
+				else if (stateName === 'MINNESOTA') stateCode = 'MN';
+				else if (stateName === 'MISSISSIPPI') stateCode = 'MS';
+				else if (stateName === 'MISSOURI') stateCode = 'MO';
+				else if (stateName === 'MONTANA') stateCode = 'MT';
+				else if (stateName === 'NEBRASKA') stateCode = 'NE';
+				else if (stateName === 'NEVADA') stateCode = 'NV';
+				else if (stateName === 'NEW HAMPSHIRE') stateCode = 'NH';
+				else if (stateName === 'NEW JERSEY') stateCode = 'NJ';
+				else if (stateName === 'NEW MEXICO') stateCode = 'NM';
+				else if (stateName === 'NEW YORK') stateCode = 'NY';
+				else if (stateName === 'NORTH CAROLINA') stateCode = 'NC';
+				else if (stateName === 'NORTH DAKOTA') stateCode = 'ND';
+				else if (stateName === 'OHIO') stateCode = 'OH';
+				else if (stateName === 'OKLAHOMA') stateCode = 'OK';
+				else if (stateName === 'OREGON') stateCode = 'OR';
+				else if (stateName === 'PENNSYLVANIA') stateCode = 'PA';
+				else if (stateName === 'RHODE ISLAND') stateCode = 'RI';
+				else if (stateName === 'SOUTH CAROLINA') stateCode = 'SC';
+				else if (stateName === 'SOUTH DAKOTA') stateCode = 'SD';
+				else if (stateName === 'TENNESSEE') stateCode = 'TN';
+				else if (stateName === 'TEXAS') stateCode = 'TX';
+				else if (stateName === 'UTAH') stateCode = 'UT';
+				else if (stateName === 'VERMONT') stateCode = 'VT';
+				else if (stateName === 'VIRGINIA') stateCode = 'VA';
+				else if (stateName === 'WASHINGTON') stateCode = 'WA';
+				else if (stateName === 'WEST VIRGINIA') stateCode = 'WV';
+				else if (stateName === 'WISCONSIN') stateCode = 'WI';
+				else if (stateName === 'WYOMING') stateCode = 'WY';
+
+				if (!stateCode) continue;
+
+				// Parse numbers, removing commas
+				const voting_age_pop = parseInt(parts[1].replace(/,/g, '')) * 1000;
+				const citizen_voting_age_pop = parseInt(parts[2].replace(/,/g, '')) * 1000;
+				const registered = parseInt(parts[3].replace(/,/g, '')) * 1000;
+				const pct_registered_total = parseFloat(parts[4]);
+				const pct_registered_total_margin = parseFloat(parts[5]);
+				const pct_registered_citizen = parseFloat(parts[6]);
+				const pct_registered_citizen_margin = parseFloat(parts[7]);
+				const total_voted = parseInt(parts[8].replace(/,/g, '')) * 1000;
+				const pct_voted_total = parseFloat(parts[9]);
+				const pct_voted_total_margin = parseFloat(parts[10]);
+				const pct_voted_citizen = parseFloat(parts[11]);
+				const pct_voted_citizen_margin = parseFloat(parts[12]);
+
 				await upsertVoterData(env.DB, {
 					state_code: stateCode,
-					voting_age_population: data.voting_age_pop * 1000, // Convert from thousands
-					citizen_voting_age_population: data.citizen_voting_age_pop * 1000,
-					total_registered_voters: data.registered * 1000,
-					percent_registered_total: data.pct_registered_total,
-					percent_registered_total_margin: data.pct_registered_total_margin,
-					percent_registered_citizen: data.pct_registered_citizen,
-					percent_registered_citizen_margin: data.pct_registered_citizen_margin,
-					total_voted: data.total_voted * 1000,
-					percent_voted_total: data.pct_voted_total,
-					percent_voted_total_margin: data.pct_voted_total_margin,
-					percent_voted_citizen: data.pct_voted_citizen,
-					percent_voted_citizen_margin: data.pct_voted_citizen_margin,
+					voting_age_population: voting_age_pop,
+					citizen_voting_age_population: citizen_voting_age_pop,
+					total_registered_voters: registered,
+					percent_registered_total: pct_registered_total,
+					percent_registered_total_margin: pct_registered_total_margin,
+					percent_registered_citizen: pct_registered_citizen,
+					percent_registered_citizen_margin: pct_registered_citizen_margin,
+					total_voted: total_voted,
+					percent_voted_total: pct_voted_total,
+					percent_voted_total_margin: pct_voted_total_margin,
+					percent_voted_citizen: pct_voted_citizen,
+					percent_voted_citizen_margin: pct_voted_citizen_margin,
 					data_year: 2024,
 					data_source: 'Census Bureau Voting and Registration Supplement'
 				});
 				updated++;
 			} catch (error) {
-				console.error(`Error updating voter data for ${stateCode}:`, error);
+				console.error(`Error parsing line: ${line}`, error);
 				errors++;
 			}
 		}
