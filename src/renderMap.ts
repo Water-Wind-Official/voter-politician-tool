@@ -613,6 +613,7 @@ export function renderHomePage(states: State[]): string {
 		const currentSearchType = 'all';
 
 		// Add click handlers to all state paths
+		console.log('Setting up event listeners for', document.querySelectorAll('.state-path').length, 'state paths');
 		document.querySelectorAll('.state-path').forEach(path => {
 			const stateCode = path.getAttribute('data-state');
 			const state = stateData.find(s => s.code === stateCode);
@@ -622,6 +623,7 @@ export function renderHomePage(states: State[]): string {
 			});
 			
 			path.addEventListener('mouseenter', (e) => {
+				console.log('Mouse entered state:', stateCode);
 				if (state) {
 					showStateTooltip(e, state.name);
 				}
@@ -639,6 +641,7 @@ export function renderHomePage(states: State[]): string {
 		});
 		
 		function showStateTooltip(e, stateName) {
+			console.log('Showing tooltip for', stateName);
 			const tooltip = document.getElementById('state-info');
 			const state = stateData.find(s => s.name === stateName);
 
