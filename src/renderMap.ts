@@ -529,8 +529,14 @@ export function renderHomePage(states: State[]): string {
 							\` : ''}
 							\${data.voterData.voter_turnout_percentage ? \`
 								<div class="data-card">
-									<div class="data-label">Voter Turnout</div>
+									<div class="data-label">Registered Voter Turnout</div>
 									<div class="data-value">\${data.voterData.voter_turnout_percentage.toFixed(1)}%</div>
+								</div>
+							\` : ''}
+							\${data.voterData.citizen_turnout_percentage ? \`
+								<div class="data-card">
+									<div class="data-label">Citizen Turnout (18+)</div>
+									<div class="data-value">\${data.voterData.citizen_turnout_percentage.toFixed(1)}%</div>
 								</div>
 							\` : ''}
 						</div>

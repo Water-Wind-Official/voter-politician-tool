@@ -74,6 +74,7 @@ export interface VoterData {
 	percent_voted_citizen: number | null;
 	percent_voted_citizen_margin: number | null;
 	voter_turnout_percentage: number | null;
+	citizen_turnout_percentage: number | null;
 	last_election_date: string | null;
 	data_source: string | null;
 	data_year: number | null;
