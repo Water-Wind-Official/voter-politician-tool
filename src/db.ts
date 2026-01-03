@@ -345,9 +345,8 @@ export async function getAllRepresentatives(db: D1Database): Promise<Representat
 export async function getAllSenators(db: D1Database): Promise<Representative[]> {
 	const result = await db
 		.prepare(`
-			SELECT r.*, d.district_number, d.name as district_name
+			SELECT r.*
 			FROM representatives r
-			LEFT JOIN districts d ON r.district_id = d.id
 			WHERE r.chamber = 'senate' AND (r.chamber_type = 1 OR r.chamber_type IS NULL)
 			ORDER BY r.state_code, r.last_name
 		`)
