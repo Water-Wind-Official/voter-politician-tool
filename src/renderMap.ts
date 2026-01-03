@@ -584,7 +584,7 @@ export function renderHomePage(states: State[]): string {
 			<div class="search-container">
 				<div class="search-bar">
 					<input type="text" id="search-input" class="search-input" placeholder="Search for states, representatives, or candidates..." />
-					<button class="search-btn" onclick="performSearch()">Search</button>
+					<button class="search-btn" id="search-btn">Search</button>
 				</div>
 				<div id="search-dropdown" class="search-dropdown"></div>
 			</div>
@@ -602,7 +602,7 @@ export function renderHomePage(states: State[]): string {
 		<div id="state-details" class="state-details">
 			<div class="state-header">
 				<h2 id="state-title" class="state-title"></h2>
-				<button class="close-btn" onclick="closeStateDetails()">✕ Close</button>
+				<button class="close-btn" id="close-btn">✕ Close</button>
 			</div>
 			<div id="state-content"></div>
 		</div>
@@ -748,9 +748,9 @@ export function renderHomePage(states: State[]): string {
 				html += '<div class="representatives-section">' +
 					'<h3 class="section-title">Representatives</h3>' +
 					'<div class="chamber-tabs">' +
-						'<button class="tab active" onclick="showChamber(\'all\')">All</button>' +
-						'<button class="tab" onclick="showChamber(\'house\')">House</button>' +
-						'<button class="tab" onclick="showChamber(\'senate\')">Senate</button>' +
+						'<button class="tab active" data-chamber="all">All</button>' +
+						'<button class="tab" data-chamber="house">House</button>' +
+						'<button class="tab" data-chamber="senate">Senate</button>' +
 					'</div>' +
 					'<div id="representatives-grid" class="representatives-grid">' +
 						renderRepresentatives(data.representatives, 'all') +
@@ -1012,6 +1012,18 @@ export function renderHomePage(states: State[]): string {
 			const searchContainer = document.querySelector('.search-container');
 			if (!searchContainer.contains(e.target)) {
 				hideSuggestions();
+			}
+		});
+
+		// Add event listeners for buttons
+		document.getElementById('search-btn').addEventListener('click', performSearch);
+		document.getElementById('close-btn').addEventListener('click', closeStateDetails);
+
+		// Add event listeners for chamber tabs (delegated to handle dynamic content)
+		document.addEventListener('click', function(e) {
+			if (e.target.classList.contains('tab') && e.target.hasAttribute('data-chamber')) {
+				const chamber = e.target.getAttribute('data-chamber');
+				showChamber(chamber);
 			}
 		});
 	</script>
