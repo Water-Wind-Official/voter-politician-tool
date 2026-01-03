@@ -511,8 +511,9 @@ export function renderHomePage(states: State[]): string {
 			let tooltipText = stateName;
 			if (state && state.electoral_winner) {
 				const winner = state.electoral_winner;
+				const color = winner === 'Republican' ? 'red' : winner === 'Democrat' ? 'blue' : 'split';
 				const margin = state.electoral_margin ? state.electoral_margin.toFixed(1) + '%' : 'N/A';
-				tooltipText = winner + ' won with ' + margin + ' margin';
+				tooltipText = winner + ' went ' + color + ' with ' + margin + ' margin';
 			}
 
 			tooltip.textContent = tooltipText;
