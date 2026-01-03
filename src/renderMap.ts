@@ -688,16 +688,16 @@ export function renderHomePage(states: State[]): string {
 			detailsDiv.scrollIntoView({ behavior: 'smooth', block: 'start' });
 			
 			try {
-				const response = await fetch(\`/api/state/\${stateCode}\`);
+				const response = await fetch('/api/state/' + stateCode);
 				const data = await response.json();
-				
+
 				// Store data for chamber filtering
 				window.currentStateData = data;
-				
+
 				titleDiv.textContent = data.state.name;
 				contentDiv.innerHTML = renderStateContent(data);
 			} catch (error) {
-				contentDiv.innerHTML = \`<div class="empty-state"><p>Error loading state information: \${error.message}</p></div>\`;
+				contentDiv.innerHTML = '<div class="empty-state"><p>Error loading state information: ' + error.message + '</p></div>';
 			}
 		}
 		
@@ -706,72 +706,63 @@ export function renderHomePage(states: State[]): string {
 			
 			// Voter data section
 			if (data.voterData) {
-				html += \`
-					<div class="voter-data-section">
-						<h3 class="section-title">Voter Information</h3>
-						<div class="data-grid">
-							\${data.voterData.total_registered_voters ? \`
-								<div class="data-card">
-									<div class="data-label">Registered Voters</div>
-									<div class="data-value">\${formatNumber(data.voterData.total_registered_voters)}</div>
-								</div>
-							\` : ''}
-							\${data.voterData.voting_age_population ? \`
-								<div class="data-card">
-									<div class="data-label">Voting Age Population</div>
-									<div class="data-value">\${formatNumber(data.voterData.voting_age_population)}</div>
-								</div>
-							\` : ''}
-							\${data.voterData.total_voted && data.voterData.total_registered_voters ? \`
-								<div class="data-card">
-									<div class="data-label">Registered Voter Turnout</div>
-									<div class="data-value">\${(((data.voterData.total_voted / data.voterData.total_registered_voters) * 100).toFixed(1))}%</div>
-								</div>
-							\` : ''}
-							\${data.voterData.total_voted && data.voterData.voting_age_population ? \`
-								<div class="data-card">
-									<div class="data-label">Citizen Turnout (18+)</div>
-									<div class="data-value">\${(((data.voterData.total_voted / data.voterData.voting_age_population) * 100).toFixed(1))}%</div>
-								</div>
-							\` : ''}
-						</div>
-					</div>
-				\`;
+				html += '<div class="voter-data-section">' +
+					'<h3 class="section-title">Voter Information</h3>' +
+					'<div class="data-grid">';
+				if (data.voterData.total_registered_voters) {
+					html += '<div class="data-card">' +
+						'<div class="data-label">Registered Voters</div>' +
+						'<div class="data-value">' + formatNumber(data.voterData.total_registered_voters) + '</div>' +
+					'</div>';
+				}
+				if (data.voterData.voting_age_population) {
+					html += '<div class="data-card">' +
+						'<div class="data-label">Voting Age Population</div>' +
+						'<div class="data-value">' + formatNumber(data.voterData.voting_age_population) + '</div>' +
+					'</div>';
+				}
+				if (data.voterData.total_voted && data.voterData.total_registered_voters) {
+					html += '<div class="data-card">' +
+						'<div class="data-label">Registered Voter Turnout</div>' +
+						'<div class="data-value">' + (((data.voterData.total_voted / data.voterData.total_registered_voters) * 100).toFixed(1)) + '%</div>' +
+					'</div>';
+				}
+				if (data.voterData.total_voted && data.voterData.voting_age_population) {
+					html += '<div class="data-card">' +
+						'<div class="data-label">Citizen Turnout (18+)</div>' +
+						'<div class="data-value">' + (((data.voterData.total_voted / data.voterData.voting_age_population) * 100).toFixed(1)) + '%</div>' +
+					'</div>';
+				}
+				html += '</div></div>';
 			} else {
-				html += \`
-					<div class="voter-data-section">
-						<h3 class="section-title">Voter Information</h3>
-						<div class="empty-state">
-							<p>Voter data not yet available for this state. Starting with Georgia!</p>
-						</div>
-					</div>
-				\`;
+				html += '<div class="voter-data-section">' +
+					'<h3 class="section-title">Voter Information</h3>' +
+					'<div class="empty-state">' +
+						'<p>Voter data not yet available for this state. Starting with Georgia!</p>' +
+					'</div>' +
+				'</div>';
 			}
 			
 			// Representatives section
 			if (data.representatives && data.representatives.length > 0) {
-				html += \`
-					<div class="representatives-section">
-						<h3 class="section-title">Representatives</h3>
-						<div class="chamber-tabs">
-							<button class="tab active" onclick="showChamber('all')">All</button>
-							<button class="tab" onclick="showChamber('house')">House</button>
-							<button class="tab" onclick="showChamber('senate')">Senate</button>
-						</div>
-						<div id="representatives-grid" class="representatives-grid">
-							\${renderRepresentatives(data.representatives, 'all')}
-						</div>
-					</div>
-				\`;
+				html += '<div class="representatives-section">' +
+					'<h3 class="section-title">Representatives</h3>' +
+					'<div class="chamber-tabs">' +
+						'<button class="tab active" onclick="showChamber(\'all\')">All</button>' +
+						'<button class="tab" onclick="showChamber(\'house\')">House</button>' +
+						'<button class="tab" onclick="showChamber(\'senate\')">Senate</button>' +
+					'</div>' +
+					'<div id="representatives-grid" class="representatives-grid">' +
+						renderRepresentatives(data.representatives, 'all') +
+					'</div>' +
+				'</div>';
 			} else {
-				html += \`
-					<div class="representatives-section">
-						<h3 class="section-title">Representatives</h3>
-						<div class="empty-state">
-							<p>No representatives found for this state.</p>
-						</div>
-					</div>
-				\`;
+				html += '<div class="representatives-section">' +
+					'<h3 class="section-title">Representatives</h3>' +
+					'<div class="empty-state">' +
+						'<p>No representatives found for this state.</p>' +
+					'</div>' +
+				'</div>';
 			}
 			
 			return html;
@@ -784,19 +775,19 @@ export function renderHomePage(states: State[]): string {
 				return '<div class="empty-state"><p>No representatives found.</p></div>';
 			}
 			
-			return filtered.map(rep => \`
-				<a href="/representative/\${rep.id}" class="representative-card">
-					<div class="representative-name">\${escapeHtml(rep.name)}</div>
-					<div class="representative-info">
-						<div class="info-item">
-							<strong>Chamber:</strong> \${rep.chamber === 'house' ? 'House of Representatives' : 'Senate'}
-						</div>
-						\${rep.party ? \`
-							<span class="badge badge-\${rep.party.toLowerCase()}">\${escapeHtml(rep.party)}</span>
-						\` : ''}
-					</div>
-				</a>
-			\`).join('');
+			return filtered.map(rep => {
+				let html = '<a href="/representative/' + rep.id + '" class="representative-card">' +
+					'<div class="representative-name">' + escapeHtml(rep.name) + '</div>' +
+					'<div class="representative-info">' +
+						'<div class="info-item">' +
+							'<strong>Chamber:</strong> ' + (rep.chamber === 'house' ? 'House of Representatives' : 'Senate') +
+						'</div>';
+				if (rep.party) {
+					html += '<span class="badge badge-' + rep.party.toLowerCase() + '">' + escapeHtml(rep.party) + '</span>';
+				}
+				html += '</div></a>';
+				return html;
+			}).join('');
 		}
 		
 		function showChamber(chamber) {
