@@ -377,15 +377,6 @@ export function renderElectionHub(states: any[]): string {
 				</div>
 			</div>
 
-			<div style="background: #f0f9ff; border-left: 4px solid #3b82f6; padding: 1rem; margin-top: 1.5rem; border-radius: 4px;">
-				<p style="margin: 0; font-size: 0.9rem; color: #1e40af;">
-					<strong>📋 Special Notes:</strong>
-					<br>• Both Maine and Nebraska split their electoral votes proportionally
-					<br>• Maine: 3 votes for Harris, 1 for Trump
-					<br>• Nebraska: 1 vote for Harris, 4 for Trump
-					<br>• All other states awarded all electoral votes to the statewide winner
-				</p>
-			</div>
 
 			<div style="text-align: center; margin-top: 2rem;">
 				<a href="https://www.fec.gov/resources/cms-content/documents/2024presgeresults.pdf" class="download-btn" target="_blank">
@@ -403,6 +394,7 @@ export function renderElectionHub(states: any[]): string {
 					This PDF contains the official 2024 presidential election results as certified by state election offices and compiled by the Federal Election Commission.
 				</p>
 			</div>
+
 		</div>
 
 		<div class="card">

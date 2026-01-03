@@ -211,11 +211,15 @@ export function renderHomePage(states: State[]): string {
 		}
 
 		.legend-color.republican {
-			background: #ff6b6b;
+			background: #ffb3ba;
 		}
 
 		.legend-color.democrat {
-			background: #74b9ff;
+			background: #bae1ff;
+		}
+
+		.legend-color.split {
+			background: #e0e0e0;
 		}
 		
 		#us-map {
@@ -233,22 +237,30 @@ export function renderHomePage(states: State[]): string {
 		}
 		
 		.state-path.republican {
-			fill: #ff6b6b; /* Vibrant pastel red for Republican states */
+			fill: #ffb3ba; /* Soft pastel red for Republican states */
 		}
 
 		.state-path.democrat {
-			fill: #74b9ff; /* Vibrant pastel blue for Democratic states */
+			fill: #bae1ff; /* Soft pastel blue for Democratic states */
 		}
 
 		.state-path.republican:hover {
-			fill: #ff5252; /* Darker red on hover */
+			fill: #ff99a1; /* Slightly darker pastel red on hover */
 		}
 
 		.state-path.democrat:hover {
-			fill: #0984e3; /* Darker blue on hover */
+			fill: #99d6ff; /* Slightly darker pastel blue on hover */
 		}
-		
-		.state-path:hover:not(.republican):not(.democrat) {
+
+		.state-path.split {
+			fill: #e0e0e0; /* Light gray for split states */
+		}
+
+		.state-path.split:hover {
+			fill: #cccccc; /* Slightly darker gray on hover */
+		}
+
+		.state-path:hover:not(.republican):not(.democrat):not(.split) {
 			fill: #667eea;
 			stroke-width: 2;
 		}
@@ -502,6 +514,21 @@ export function renderHomePage(states: State[]): string {
 				<svg id="us-map" viewBox="0 0 959 593" xmlns="http://www.w3.org/2000/svg">
 					${generateUSMapSVG(states)}
 				</svg>
+				<div class="map-legend">
+					<div class="legend-title">2024 Election Results</div>
+					<div class="legend-item">
+						<div class="legend-color republican"></div>
+						<span>Republican</span>
+					</div>
+					<div class="legend-item">
+						<div class="legend-color democrat"></div>
+						<span>Democrat</span>
+					</div>
+					<div class="legend-item">
+						<div class="legend-color split"></div>
+						<span>Split/Tie</span>
+					</div>
+				</div>
 				<div id="state-info" class="state-info"></div>
 			</div>
 		</div>
@@ -941,6 +968,8 @@ function generateUSMapSVG(states: State[]): string {
 			electoralClass = 'republican';
 		} else if (state?.electoral_winner === 'Democrat') {
 			electoralClass = 'democrat';
+		} else if (state?.electoral_winner === 'Split') {
+			electoralClass = 'split';
 		}
 		
 		// Create a rounded rectangle for each state
