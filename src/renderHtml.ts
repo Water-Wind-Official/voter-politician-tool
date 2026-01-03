@@ -543,69 +543,258 @@ export function renderPoliticianProfile(
 			pointer-events: none;
 		}
 		
+		.profile-header {
+			background: linear-gradient(135deg, rgba(30, 41, 59, 0.95) 0%, rgba(51, 65, 85, 0.95) 100%);
+			backdrop-filter: blur(20px);
+			border: 1px solid rgba(148, 163, 184, 0.2);
+			border-radius: 16px;
+			padding: 2rem;
+			margin-bottom: 2rem;
+			box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(148, 163, 184, 0.1);
+			text-align: center;
+			position: relative;
+		}
+
+		.profile-header::before {
+			content: '';
+			position: absolute;
+			top: 0;
+			left: 0;
+			right: 0;
+			bottom: 0;
+			background: linear-gradient(135deg, rgba(59, 130, 246, 0.1) 0%, rgba(239, 68, 68, 0.1) 100%);
+			border-radius: 16px;
+			pointer-events: none;
+		}
+
 		.profile-name {
 			font-size: 2.5rem;
 			margin-bottom: 1rem;
-			color: #f1f5f9;
+			color: #ffffff;
 			font-weight: 800;
 			letter-spacing: -0.025em;
 			position: relative;
 			z-index: 1;
 			text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
 		}
-		
+
+		.profile-position {
+			font-size: 1.2rem;
+			color: #cbd5e1;
+			margin-bottom: 1rem;
+			font-weight: 500;
+			opacity: 0.9;
+			position: relative;
+			z-index: 1;
+		}
+
 		.profile-details {
 			display: grid;
-			grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-			gap: 1rem;
+			grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+			gap: 1.5rem;
 			margin-top: 1.5rem;
+			position: relative;
+			z-index: 1;
 		}
-		
+
 		.detail-item {
-			display: flex;
-			flex-direction: column;
+			background: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.05) 100%);
+			backdrop-filter: blur(10px);
+			border: 1px solid rgba(148, 163, 184, 0.2);
+			border-radius: 12px;
+			padding: 1rem;
+			text-align: center;
+			transition: all 0.3s ease;
 		}
-		
+
+		.detail-item:hover {
+			transform: translateY(-2px);
+			box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+			border-color: rgba(148, 163, 184, 0.4);
+		}
+
 		.detail-label {
-			font-size: 0.85rem;
+			font-size: 0.8rem;
 			color: #94a3b8;
 			text-transform: uppercase;
-			letter-spacing: 0.5px;
-			margin-bottom: 0.25rem;
-			opacity: 0.9;
+			letter-spacing: 1px;
+			margin-bottom: 0.5rem;
+			opacity: 0.8;
+			font-weight: 600;
 		}
 
 		.detail-value {
-			font-size: 1.1rem;
-			font-weight: 600;
+			font-size: 1.2rem;
+			font-weight: 700;
 			color: #f1f5f9;
 		}
 		
 		.badge {
 			display: inline-block;
-			padding: 0.5rem 1rem;
-			border-radius: 20px;
-			font-size: 0.9rem;
-			font-weight: 600;
-			margin-top: 0.5rem;
+			padding: 0.75rem 1.5rem;
+			border-radius: 25px;
+			font-size: 1rem;
+			font-weight: 700;
+			margin-top: 1rem;
+			position: relative;
+			z-index: 1;
+			text-transform: uppercase;
+			letter-spacing: 0.5px;
 		}
 
 		.badge-democrat {
 			background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
 			color: white;
-			box-shadow: 0 0 10px rgba(59, 130, 246, 0.3);
+			box-shadow: 0 0 15px rgba(59, 130, 246, 0.4);
 		}
 
 		.badge-republican {
 			background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
 			color: white;
-			box-shadow: 0 0 10px rgba(239, 68, 68, 0.3);
+			box-shadow: 0 0 15px rgba(239, 68, 68, 0.4);
 		}
 
 		.badge-independent {
 			background: linear-gradient(135deg, #6b7280 0%, #4b5563 100%);
 			color: white;
-			box-shadow: 0 0 10px rgba(107, 114, 128, 0.3);
+			box-shadow: 0 0 15px rgba(107, 114, 128, 0.4);
+		}
+
+		.state-info-section {
+			background: linear-gradient(135deg, rgba(30, 41, 59, 0.95) 0%, rgba(51, 65, 85, 0.9) 100%);
+			backdrop-filter: blur(20px);
+			border: 1px solid rgba(148, 163, 184, 0.2);
+			border-radius: 16px;
+			padding: 2rem;
+			margin-bottom: 2rem;
+			box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(148, 163, 184, 0.1);
+			position: relative;
+		}
+
+		.state-info-section::before {
+			content: '';
+			position: absolute;
+			top: 0;
+			left: 0;
+			right: 0;
+			bottom: 0;
+			background: linear-gradient(135deg, rgba(59, 130, 246, 0.05) 0%, rgba(239, 68, 68, 0.05) 100%);
+			border-radius: 16px;
+			pointer-events: none;
+		}
+
+		.state-info-title {
+			font-size: 1.5rem;
+			font-weight: 700;
+			color: #60a5fa;
+			margin-bottom: 1.5rem;
+			padding-bottom: 0.5rem;
+			border-bottom: 2px solid rgba(148, 163, 184, 0.3);
+			position: relative;
+			z-index: 1;
+			text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+		}
+
+		.state-stats {
+			display: grid;
+			grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+			gap: 1.5rem;
+			position: relative;
+			z-index: 1;
+		}
+
+		.stat-item {
+			text-align: center;
+			padding: 1rem;
+			background: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.05) 100%);
+			backdrop-filter: blur(10px);
+			border: 1px solid rgba(148, 163, 184, 0.2);
+			border-radius: 12px;
+			transition: all 0.3s ease;
+		}
+
+		.stat-item:hover {
+			transform: translateY(-2px);
+			box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+			border-color: rgba(148, 163, 184, 0.4);
+		}
+
+		.stat-value {
+			font-size: 1.8rem;
+			font-weight: 700;
+			color: #60a5fa;
+			margin-bottom: 0.25rem;
+		}
+
+		.stat-label {
+			font-size: 0.9rem;
+			color: #cbd5e1;
+			opacity: 0.9;
+		}
+
+		.contact-section {
+			background: linear-gradient(135deg, rgba(30, 41, 59, 0.95) 0%, rgba(51, 65, 85, 0.9) 100%);
+			backdrop-filter: blur(20px);
+			border: 1px solid rgba(148, 163, 184, 0.2);
+			border-radius: 16px;
+			padding: 2rem;
+			margin-bottom: 2rem;
+			box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(148, 163, 184, 0.1);
+			position: relative;
+		}
+
+		.contact-section::before {
+			content: '';
+			position: absolute;
+			top: 0;
+			left: 0;
+			right: 0;
+			bottom: 0;
+			background: linear-gradient(135deg, rgba(59, 130, 246, 0.05) 0%, rgba(239, 68, 68, 0.05) 100%);
+			border-radius: 16px;
+			pointer-events: none;
+		}
+
+		.contact-title {
+			font-size: 1.5rem;
+			font-weight: 700;
+			color: #60a5fa;
+			margin-bottom: 1.5rem;
+			padding-bottom: 0.5rem;
+			border-bottom: 2px solid rgba(148, 163, 184, 0.3);
+			position: relative;
+			z-index: 1;
+			text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+		}
+
+		.social-links {
+			display: grid;
+			grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+			gap: 1rem;
+			position: relative;
+			z-index: 1;
+		}
+
+		.social-link {
+			display: block;
+			padding: 1rem;
+			background: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.05) 100%);
+			backdrop-filter: blur(10px);
+			border: 1px solid rgba(148, 163, 184, 0.2);
+			border-radius: 12px;
+			color: #93c5fd;
+			text-decoration: none;
+			font-weight: 600;
+			transition: all 0.3s ease;
+			text-align: center;
+		}
+
+		.social-link:hover {
+			background: linear-gradient(135deg, rgba(59, 130, 246, 0.2) 0%, rgba(37, 99, 235, 0.1) 100%);
+			border-color: rgba(59, 130, 246, 0.5);
+			color: #dbeafe;
+			transform: translateY(-2px);
+			box-shadow: 0 4px 16px rgba(59, 130, 246, 0.3);
 		}
 		
 		.social-links {
@@ -824,12 +1013,13 @@ export function renderPoliticianProfile(
 <body>
 	<div class="container">
 		<a href="/" class="back-link">← Back to All Politicians</a>
-		
+
 		<div class="profile-header">
 			${renderPartyIcon(politician.party)}
 			<h1 class="profile-name">${escapeHtml(politician.name)}</h1>
+			<div class="profile-position">${politician.chamber === 'house' ? 'Representative' : 'Senator'}</div>
 			${politician.party ? `<span class="badge badge-${partyClass}">${escapeHtml(politician.party)}</span>` : ''}
-			
+
 			<div class="profile-details">
 				<div class="detail-item">
 					<div class="detail-label">State</div>
@@ -837,7 +1027,7 @@ export function renderPoliticianProfile(
 				</div>
 				<div class="detail-item">
 					<div class="detail-label">Chamber</div>
-					<div class="detail-value">${politician.chamber === 'house' ? 'House of Representatives' : 'Senate'}</div>
+					<div class="detail-value">${politician.chamber === 'house' ? 'House' : 'Senate'}</div>
 				</div>
 				${politician.district ? `
 				<div class="detail-item">
@@ -845,17 +1035,60 @@ export function renderPoliticianProfile(
 					<div class="detail-value">${escapeHtml(politician.district)}</div>
 				</div>
 				` : ''}
+				${politician.term_start && politician.term_end ? `
+				<div class="detail-item">
+					<div class="detail-label">Term</div>
+					<div class="detail-value">${formatDate(politician.term_start)} - ${formatDate(politician.term_end)}</div>
+				</div>
+				` : ''}
 			</div>
-			
+		</div>
+
+		${politician.state_data ? `
+		<div class="state-info-section">
+			<h2 class="state-info-title">📊 About ${escapeHtml(politician.state)}</h2>
+			<div class="state-stats">
+				<div class="stat-item">
+					<div class="stat-value">${politician.state_data.registered_voters?.toLocaleString() || 'N/A'}</div>
+					<div class="stat-label">Registered Voters</div>
+				</div>
+				<div class="stat-item">
+					<div class="stat-value">${politician.state_data.voting_age_population?.toLocaleString() || 'N/A'}</div>
+					<div class="stat-label">Voting Age Population</div>
+				</div>
+				<div class="stat-item">
+					<div class="stat-value">${politician.state_data.registered_voter_turnout ? (politician.state_data.registered_voter_turnout * 100).toFixed(1) + '%' : 'N/A'}</div>
+					<div class="stat-label">Voter Turnout</div>
+				</div>
+				<div class="stat-item">
+					<div class="stat-value">${politician.state_data.citizen_turnout ? (politician.state_data.citizen_turnout * 100).toFixed(1) + '%' : 'N/A'}</div>
+					<div class="stat-label">Citizen Turnout (18+)</div>
+				</div>
+			</div>
+		</div>
+		` : ''}
+
+		<div class="contact-section">
+			<h2 class="contact-title">📞 Contact Information</h2>
 			<div class="social-links">
+				${politician.office_phone ? `
+					<a href="tel:${escapeHtml(politician.office_phone)}" class="social-link">
+						📞 ${escapeHtml(politician.office_phone)}<br><small>Office Phone</small>
+					</a>
+				` : ''}
+				${politician.email ? `
+					<a href="mailto:${escapeHtml(politician.email)}" class="social-link">
+						✉️ ${escapeHtml(politician.email)}<br><small>Email</small>
+					</a>
+				` : ''}
 				${politician.twitter_handle ? `
 					<a href="https://twitter.com/${escapeHtml(politician.twitter_handle)}" target="_blank" class="social-link">
-						🐦 Twitter: @${escapeHtml(politician.twitter_handle)}
+						🐦 @${escapeHtml(politician.twitter_handle)}<br><small>Twitter</small>
 					</a>
 				` : ''}
 				${politician.website ? `
 					<a href="${escapeHtml(politician.website)}" target="_blank" class="social-link">
-						🌐 Official Website
+						🌐 Official Website<br><small>Congress.gov</small>
 					</a>
 				` : ''}
 			</div>

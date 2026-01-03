@@ -201,11 +201,26 @@ Harris sought the Democratic nomination for president in the 2024 election and b
 		}
 
 		.bio-section {
-			background: white;
-			border-radius: 12px;
+			background: linear-gradient(135deg, rgba(30, 41, 59, 0.95) 0%, rgba(51, 65, 85, 0.9) 100%);
+			backdrop-filter: blur(20px);
+			border: 1px solid rgba(148, 163, 184, 0.2);
+			border-radius: 16px;
 			padding: 2rem;
 			margin-bottom: 2rem;
-			box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+			box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(148, 163, 184, 0.1);
+			position: relative;
+		}
+
+		.bio-section::before {
+			content: '';
+			position: absolute;
+			top: 0;
+			left: 0;
+			right: 0;
+			bottom: 0;
+			background: linear-gradient(135deg, rgba(59, 130, 246, 0.05) 0%, rgba(239, 68, 68, 0.05) 100%);
+			border-radius: 16px;
+			pointer-events: none;
 		}
 
 		.section-title {
@@ -223,14 +238,29 @@ Harris sought the Democratic nomination for president in the 2024 election and b
 		.bio-text {
 			font-size: 1.1rem;
 			line-height: 1.7;
-			color: #4b5563;
+			color: #cbd5e1;
 			margin-bottom: 2rem;
+			position: relative;
+			z-index: 1;
+		}
+
+		.achievements-title {
+			font-size: 1.4rem;
+			font-weight: 700;
+			color: #f1f5f9;
+			margin-bottom: 1.5rem;
+			padding-bottom: 0.5rem;
+			border-bottom: 2px solid rgba(148, 163, 184, 0.3);
+			position: relative;
+			z-index: 1;
 		}
 
 		.achievements-list {
 			display: grid;
 			grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-			gap: 1rem;
+			gap: 1.5rem;
+			position: relative;
+			z-index: 1;
 		}
 
 		.achievement-item {
@@ -244,6 +274,10 @@ Harris sought the Democratic nomination for president in the 2024 election and b
 			box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 			position: relative;
 			z-index: 1;
+			font-size: 1rem;
+			font-weight: 600;
+			color: #f1f5f9;
+			text-align: center;
 		}
 
 		.achievement-item:hover {
@@ -396,7 +430,7 @@ Harris sought the Democratic nomination for president in the 2024 election and b
 			<h2 class="section-title">Biography</h2>
 			<div class="bio-text">${data.bio.replace(/\n/g, '<br>')}</div>
 
-			<h3 style="color: #333; margin-bottom: 1rem; font-size: 1.4rem;">Key Achievements</h3>
+			<h3 class="achievements-title">🏆 Key Achievements</h3>
 			<div class="achievements-list">
 				${data.achievements.map(achievement => `
 					<div class="achievement-item">
