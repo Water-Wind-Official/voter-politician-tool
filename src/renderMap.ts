@@ -475,7 +475,7 @@ export function renderHomePage(states: State[]): string {
 			font-size: 1.25rem;
 			font-weight: 700;
 			margin-bottom: 0.5rem;
-			color: #333;
+			color: #f8fafc;
 		}
 		
 		.representative-info {
@@ -487,7 +487,7 @@ export function renderHomePage(states: State[]): string {
 		
 		.info-item {
 			font-size: 0.9rem;
-			color: #666;
+			color: #e2e8f0;
 		}
 		
 		.badge {
@@ -780,7 +780,7 @@ export function renderHomePage(states: State[]): string {
 					'<div class="representative-name">' + escapeHtml(rep.name) + '</div>' +
 					'<div class="representative-info">' +
 						'<div class="info-item">' +
-							'<strong>Chamber:</strong> ' + (rep.chamber === 'house' ? 'House of Representatives' : 'Senate') +
+							(rep.chamber === 'house' ? 'House of Representatives' : 'Senate') +
 						'</div>';
 				if (rep.party) {
 					html += '<span class="badge badge-' + rep.party.toLowerCase() + '">' + escapeHtml(rep.party) + '</span>';
