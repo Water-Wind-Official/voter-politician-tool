@@ -47,6 +47,110 @@ export function renderElectionHub(states: any[]): string {
 			margin-bottom: 2rem;
 		}
 
+		.candidate-links {
+			margin-top: 2rem;
+			padding: 2rem;
+			background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+			border-radius: 12px;
+			border: 1px solid #e5e7eb;
+		}
+
+		.candidate-links h3 {
+			font-size: 1.5rem;
+			font-weight: 700;
+			color: #1f2937;
+			margin-bottom: 1.5rem;
+			text-align: center;
+		}
+
+		.candidate-links-grid {
+			display: grid;
+			grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+			gap: 1.5rem;
+		}
+
+		.candidate-link {
+			display: block;
+			padding: 1.5rem;
+			border-radius: 12px;
+			text-decoration: none;
+			color: inherit;
+			transition: all 0.3s ease;
+			border: 2px solid transparent;
+			background: white;
+			box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+		}
+
+		.candidate-link:hover {
+			transform: translateY(-2px);
+			box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+		}
+
+		.trump-link {
+			border-color: #dc2626;
+		}
+
+		.trump-link:hover {
+			background: linear-gradient(135deg, rgba(220, 38, 38, 0.05) 0%, rgba(185, 28, 28, 0.02) 100%);
+		}
+
+		.harris-link {
+			border-color: #2563eb;
+		}
+
+		.harris-link:hover {
+			background: linear-gradient(135deg, rgba(37, 99, 235, 0.05) 0%, rgba(29, 78, 216, 0.02) 100%);
+		}
+
+		.candidate-header {
+			display: flex;
+			align-items: center;
+			gap: 0.75rem;
+			margin-bottom: 0.75rem;
+		}
+
+		.candidate-flag {
+			font-size: 1.5rem;
+		}
+
+		.candidate-name {
+			font-size: 1.2rem;
+			font-weight: 700;
+			color: #1f2937;
+		}
+
+		.candidate-party {
+			font-size: 0.9rem;
+			color: #6b7280;
+			font-weight: 500;
+		}
+
+		.candidate-description {
+			font-size: 0.95rem;
+			color: #4b5563;
+			line-height: 1.5;
+		}
+
+		@media (max-width: 768px) {
+			.candidate-links-grid {
+				grid-template-columns: 1fr;
+			}
+
+			.candidate-header {
+				flex-direction: column;
+				align-items: flex-start;
+				gap: 0.5rem;
+			}
+
+			.candidate-links {
+				padding: 1rem;
+			}
+
+			.candidate-links h3 {
+				font-size: 1.3rem;
+			}
+		}
+
 		nav {
 			display: flex;
 			justify-content: center;
@@ -293,70 +397,6 @@ export function renderElectionHub(states: any[]): string {
 			padding-top: 2rem;
 		}
 
-		.candidate-buttons {
-			display: flex;
-			gap: 1rem;
-			justify-content: center;
-			margin: 1.5rem 0;
-			flex-wrap: wrap;
-		}
-
-		.candidate-btn {
-			display: flex;
-			align-items: center;
-			gap: 0.75rem;
-			padding: 1rem 1.5rem;
-			border-radius: 12px;
-			text-decoration: none;
-			color: white;
-			font-weight: 600;
-			transition: all 0.3s ease;
-			box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-			border: 2px solid transparent;
-			min-width: 220px;
-			justify-content: center;
-		}
-
-		.candidate-btn:hover {
-			transform: translateY(-2px);
-			box-shadow: 0 8px 20px rgba(0,0,0,0.2);
-		}
-
-		.trump-btn {
-			background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
-			border-color: #dc2626;
-		}
-
-		.trump-btn:hover {
-			background: linear-gradient(135deg, #b91c1c 0%, #991b1b 100%);
-			border-color: #b91c1c;
-		}
-
-		.harris-btn {
-			background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
-			border-color: #2563eb;
-		}
-
-		.harris-btn:hover {
-			background: linear-gradient(135deg, #1d4ed8 0%, #1e40af 100%);
-			border-color: #1d4ed8;
-		}
-
-		.candidate-icon {
-			font-size: 1.5rem;
-		}
-
-		.candidate-name {
-			font-size: 1.1rem;
-			font-weight: 700;
-		}
-
-		.candidate-label {
-			font-size: 0.85rem;
-			opacity: 0.9;
-			font-weight: 400;
-		}
-
 		@media (max-width: 768px) {
 			nav {
 				flex-direction: column;
@@ -365,15 +405,6 @@ export function renderElectionHub(states: any[]): string {
 
 			.title {
 				font-size: 2rem;
-			}
-
-			.candidate-buttons {
-				flex-direction: column;
-				align-items: center;
-			}
-
-			.candidate-btn {
-				min-width: 200px;
 			}
 
 			.election-results {
@@ -395,24 +426,33 @@ export function renderElectionHub(states: any[]): string {
 		<header>
 			<h1 class="title">Voter Politician Tool</h1>
 			<p class="subtitle">Presidential Election Results & Data Hub</p>
-			<div class="candidate-buttons">
-				<a href="https://web.archive.org/web/20241010000624/https://www.donaldjtrump.com/platform" target="_blank" class="candidate-btn trump-btn">
-					<span class="candidate-icon">🇺🇸</span>
-					<span class="candidate-name">Donald J. Trump</span>
-					<span class="candidate-label">Platform & Agenda</span>
-				</a>
-				<a href="https://web.archive.org/web/20241005024829/https://kamalaharris.com/issues/" target="_blank" class="candidate-btn harris-btn">
-					<span class="candidate-icon">🇺🇸</span>
-					<span class="candidate-name">Kamala Harris</span>
-					<span class="candidate-label">Issues & Platform</span>
-				</a>
-			</div>
 			<nav>
 				<a href="/">State Map</a>
 				<a href="/issues">Issues Hub</a>
 				<a href="/senators">Senate Hub</a>
 				<a href="/house">House Hub</a>
 			</nav>
+			<div class="candidate-links">
+				<h3>2024 Presidential Candidates</h3>
+				<div class="candidate-links-grid">
+					<a href="https://web.archive.org/web/20241010000624/https://www.donaldjtrump.com/platform" target="_blank" class="candidate-link trump-link">
+						<div class="candidate-header">
+							<span class="candidate-flag">🇺🇸</span>
+							<span class="candidate-name">Donald J. Trump</span>
+							<span class="candidate-party">(Republican)</span>
+						</div>
+						<div class="candidate-description">View Trump's official campaign platform and policy positions</div>
+					</a>
+					<a href="https://web.archive.org/web/20241005024829/https://kamalaharris.com/issues/" target="_blank" class="candidate-link harris-link">
+						<div class="candidate-header">
+							<span class="candidate-flag">🇺🇸</span>
+							<span class="candidate-name">Kamala Harris</span>
+							<span class="candidate-party">(Democrat)</span>
+						</div>
+						<div class="candidate-description">View Harris's official campaign issues and policy positions</div>
+					</a>
+				</div>
+			</div>
 		</header>
 
 		<div class="card">

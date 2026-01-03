@@ -158,7 +158,6 @@ export function renderHomePage(states: State[]): string {
 			font-size: 1.1rem;
 		}
 
-
 		.map-container {
 			background: white;
 			border-radius: 12px;

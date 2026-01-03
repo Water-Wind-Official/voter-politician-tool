@@ -27,7 +27,7 @@ export function renderIssuesPage(democratIssues: Issue[], republicanIssues: Issu
 			max-width: 1400px;
 			margin: 0 auto;
 			display: grid;
-			grid-template-columns: 1fr 2fr 1fr;
+			grid-template-columns: 1fr 1.5fr 1fr;
 			gap: 2rem;
 			align-items: start;
 		}
