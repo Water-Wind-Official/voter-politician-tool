@@ -645,7 +645,6 @@ export function renderHomePage(states: State[]): string {
 					<div class="representative-info">
 						<div class="info-item">
 							<strong>Chamber:</strong> \${rep.chamber === 'house' ? 'House of Representatives' : 'Senate'}
-							\${rep.district_number ? \` - District \${rep.district_number}\` : ''}
 						</div>
 						\${rep.party ? \`
 							<span class="badge badge-\${rep.party.toLowerCase()}">\${escapeHtml(rep.party)}</span>

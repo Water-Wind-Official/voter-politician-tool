@@ -287,7 +287,6 @@ export function renderHouseHub(houseMembers: Representative[]): string {
 						<div class="members-container">
 						${stateMembers.map(member => {
 							const partyClass = member.party?.toLowerCase() || 'independent';
-							const districtDisplay = member.district_number ? `District ${member.district_number}` : 'At Large';
 							return `
 								<div class="member-card">
 									<div class="member-name">${escapeHtml(member.name)}</div>
