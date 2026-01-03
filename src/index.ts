@@ -36,14 +36,14 @@ export default {
 		const url = new URL(request.url);
 		const path = url.pathname;
 
+		// Admin API endpoints (before general API endpoints to ensure admin auth)
+		if (path.startsWith('/api/admin/')) {
+			return handleAdminApi(request, env, path);
+		}
+
 		// API endpoints
 		if (path.startsWith('/api/')) {
 			return handleApiRequest(request, env, path);
-		}
-
-		// Admin API endpoints (before admin dashboard check)
-		if (path.startsWith('/api/admin/')) {
-			return handleAdminApi(request, env, path);
 		}
 
 		// Web pages
