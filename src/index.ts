@@ -238,7 +238,7 @@ async function handleApiRequest(request: Request, env: Env, path: string): Promi
 			const results = senators.filter(senator =>
 				senator.name.toLowerCase().includes(query.toLowerCase()) ||
 				senator.state_code.toLowerCase().includes(query.toLowerCase())
-			).slice(0, 10);
+			).slice(0, 5);
 
 			return Response.json({ results });
 		} else if (searchType === 'house') {
@@ -246,7 +246,7 @@ async function handleApiRequest(request: Request, env: Env, path: string): Promi
 			const results = houseMembers.filter(member =>
 				member.name.toLowerCase().includes(query.toLowerCase()) ||
 				member.state_code.toLowerCase().includes(query.toLowerCase())
-			).slice(0, 10);
+			).slice(0, 5);
 
 			return Response.json({ results });
 		} else if (searchType === 'representatives') {
@@ -254,7 +254,7 @@ async function handleApiRequest(request: Request, env: Env, path: string): Promi
 			const results = representatives.filter(rep =>
 				rep.name.toLowerCase().includes(query.toLowerCase()) ||
 				rep.state_code.toLowerCase().includes(query.toLowerCase())
-			).slice(0, 10);
+			).slice(0, 5);
 
 			return Response.json({ results });
 		}

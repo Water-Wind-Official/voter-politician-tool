@@ -368,12 +368,14 @@ export function renderIssuesPage(democratIssues: Issue[], republicanIssues: Issu
 		.issue-category {
 			display: inline-block;
 			padding: 0.25rem 0.75rem;
-			background: rgba(0,0,0,0.05);
+			background: rgba(148, 163, 184, 0.2);
+			border: 1px solid rgba(148, 163, 184, 0.3);
 			border-radius: 12px;
 			font-size: 0.8rem;
 			font-weight: 500;
 			margin-top: 0.5rem;
-			color: #374151;
+			color: #f1f5f9;
+			backdrop-filter: blur(5px);
 		}
 
 		.empty-state {

@@ -23,10 +23,30 @@ export function renderPoliticianList(
 		
 		body {
 			font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-			background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+			background:
+				radial-gradient(circle at 20% 50%, rgba(120, 119, 198, 0.3) 0%, transparent 50%),
+				radial-gradient(circle at 80% 20%, rgba(255, 255, 255, 0.15) 0%, transparent 50%),
+				radial-gradient(circle at 40% 80%, rgba(120, 119, 198, 0.3) 0%, transparent 50%),
+				linear-gradient(135deg, #0f172a 0%, #1e293b 25%, #334155 50%, #475569 75%, #64748b 100%);
 			min-height: 100vh;
 			padding: 2rem;
-			color: #333;
+			color: #f1f5f9;
+			position: relative;
+		}
+
+		body::before {
+			content: '';
+			position: fixed;
+			top: 0;
+			left: 0;
+			right: 0;
+			bottom: 0;
+			background:
+				radial-gradient(circle at 30% 20%, rgba(59, 130, 246, 0.1) 0%, transparent 40%),
+				radial-gradient(circle at 70% 80%, rgba(239, 68, 68, 0.08) 0%, transparent 40%),
+				radial-gradient(circle at 50% 50%, rgba(16, 185, 129, 0.05) 0%, transparent 50%);
+			pointer-events: none;
+			z-index: -1;
 		}
 		
 		.container {
@@ -35,85 +55,134 @@ export function renderPoliticianList(
 		}
 		
 		header {
-			background: white;
-			border-radius: 12px;
-			padding: 2rem;
+			background: linear-gradient(135deg, rgba(30, 41, 59, 0.95) 0%, rgba(51, 65, 85, 0.95) 100%);
+			backdrop-filter: blur(20px);
+			border: 1px solid rgba(148, 163, 184, 0.2);
+			border-radius: 16px;
+			padding: 2.5rem;
 			margin-bottom: 2rem;
-			box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+			box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(148, 163, 184, 0.1);
+			position: relative;
 		}
-		
+
+		header::before {
+			content: '';
+			position: absolute;
+			top: 0;
+			left: 0;
+			right: 0;
+			bottom: 0;
+			background: linear-gradient(135deg, rgba(59, 130, 246, 0.1) 0%, rgba(239, 68, 68, 0.1) 100%);
+			border-radius: 16px;
+			pointer-events: none;
+		}
+
 		h1 {
 			font-size: 2.5rem;
 			margin-bottom: 0.5rem;
-			background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+			background: linear-gradient(135deg, #60a5fa 0%, #a78bfa 25%, #f472b6 50%, #fbbf24 75%, #34d399 100%);
 			-webkit-background-clip: text;
 			-webkit-text-fill-color: transparent;
 			background-clip: text;
+			font-weight: 800;
+			letter-spacing: -0.025em;
+			position: relative;
+			z-index: 1;
 		}
-		
+
 		.subtitle {
-			color: #666;
+			color: #cbd5e1;
 			font-size: 1.1rem;
+			opacity: 0.9;
+			position: relative;
+			z-index: 1;
 		}
 		
 		.filters {
-			background: white;
-			border-radius: 12px;
+			background: linear-gradient(135deg, rgba(30, 41, 59, 0.95) 0%, rgba(51, 65, 85, 0.9) 100%);
+			backdrop-filter: blur(20px);
+			border: 1px solid rgba(148, 163, 184, 0.2);
+			border-radius: 16px;
 			padding: 1.5rem;
 			margin-bottom: 2rem;
-			box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+			box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(148, 163, 184, 0.1);
 			display: flex;
 			gap: 1rem;
 			flex-wrap: wrap;
 			align-items: center;
+			position: relative;
 		}
-		
+
+		.filters::before {
+			content: '';
+			position: absolute;
+			top: 0;
+			left: 0;
+			right: 0;
+			bottom: 0;
+			background: linear-gradient(135deg, rgba(59, 130, 246, 0.05) 0%, rgba(239, 68, 68, 0.05) 100%);
+			border-radius: 16px;
+			pointer-events: none;
+		}
+
 		.filters label {
 			font-weight: 600;
-			color: #555;
+			color: #f1f5f9;
+			position: relative;
+			z-index: 1;
 		}
-		
+
 		.filters select {
 			padding: 0.5rem 1rem;
-			border: 2px solid #e0e0e0;
-			border-radius: 8px;
+			border: 2px solid rgba(148, 163, 184, 0.3);
+			border-radius: 12px;
 			font-size: 1rem;
-			background: white;
+			background: rgba(255, 255, 255, 0.1);
+			backdrop-filter: blur(10px);
+			color: #f1f5f9;
 			cursor: pointer;
-			transition: border-color 0.2s;
+			transition: all 0.3s ease;
+			position: relative;
+			z-index: 1;
 		}
-		
+
 		.filters select:hover {
-			border-color: #667eea;
+			border-color: rgba(59, 130, 246, 0.5);
+			background: rgba(255, 255, 255, 0.15);
 		}
-		
+
 		.filters select:focus {
 			outline: none;
-			border-color: #667eea;
+			border-color: #60a5fa;
+			box-shadow: 0 0 20px rgba(59, 130, 246, 0.3);
 		}
 		
 		.btn {
 			padding: 0.5rem 1.5rem;
-			background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+			background: linear-gradient(135deg, #60a5fa 0%, #a78bfa 50%, #f472b6 100%);
 			color: white;
 			border: none;
-			border-radius: 8px;
+			border-radius: 12px;
 			font-size: 1rem;
 			font-weight: 600;
 			cursor: pointer;
-			transition: transform 0.2s, box-shadow 0.2s, opacity 0.2s;
+			transition: all 0.3s ease;
 			text-decoration: none;
 			display: inline-block;
+			border: 1px solid rgba(255, 255, 255, 0.2);
+			position: relative;
+			z-index: 1;
 		}
-		
+
 		.btn:hover:not(:disabled) {
-			transform: translateY(-2px);
-			box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+			transform: translateY(-3px) scale(1.02);
+			box-shadow: 0 8px 25px rgba(59, 130, 246, 0.5);
 		}
-		
+
 		.btn:disabled {
 			opacity: 0.6;
 			cursor: not-allowed;
+			transform: none;
 		}
 		
 		@keyframes spin {
@@ -132,27 +201,31 @@ export function renderPoliticianList(
 		}
 		
 		.politician-card {
-			background: white;
-			border-radius: 12px;
+			background: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.05) 100%);
+			backdrop-filter: blur(10px);
+			border: 1px solid rgba(148, 163, 184, 0.2);
+			border-radius: 16px;
 			padding: 1.5rem;
-			box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-			transition: transform 0.2s, box-shadow 0.2s;
+			box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+			transition: all 0.3s ease;
 			cursor: pointer;
 			text-decoration: none;
 			color: inherit;
 			display: block;
+			position: relative;
 		}
-		
+
 		.politician-card:hover {
-			transform: translateY(-4px);
-			box-shadow: 0 8px 16px rgba(0,0,0,0.15);
+			transform: translateY(-6px) scale(1.01);
+			box-shadow: 0 12px 30px rgba(0, 0, 0, 0.25);
+			border-color: rgba(148, 163, 184, 0.4);
 		}
-		
+
 		.politician-name {
 			font-size: 1.5rem;
 			font-weight: 700;
 			margin-bottom: 0.5rem;
-			color: #333;
+			color: #f1f5f9;
 		}
 		
 		.politician-info {
@@ -161,13 +234,14 @@ export function renderPoliticianList(
 			gap: 0.5rem;
 			margin-top: 1rem;
 		}
-		
+
 		.info-item {
 			display: flex;
 			align-items: center;
 			gap: 0.5rem;
 			font-size: 0.95rem;
-			color: #666;
+			color: #cbd5e1;
+			opacity: 0.9;
 		}
 		
 		.badge {
@@ -180,46 +254,81 @@ export function renderPoliticianList(
 		}
 		
 		.badge-democrat {
-			background: #3b82f6;
+			background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
 			color: white;
+			box-shadow: 0 0 10px rgba(59, 130, 246, 0.3);
 		}
-		
+
 		.badge-republican {
-			background: #ef4444;
+			background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
 			color: white;
+			box-shadow: 0 0 10px rgba(239, 68, 68, 0.3);
 		}
-		
+
 		.badge-independent {
-			background: #6b7280;
+			background: linear-gradient(135deg, #6b7280 0%, #4b5563 100%);
 			color: white;
+			box-shadow: 0 0 10px rgba(107, 114, 128, 0.3);
 		}
 		
 		.empty-state {
-			background: white;
-			border-radius: 12px;
+			background: linear-gradient(135deg, rgba(30, 41, 59, 0.95) 0%, rgba(51, 65, 85, 0.9) 100%);
+			backdrop-filter: blur(20px);
+			border: 1px solid rgba(148, 163, 184, 0.2);
+			border-radius: 16px;
 			padding: 3rem;
 			text-align: center;
-			box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+			box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(148, 163, 184, 0.1);
+			position: relative;
 		}
-		
+
+		.empty-state::before {
+			content: '';
+			position: absolute;
+			top: 0;
+			left: 0;
+			right: 0;
+			bottom: 0;
+			background: linear-gradient(135deg, rgba(59, 130, 246, 0.05) 0%, rgba(239, 68, 68, 0.05) 100%);
+			border-radius: 16px;
+			pointer-events: none;
+		}
+
 		.empty-state h2 {
-			color: #666;
+			color: #cbd5e1;
 			margin-bottom: 1rem;
+			position: relative;
+			z-index: 1;
 		}
-		
+
 		.legal-notice {
-			background: white;
-			border-radius: 12px;
+			background: linear-gradient(135deg, rgba(30, 41, 59, 0.95) 0%, rgba(51, 65, 85, 0.9) 100%);
+			backdrop-filter: blur(20px);
+			border: 1px solid rgba(148, 163, 184, 0.2);
+			border-radius: 16px;
 			padding: 1.5rem;
 			margin-top: 2rem;
-			box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+			box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(148, 163, 184, 0.1);
 			font-size: 0.9rem;
-			color: #666;
+			color: #cbd5e1;
 			line-height: 1.6;
+			position: relative;
 		}
-		
+
+		.legal-notice::before {
+			content: '';
+			position: absolute;
+			top: 0;
+			left: 0;
+			right: 0;
+			bottom: 0;
+			background: linear-gradient(135deg, rgba(59, 130, 246, 0.05) 0%, rgba(239, 68, 68, 0.05) 100%);
+			border-radius: 16px;
+			pointer-events: none;
+		}
+
 		.legal-notice strong {
-			color: #333;
+			color: #f1f5f9;
 		}
 	</style>
 </head>
@@ -367,12 +476,32 @@ export function renderPoliticianProfile(
 		
 		body {
 			font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-			background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+			background:
+				radial-gradient(circle at 20% 50%, rgba(120, 119, 198, 0.3) 0%, transparent 50%),
+				radial-gradient(circle at 80% 20%, rgba(255, 255, 255, 0.15) 0%, transparent 50%),
+				radial-gradient(circle at 40% 80%, rgba(120, 119, 198, 0.3) 0%, transparent 50%),
+				linear-gradient(135deg, #0f172a 0%, #1e293b 25%, #334155 50%, #475569 75%, #64748b 100%);
 			min-height: 100vh;
 			padding: 2rem;
-			color: #333;
+			color: #f1f5f9;
+			position: relative;
 		}
-		
+
+		body::before {
+			content: '';
+			position: fixed;
+			top: 0;
+			left: 0;
+			right: 0;
+			bottom: 0;
+			background:
+				radial-gradient(circle at 30% 20%, rgba(59, 130, 246, 0.1) 0%, transparent 40%),
+				radial-gradient(circle at 70% 80%, rgba(239, 68, 68, 0.08) 0%, transparent 40%),
+				radial-gradient(circle at 50% 50%, rgba(16, 185, 129, 0.05) 0%, transparent 50%);
+			pointer-events: none;
+			z-index: -1;
+		}
+
 		.container {
 			max-width: 1000px;
 			margin: 0 auto;
@@ -381,28 +510,51 @@ export function renderPoliticianProfile(
 		.back-link {
 			display: inline-block;
 			margin-bottom: 1rem;
-			color: white;
+			color: #93c5fd;
 			text-decoration: none;
 			font-weight: 600;
 			opacity: 0.9;
+			transition: all 0.3s ease;
 		}
-		
+
 		.back-link:hover {
 			opacity: 1;
+			color: #dbeafe;
+			transform: translateX(-2px);
 		}
 		
 		.profile-header {
-			background: white;
-			border-radius: 12px;
-			padding: 2rem;
+			background: linear-gradient(135deg, rgba(30, 41, 59, 0.95) 0%, rgba(51, 65, 85, 0.95) 100%);
+			backdrop-filter: blur(20px);
+			border: 1px solid rgba(148, 163, 184, 0.2);
+			border-radius: 16px;
+			padding: 2.5rem;
 			margin-bottom: 2rem;
-			box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+			box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(148, 163, 184, 0.1);
+			position: relative;
+		}
+
+		.profile-header::before {
+			content: '';
+			position: absolute;
+			top: 0;
+			left: 0;
+			right: 0;
+			bottom: 0;
+			background: linear-gradient(135deg, rgba(59, 130, 246, 0.1) 0%, rgba(239, 68, 68, 0.1) 100%);
+			border-radius: 16px;
+			pointer-events: none;
 		}
 		
 		.profile-name {
 			font-size: 2.5rem;
 			margin-bottom: 1rem;
-			color: #333;
+			color: #f1f5f9;
+			font-weight: 800;
+			letter-spacing: -0.025em;
+			position: relative;
+			z-index: 1;
+			text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
 		}
 		
 		.profile-details {
@@ -419,16 +571,17 @@ export function renderPoliticianProfile(
 		
 		.detail-label {
 			font-size: 0.85rem;
-			color: #666;
+			color: #94a3b8;
 			text-transform: uppercase;
 			letter-spacing: 0.5px;
 			margin-bottom: 0.25rem;
+			opacity: 0.9;
 		}
-		
+
 		.detail-value {
 			font-size: 1.1rem;
 			font-weight: 600;
-			color: #333;
+			color: #f1f5f9;
 		}
 		
 		.badge {
@@ -439,20 +592,23 @@ export function renderPoliticianProfile(
 			font-weight: 600;
 			margin-top: 0.5rem;
 		}
-		
+
 		.badge-democrat {
-			background: #3b82f6;
+			background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
 			color: white;
+			box-shadow: 0 0 10px rgba(59, 130, 246, 0.3);
 		}
-		
+
 		.badge-republican {
-			background: #ef4444;
+			background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
 			color: white;
+			box-shadow: 0 0 10px rgba(239, 68, 68, 0.3);
 		}
-		
+
 		.badge-independent {
-			background: #6b7280;
+			background: linear-gradient(135deg, #6b7280 0%, #4b5563 100%);
 			color: white;
+			box-shadow: 0 0 10px rgba(107, 114, 128, 0.3);
 		}
 		
 		.social-links {
@@ -460,45 +616,73 @@ export function renderPoliticianProfile(
 			gap: 1rem;
 			margin-top: 1rem;
 		}
-		
+
 		.social-link {
 			padding: 0.5rem 1rem;
-			background: #f3f4f6;
-			border-radius: 8px;
+			background: rgba(148, 163, 184, 0.2);
+			backdrop-filter: blur(10px);
+			border: 1px solid rgba(148, 163, 184, 0.3);
+			border-radius: 12px;
 			text-decoration: none;
-			color: #333;
+			color: #f1f5f9;
 			font-weight: 600;
-			transition: background 0.2s;
+			transition: all 0.3s ease;
 		}
-		
+
 		.social-link:hover {
-			background: #e5e7eb;
+			background: rgba(148, 163, 184, 0.3);
+			border-color: rgba(148, 163, 184, 0.5);
+			transform: translateY(-1px);
 		}
 		
 		.votes-section {
-			background: white;
-			border-radius: 12px;
+			background: linear-gradient(135deg, rgba(30, 41, 59, 0.95) 0%, rgba(51, 65, 85, 0.9) 100%);
+			backdrop-filter: blur(20px);
+			border: 1px solid rgba(148, 163, 184, 0.2);
+			border-radius: 16px;
 			padding: 2rem;
-			box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+			box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(148, 163, 184, 0.1);
+			position: relative;
 		}
-		
+
+		.votes-section::before {
+			content: '';
+			position: absolute;
+			top: 0;
+			left: 0;
+			right: 0;
+			bottom: 0;
+			background: linear-gradient(135deg, rgba(59, 130, 246, 0.05) 0%, rgba(239, 68, 68, 0.05) 100%);
+			border-radius: 16px;
+			pointer-events: none;
+		}
+
 		.section-title {
 			font-size: 1.8rem;
 			margin-bottom: 1.5rem;
-			color: #333;
+			color: #f1f5f9;
+			position: relative;
+			z-index: 1;
+			text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
 		}
 		
 		.vote-item {
-			border-left: 4px solid #e5e7eb;
+			border-left: 4px solid rgba(148, 163, 184, 0.3);
 			padding: 1rem;
 			margin-bottom: 1rem;
-			background: #f9fafb;
-			border-radius: 0 8px 8px 0;
-			transition: border-color 0.2s;
+			background: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.05) 100%);
+			backdrop-filter: blur(10px);
+			border: 1px solid rgba(148, 163, 184, 0.2);
+			border-radius: 0 12px 12px 0;
+			transition: all 0.3s ease;
+			position: relative;
+			z-index: 1;
 		}
-		
+
 		.vote-item:hover {
-			border-color: #667eea;
+			border-color: rgba(59, 130, 246, 0.5);
+			transform: translateX(4px);
+			box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 		}
 		
 		.vote-item.yes {
@@ -528,62 +712,115 @@ export function renderPoliticianProfile(
 		}
 		
 		.vote-position.yes {
-			background: #10b981;
+			background: linear-gradient(135deg, #10b981 0%, #059669 100%);
 			color: white;
+			box-shadow: 0 0 10px rgba(16, 185, 129, 0.3);
 		}
-		
+
 		.vote-position.no {
-			background: #ef4444;
+			background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
 			color: white;
+			box-shadow: 0 0 10px rgba(239, 68, 68, 0.3);
 		}
-		
+
 		.vote-position.not-voting {
-			background: #6b7280;
+			background: linear-gradient(135deg, #6b7280 0%, #4b5563 100%);
 			color: white;
+			box-shadow: 0 0 10px rgba(107, 114, 128, 0.3);
 		}
-		
+
 		.vote-position.present {
-			background: #f59e0b;
+			background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
 			color: white;
+			box-shadow: 0 0 10px rgba(245, 158, 11, 0.3);
 		}
 		
 		.vote-title {
 			font-weight: 600;
 			font-size: 1.1rem;
 			margin-bottom: 0.5rem;
-			color: #333;
+			color: #f1f5f9;
 		}
-		
+
 		.vote-description {
-			color: #666;
+			color: #cbd5e1;
 			margin-bottom: 0.5rem;
 			line-height: 1.5;
+			opacity: 0.9;
 		}
-		
+
 		.vote-meta {
 			display: flex;
 			gap: 1rem;
 			font-size: 0.85rem;
-			color: #999;
+			color: #94a3b8;
 			margin-top: 0.5rem;
 		}
 		
 		.twitter-embed {
 			margin-top: 2rem;
 			padding: 1.5rem;
-			background: #f9fafb;
-			border-radius: 8px;
+			background: linear-gradient(135deg, rgba(30, 41, 59, 0.95) 0%, rgba(51, 65, 85, 0.9) 100%);
+			backdrop-filter: blur(20px);
+			border: 1px solid rgba(148, 163, 184, 0.2);
+			border-radius: 12px;
+			position: relative;
 		}
-		
+
+		.twitter-embed::before {
+			content: '';
+			position: absolute;
+			top: 0;
+			left: 0;
+			right: 0;
+			bottom: 0;
+			background: linear-gradient(135deg, rgba(59, 130, 246, 0.05) 0%, rgba(239, 68, 68, 0.05) 100%);
+			border-radius: 12px;
+			pointer-events: none;
+		}
+
 		.twitter-embed h3 {
 			margin-bottom: 1rem;
-			color: #333;
+			color: #f1f5f9;
+			position: relative;
+			z-index: 1;
 		}
 		
 		.empty-votes {
 			text-align: center;
 			padding: 3rem;
-			color: #666;
+			color: #94a3b8;
+			position: relative;
+			z-index: 1;
+		}
+
+		.party-icon {
+			position: absolute;
+			top: 2rem;
+			right: 2rem;
+			width: 50px;
+			height: 50px;
+			animation: bounce 2s infinite;
+		}
+
+		.donkey-icon {
+			filter: drop-shadow(0 0 15px rgba(59, 130, 246, 0.6)) brightness(1.1);
+		}
+
+		.elephant-icon {
+			filter: drop-shadow(0 0 15px rgba(239, 68, 68, 0.6)) brightness(1.1);
+		}
+
+		@keyframes bounce {
+			0%, 20%, 50%, 80%, 100% {
+				transform: translateY(0);
+			}
+			40% {
+				transform: translateY(-10px);
+			}
+			60% {
+				transform: translateY(-5px);
+			}
 		}
 	</style>
 </head>
@@ -592,6 +829,7 @@ export function renderPoliticianProfile(
 		<a href="/" class="back-link">← Back to All Politicians</a>
 		
 		<div class="profile-header">
+			${renderPartyIcon(politician.party)}
 			<h1 class="profile-name">${escapeHtml(politician.name)}</h1>
 			${politician.party ? `<span class="badge badge-${partyClass}">${escapeHtml(politician.party)}</span>` : ''}
 			
@@ -686,12 +924,24 @@ function escapeHtml(text: string | null | undefined): string {
 function formatDate(dateString: string): string {
 	try {
 		const date = new Date(dateString);
-		return date.toLocaleDateString('en-US', { 
-			year: 'numeric', 
-			month: 'long', 
-			day: 'numeric' 
+		return date.toLocaleDateString('en-US', {
+			year: 'numeric',
+			month: 'long',
+			day: 'numeric'
 		});
 	} catch {
 		return dateString;
 	}
+}
+
+function renderPartyIcon(party: string | null): string {
+	if (!party) return '';
+
+	const normalizedParty = party.toLowerCase();
+	if (normalizedParty === 'democrat') {
+		return `<img class="party-icon donkey-icon" src="https://content.mycutegraphics.com/graphics/animal/horse-head.png" alt="Donkey" />`;
+	} else if (normalizedParty === 'republican') {
+		return `<img class="party-icon elephant-icon" src="https://content.mycutegraphics.com/graphics/animal/cute-elephant.png" alt="Elephant" />`;
+	}
+	return '';
 }

@@ -99,13 +99,49 @@ export function renderHomePage(states: State[]): string {
 		}
 
 		.search-container {
-			margin-top: 1rem;
-			padding-top: 1rem;
-			border-top: 1px solid #e5e7eb;
+			margin-top: 1.5rem;
+			padding-top: 1.5rem;
+			border-top: 1px solid rgba(148, 163, 184, 0.3);
 			display: flex;
 			flex-direction: column;
 			align-items: center;
-			gap: 1rem;
+			position: relative;
+			z-index: 1;
+		}
+
+		.search-type-selector {
+			display: flex;
+			gap: 0.5rem;
+			flex-wrap: wrap;
+			justify-content: center;
+			margin-bottom: 1rem;
+		}
+
+		.search-type-btn {
+			padding: 0.5rem 1rem;
+			background: rgba(148, 163, 184, 0.2);
+			backdrop-filter: blur(10px);
+			border: 1px solid rgba(148, 163, 184, 0.3);
+			border-radius: 8px;
+			cursor: pointer;
+			font-weight: 600;
+			font-size: 0.9rem;
+			transition: all 0.3s ease;
+			color: #cbd5e1;
+		}
+
+		.search-type-btn.active {
+			background: linear-gradient(135deg, #60a5fa 0%, #a78bfa 50%, #f472b6 100%);
+			color: white;
+			border-color: rgba(59, 130, 246, 0.5);
+			box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+		}
+
+		.search-type-btn:hover:not(.active) {
+			background: rgba(148, 163, 184, 0.3);
+			border-color: rgba(148, 163, 184, 0.5);
+			color: #f1f5f9;
+			transform: translateY(-1px);
 		}
 
 		.search-bar {
@@ -576,7 +612,7 @@ export function renderHomePage(states: State[]): string {
 	<div class="container">
 		<header>
 			<h1>Voter Politician Tool</h1>
-			<p class="subtitle" style="opacity: 0.7;">Click on any state to view representatives and voter information</p>
+			<p class="subtitle" style="opacity: 0.95;">Click on any state to view representatives and voter information</p>
 			<nav>
 				<a href="/issues">Issues Hub</a>
 				<a href="/senators">Senate Hub</a>
@@ -584,8 +620,13 @@ export function renderHomePage(states: State[]): string {
 				<a href="/election">Election Hub</a>
 			</nav>
 			<div class="search-container">
+				<div class="search-type-selector">
+					<button class="search-type-btn active" data-type="all" onclick="setSearchType('all')">All</button>
+					<button class="search-type-btn" data-type="states" onclick="setSearchType('states')">States</button>
+					<button class="search-type-btn" data-type="representatives" onclick="setSearchType('representatives')">Representatives</button>
+				</div>
 				<div class="search-bar">
-					<input type="text" id="search-input" class="search-input" placeholder="Search for a state..." />
+					<input type="text" id="search-input" class="search-input" placeholder="Search for states, representatives, or candidates..." />
 					<button class="search-btn" onclick="performSearch()">Search</button>
 				</div>
 				<div id="search-dropdown" class="search-dropdown"></div>
@@ -612,6 +653,26 @@ export function renderHomePage(states: State[]): string {
 	
 	<script>
 		const stateData = ${JSON.stringify(states)};
+		let currentSearchType = 'all';
+
+		function setSearchType(type) {
+			currentSearchType = type;
+			document.querySelectorAll('.search-type-btn').forEach(btn => {
+				btn.classList.remove('active');
+			});
+			document.querySelector('[data-type="' + type + '"]').classList.add('active');
+
+			const searchInput = document.getElementById('search-input');
+			const placeholderText = {
+				'all': 'Search for states, representatives, or candidates...',
+				'states': 'Search for a state...',
+				'representatives': 'Search for representatives or candidates...'
+			}[type] || 'Search for states, representatives, or candidates...';
+
+			searchInput.placeholder = placeholderText;
+			searchInput.value = '';
+			hideSuggestions();
+		}
 
 		// Add click handlers to all state paths
 		document.querySelectorAll('.state-path').forEach(path => {
@@ -833,41 +894,82 @@ export function renderHomePage(states: State[]): string {
 		let currentSuggestions = [];
 		let selectedSuggestionIndex = -1;
 
-		function showSuggestions(query) {
+		async function showSuggestions(query) {
 			const dropdown = document.getElementById('search-dropdown');
 			if (!query.trim()) {
 				dropdown.style.display = 'none';
 				return;
 			}
 
-			// Find matching states (top 4)
-			const matches = stateData.filter(s =>
-				s.name.toLowerCase().includes(query.toLowerCase()) ||
-				s.code.toLowerCase().includes(query.toLowerCase())
-			).slice(0, 4);
+			let matches = [];
 
-			if (matches.length === 0) {
+			try {
+				if (currentSearchType === 'states' || currentSearchType === 'all') {
+					// Find matching states
+					const stateMatches = stateData.filter(s =>
+						s.name.toLowerCase().includes(query.toLowerCase()) ||
+						s.code.toLowerCase().includes(query.toLowerCase())
+					);
+					matches = [...matches, ...stateMatches];
+				}
+
+				if (currentSearchType === 'representatives' || currentSearchType === 'all') {
+					// Add presidential candidates
+					const candidates = [
+						{ id: 'trump', name: 'Donald J. Trump', party: 'Republican', chamber: 'Candidate', state_code: 'National' },
+						{ id: 'harris', name: 'Kamala Harris', party: 'Democrat', chamber: 'Candidate', state_code: 'National' }
+					];
+
+					const candidateMatches = candidates.filter(c =>
+						c.name.toLowerCase().includes(query.toLowerCase()) ||
+						c.party.toLowerCase().includes(query.toLowerCase())
+					);
+
+					// Search for representatives via API
+					const response = await fetch('/api/search/representatives?q=' + encodeURIComponent(query));
+					const data = await response.json();
+					const repMatches = data.results || [];
+
+					matches = [...candidateMatches, ...repMatches, ...matches];
+				}
+
+				// Limit to top 6 results
+				matches = matches.slice(0, 6);
+
+				if (matches.length === 0) {
+					dropdown.style.display = 'none';
+					return;
+				}
+
+				currentSuggestions = matches;
+				selectedSuggestionIndex = -1;
+
+				const suggestionsHtml = matches.map((item, index) => {
+					let displayText = '';
+					if (item.chamber === 'Candidate') {
+						displayText = item.party + ' - Presidential Candidate';
+					} else if (item.chamber) {
+						displayText = item.state_code + ' - ' + (item.chamber === 'house' ? 'House' : 'Senate');
+					} else {
+						displayText = item.code;
+					}
+					return '<div class="search-suggestion" data-index="' + index + '">' +
+						'<div class="suggestion-name">' + item.name + '</div>' +
+						'<div class="suggestion-code">' + displayText + '</div>' +
+					'</div>';
+				}).join('');
+
+				dropdown.innerHTML = suggestionsHtml;
+				dropdown.style.display = 'block';
+
+				// Add click handlers
+				dropdown.querySelectorAll('.search-suggestion').forEach((el, index) => {
+					el.addEventListener('click', () => selectSuggestion(index));
+				});
+			} catch (error) {
+				console.error('Search error:', error);
 				dropdown.style.display = 'none';
-				return;
 			}
-
-			currentSuggestions = matches;
-			selectedSuggestionIndex = -1;
-
-			const suggestionsHtml = matches.map((state, index) =>
-				'<div class="search-suggestion" data-index="' + index + '">' +
-					'<div class="suggestion-name">' + state.name + '</div>' +
-					'<div class="suggestion-code">' + state.code + '</div>' +
-				'</div>'
-			).join('');
-
-			dropdown.innerHTML = suggestionsHtml;
-			dropdown.style.display = 'block';
-
-			// Add click handlers
-			dropdown.querySelectorAll('.search-suggestion').forEach((el, index) => {
-				el.addEventListener('click', () => selectSuggestion(index));
-			});
 		}
 
 		function hideSuggestions() {
@@ -884,20 +986,29 @@ export function renderHomePage(states: State[]): string {
 
 		function selectSuggestion(index) {
 			if (index >= 0 && index < currentSuggestions.length) {
-				const state = currentSuggestions[index];
-				loadStateDetails(state.code);
+				const item = currentSuggestions[index];
 
-				// Highlight the state on the map
-				document.querySelectorAll('.state-path').forEach(path => {
-					path.classList.remove('selected');
-				});
-				const statePath = document.querySelector('[data-state="' + state.code + '"]');
-				if (statePath) {
-					statePath.classList.add('selected');
+				if (item.chamber === 'Candidate') {
+					// Navigate to candidate profile
+					window.location.href = '/' + (item.id === 'trump' ? 'trump' : 'harris');
+					return;
+				} else {
+					// Handle state selection
+					loadStateDetails(item.code);
+
+					// Highlight the state on the map
+					document.querySelectorAll('.state-path').forEach(path => {
+						path.classList.remove('selected');
+					});
+					const statePath = document.querySelector('[data-state="' + item.code + '"]');
+					if (statePath) {
+						statePath.classList.add('selected');
+					}
+
+					// Update search input and hide dropdown
+					document.getElementById('search-input').value = item.name;
 				}
 
-				// Update search input and hide dropdown
-				document.getElementById('search-input').value = state.name;
 				hideSuggestions();
 			}
 		}
@@ -910,6 +1021,22 @@ export function renderHomePage(states: State[]): string {
 				// If a suggestion is highlighted, select it
 				selectSuggestion(selectedSuggestionIndex);
 			} else if (query) {
+				// Check for exact candidate matches first
+				const candidates = [
+					{ id: 'trump', name: 'Donald J. Trump', party: 'Republican', chamber: 'Candidate' },
+					{ id: 'harris', name: 'Kamala Harris', party: 'Democrat', chamber: 'Candidate' }
+				];
+
+				const candidateMatch = candidates.find(c =>
+					c.name.toLowerCase() === query ||
+					c.id === query
+				);
+
+				if (candidateMatch) {
+					window.location.href = '/' + (candidateMatch.id === 'trump' ? 'trump' : 'harris');
+					return;
+				}
+
 				// Try to find exact match for states
 				const state = stateData.find(s =>
 					s.name.toLowerCase() === query ||
@@ -919,7 +1046,7 @@ export function renderHomePage(states: State[]): string {
 				if (state) {
 					selectSuggestion(currentSuggestions.indexOf(state));
 				} else {
-					alert('State not found. Please select from suggestions or try a different search.');
+					alert('No results found. Try searching for a state, representative, or presidential candidate.');
 				}
 			}
 		}

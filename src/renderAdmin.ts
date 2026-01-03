@@ -15,37 +15,80 @@ export function renderAdminLogin(): string {
 		
 		body {
 			font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-			background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+			background:
+				radial-gradient(circle at 20% 50%, rgba(120, 119, 198, 0.3) 0%, transparent 50%),
+				radial-gradient(circle at 80% 20%, rgba(255, 255, 255, 0.15) 0%, transparent 50%),
+				radial-gradient(circle at 40% 80%, rgba(120, 119, 198, 0.3) 0%, transparent 50%),
+				linear-gradient(135deg, #0f172a 0%, #1e293b 25%, #334155 50%, #475569 75%, #64748b 100%);
 			min-height: 100vh;
 			display: flex;
 			align-items: center;
 			justify-content: center;
 			padding: 2rem;
+			color: #f1f5f9;
+			position: relative;
+		}
+
+		body::before {
+			content: '';
+			position: fixed;
+			top: 0;
+			left: 0;
+			right: 0;
+			bottom: 0;
+			background:
+				radial-gradient(circle at 30% 20%, rgba(59, 130, 246, 0.1) 0%, transparent 40%),
+				radial-gradient(circle at 70% 80%, rgba(239, 68, 68, 0.08) 0%, transparent 40%),
+				radial-gradient(circle at 50% 50%, rgba(16, 185, 129, 0.05) 0%, transparent 50%);
+			pointer-events: none;
+			z-index: -1;
 		}
 		
 		.login-container {
-			background: white;
-			border-radius: 12px;
+			background: linear-gradient(135deg, rgba(30, 41, 59, 0.95) 0%, rgba(51, 65, 85, 0.95) 100%);
+			backdrop-filter: blur(20px);
+			border: 1px solid rgba(148, 163, 184, 0.2);
+			border-radius: 16px;
 			padding: 3rem;
-			box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+			box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(148, 163, 184, 0.1);
 			width: 100%;
 			max-width: 400px;
+			position: relative;
+		}
+
+		.login-container::before {
+			content: '';
+			position: absolute;
+			top: 0;
+			left: 0;
+			right: 0;
+			bottom: 0;
+			background: linear-gradient(135deg, rgba(59, 130, 246, 0.1) 0%, rgba(239, 68, 68, 0.1) 100%);
+			border-radius: 16px;
+			pointer-events: none;
 		}
 		
 		h1 {
 			font-size: 2rem;
 			margin-bottom: 0.5rem;
-			background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+			background: linear-gradient(135deg, #60a5fa 0%, #a78bfa 25%, #f472b6 50%, #fbbf24 75%, #34d399 100%);
 			-webkit-background-clip: text;
 			-webkit-text-fill-color: transparent;
 			background-clip: text;
+			font-weight: 800;
+			letter-spacing: -0.025em;
 			text-align: center;
+			position: relative;
+			z-index: 1;
 		}
 		
 		.subtitle {
-			color: #666;
+			color: #cbd5e1;
 			text-align: center;
 			margin-bottom: 2rem;
+			opacity: 0.9;
+			position: relative;
+			z-index: 1;
 		}
 		
 		.form-group {
@@ -55,49 +98,69 @@ export function renderAdminLogin(): string {
 		label {
 			display: block;
 			margin-bottom: 0.5rem;
-			color: #333;
+			color: #f1f5f9;
 			font-weight: 600;
+			position: relative;
+			z-index: 1;
 		}
 		
 		input {
 			width: 100%;
 			padding: 0.75rem;
-			border: 2px solid #e0e0e0;
-			border-radius: 8px;
+			border: 2px solid rgba(148, 163, 184, 0.3);
+			border-radius: 12px;
 			font-size: 1rem;
-			transition: border-color 0.2s;
+			background: rgba(255, 255, 255, 0.1);
+			backdrop-filter: blur(10px);
+			color: #f1f5f9;
+			transition: all 0.3s ease;
+			position: relative;
+			z-index: 1;
 		}
-		
+
 		input:focus {
 			outline: none;
-			border-color: #667eea;
+			border-color: #60a5fa;
+			box-shadow: 0 0 20px rgba(59, 130, 246, 0.3);
+			background: rgba(255, 255, 255, 0.15);
+		}
+
+		input::placeholder {
+			color: #94a3b8;
 		}
 		
 		.btn {
 			width: 100%;
 			padding: 0.75rem;
-			background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+			background: linear-gradient(135deg, #60a5fa 0%, #a78bfa 50%, #f472b6 100%);
 			color: white;
 			border: none;
-			border-radius: 8px;
+			border-radius: 12px;
 			font-size: 1rem;
 			font-weight: 600;
 			cursor: pointer;
-			transition: transform 0.2s, box-shadow 0.2s;
+			transition: all 0.3s ease;
+			border: 1px solid rgba(255, 255, 255, 0.2);
+			position: relative;
+			z-index: 1;
 		}
-		
+
 		.btn:hover {
-			transform: translateY(-2px);
-			box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+			transform: translateY(-3px) scale(1.02);
+			box-shadow: 0 8px 25px rgba(59, 130, 246, 0.5);
 		}
 		
 		.error {
-			background: #fee;
-			color: #c33;
+			background: linear-gradient(135deg, rgba(239, 68, 68, 0.2) 0%, rgba(220, 38, 38, 0.1) 100%);
+			backdrop-filter: blur(10px);
+			color: #f87171;
 			padding: 0.75rem;
-			border-radius: 8px;
+			border-radius: 12px;
 			margin-bottom: 1rem;
+			border: 1px solid rgba(239, 68, 68, 0.3);
 			display: none;
+			position: relative;
+			z-index: 1;
 		}
 	</style>
 </head>

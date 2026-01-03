@@ -270,23 +270,29 @@ export function renderElectionHub(states: any[]): string {
 		}
 
 		.result-card {
-			background: #f8fafc;
-			border-radius: 8px;
+			background: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.05) 100%);
+			backdrop-filter: blur(10px);
+			border: 1px solid rgba(148, 163, 184, 0.2);
+			border-radius: 12px;
 			padding: 1.5rem;
-			border-left: 4px solid #667eea;
+			border-left: 4px solid #60a5fa;
+			box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+			position: relative;
+			z-index: 1;
 		}
 
 		.result-title {
 			font-size: 1.2rem;
 			font-weight: 600;
 			margin-bottom: 1rem;
-			color: #1f2937;
+			color: #f1f5f9;
 		}
 
 		.result-meta {
 			margin-bottom: 1rem;
-			color: #6b7280;
+			color: #cbd5e1;
 			font-size: 0.9rem;
+			opacity: 0.9;
 		}
 
 		.download-btn {
@@ -552,13 +558,13 @@ export function renderElectionHub(states: any[]): string {
 
 		<div class="card">
 			<h2 class="card-title">🗳️ 2024 Presidential Election Results</h2>
-			<p style="color: #6b7280; margin-bottom: 1rem;">
+			<p style="color: #cbd5e1; margin-bottom: 1rem;">
 				Official results from the Federal Election Commission (FEC) as reported by state election offices.
 			</p>
 
 			<!-- Popular Vote Results -->
 			<div class="popular-vote-section">
-				<h3 style="color: #333; margin-bottom: 1rem; font-size: 1.3rem;">Popular Vote Results</h3>
+				<h3 style="color: #f1f5f9; margin-bottom: 1rem; font-size: 1.3rem;">Popular Vote Results</h3>
 				<div class="popular-vote-grid">
 					<div class="popular-vote-card trump">
 						<div class="candidate-name">Donald J. Trump (R)</div>
@@ -577,7 +583,7 @@ export function renderElectionHub(states: any[]): string {
 
 			<!-- Electoral College Results -->
 			<div class="electoral-section">
-				<h3 style="color: #333; margin: 2rem 0 1rem 0; font-size: 1.3rem;">Electoral College Results</h3>
+				<h3 style="color: #f1f5f9; margin: 2rem 0 1rem 0; font-size: 1.3rem;">Electoral College Results</h3>
 				<div class="stats-grid">
 					<div class="stat-card">
 						<div class="stat-value">312</div>
@@ -605,10 +611,10 @@ export function renderElectionHub(states: any[]): string {
 				</a>
 			</div>
 
-			<div style="background: #f0f9ff; border-left: 4px solid #3b82f6; padding: 1rem; margin-top: 2rem; border-radius: 4px;">
-				<p style="margin: 0; font-size: 0.9rem; color: #1e40af;">
+			<div style="background: linear-gradient(135deg, rgba(59, 130, 246, 0.1) 0%, rgba(37, 99, 235, 0.05) 100%); backdrop-filter: blur(10px); border: 1px solid rgba(59, 130, 246, 0.3); border-left: 4px solid #60a5fa; padding: 1rem; margin-top: 2rem; border-radius: 8px;">
+				<p style="margin: 0; font-size: 0.9rem; color: #cbd5e1;">
 					<strong>📋 Source:</strong>
-					<a href="https://www.fec.gov/resources/cms-content/documents/2024presgeresults.pdf" target="_blank" style="color: #3b82f6; text-decoration: underline;">
+					<a href="https://www.fec.gov/resources/cms-content/documents/2024presgeresults.pdf" target="_blank" style="color: #93c5fd; text-decoration: underline;">
 						https://www.fec.gov/resources/cms-content/documents/2024presgeresults.pdf
 					</a>
 					<br><br>
@@ -645,30 +651,30 @@ export function renderElectionHub(states: any[]): string {
 				<div class="result-card">
 					<div class="result-title">Popular Vote Summary</div>
 					<div class="result-meta">Based on official FEC data</div>
-					<ul style="list-style: none; padding: 0;">
-						<li><strong>Donald J. Trump (R):</strong> ~77 million votes</li>
-						<li><strong>Kamala Harris (D):</strong> ~74 million votes</li>
-						<li><strong>Other Candidates:</strong> ~2 million votes</li>
+					<ul style="list-style: none; padding: 0; color: #f1f5f9;">
+						<li><strong style="color: #f87171;">Donald J. Trump (R):</strong> ~77 million votes</li>
+						<li><strong style="color: #60a5fa;">Kamala Harris (D):</strong> ~74 million votes</li>
+						<li><strong style="color: #cbd5e1;">Other Candidates:</strong> ~2 million votes</li>
 					</ul>
 				</div>
 
 				<div class="result-card">
 					<div class="result-title">Electoral Vote Distribution</div>
 					<div class="result-meta">270 votes needed to win</div>
-					<ul style="list-style: none; padding: 0;">
-						<li><strong>Republican States:</strong> 312 electoral votes</li>
-						<li><strong>Democratic States:</strong> 226 electoral votes</li>
-						<li><strong>Swing States:</strong> Varies by election</li>
+					<ul style="list-style: none; padding: 0; color: #f1f5f9;">
+						<li><strong style="color: #f87171;">Republican States:</strong> 312 electoral votes</li>
+						<li><strong style="color: #60a5fa;">Democratic States:</strong> 226 electoral votes</li>
+						<li><strong style="color: #94a3b8;">Swing States:</strong> Varies by election</li>
 					</ul>
 				</div>
 
 				<div class="result-card">
 					<div class="result-title">State Results Overview</div>
 					<div class="result-meta">2024 Presidential Election</div>
-					<ul style="list-style: none; padding: 0;">
-						<li><strong>Republican Wins:</strong> 26 states</li>
-						<li><strong>Democratic Wins:</strong> 24 states + DC</li>
-						<li><strong>Split Electoral Votes:</strong> ME, NE</li>
+					<ul style="list-style: none; padding: 0; color: #f1f5f9;">
+						<li><strong style="color: #f87171;">Republican Wins:</strong> 26 states</li>
+						<li><strong style="color: #60a5fa;">Democratic Wins:</strong> 24 states + DC</li>
+						<li><strong style="color: #fbbf24;">Split Electoral Votes:</strong> ME, NE</li>
 					</ul>
 				</div>
 			</div>
