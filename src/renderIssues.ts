@@ -366,12 +366,7 @@ export function renderIssuesPage(democratIssues: Issue[], republicanIssues: Issu
 		<!-- Democrats Section (Left) -->
 		<div class="section democrat-section">
 			<div class="section-header">
-				<svg class="section-icon donkey-icon" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
-					<path d="M50 10c-5 0-10 5-10 10v10c0 5 5 10 10 10s10-5 10-10V20c0-5-5-10-10-10z" fill="#3b82f6"/>
-					<path d="M30 40c-5 0-10 5-10 10v20c0 5 5 10 10 10h40c5 0 10-5 10-10V50c0-5-5-10-10-10H30z" fill="#3b82f6"/>
-					<path d="M20 60c-5 0-10 5-10 10v10c0 5 5 10 10 10h10c5 0 10-5 10-10V70c0-5-5-10-10-10H20z" fill="#3b82f6"/>
-					<path d="M70 60c-5 0-10 5-10 10v10c0 5 5 10 10 10h10c5 0 10-5 10-10V70c0-5-5-10-10-10H70z" fill="#3b82f6"/>
-				</svg>
+				<img class="section-icon donkey-icon" src="https://content.mycutegraphics.com/graphics/animal/horse-head.png" alt="Horse" />
 				<h2 class="section-title democrat-title">Democratic Issues</h2>
 			</div>
 			<div class="issues-list">
@@ -424,13 +419,7 @@ export function renderIssuesPage(democratIssues: Issue[], republicanIssues: Issu
 		<!-- Republicans Section (Right) -->
 		<div class="section republican-section">
 			<div class="section-header">
-				<svg class="section-icon elephant-icon" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
-					<path d="M50 10c-5 0-10 5-10 10v10c0 5 5 10 10 10s10-5 10-10V20c0-5-5-10-10-10z" fill="#ef4444"/>
-					<path d="M30 40c-5 0-10 5-10 10v20c0 5 5 10 10 10h40c5 0 10-5 10-10V50c0-5-5-10-10-10H30z" fill="#ef4444"/>
-					<path d="M15 55c-5 0-10 5-10 10v5c0 5 5 10 10 10h15c5 0 10-5 10-10v-5c0-5-5-10-10-10H15z" fill="#ef4444"/>
-					<path d="M70 55c-5 0-10 5-10 10v5c0 5 5 10 10 10h15c5 0 10-5 10-10v-5c0-5-5-10-10-10H70z" fill="#ef4444"/>
-					<path d="M45 65c-3 0-5 2-5 5v5c0 3 2 5 5 5s5-2 5-5v-5c0-3-2-5-5-5z" fill="#ef4444"/>
-				</svg>
+				<img class="section-icon elephant-icon" src="https://content.mycutegraphics.com/graphics/animal/cute-elephant.png" alt="Elephant" />
 				<h2 class="section-title republican-title">Republican Issues</h2>
 			</div>
 			<div class="issues-list">
