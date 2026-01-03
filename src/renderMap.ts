@@ -98,6 +98,52 @@ export function renderHomePage(states: State[]): string {
 			background: #5a67d8;
 		}
 
+		.search-dropdown {
+			position: absolute;
+			top: 100%;
+			left: 0;
+			right: 0;
+			background: white;
+			border: 2px solid #667eea;
+			border-top: none;
+			border-radius: 0 0 8px 8px;
+			max-height: 200px;
+			overflow-y: auto;
+			z-index: 1000;
+			display: none;
+			box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+		}
+
+		.search-suggestion {
+			padding: 12px 16px;
+			cursor: pointer;
+			border-bottom: 1px solid #e5e7eb;
+			transition: background 0.2s;
+		}
+
+		.search-suggestion:last-child {
+			border-bottom: none;
+		}
+
+		.search-suggestion:hover,
+		.search-suggestion.highlighted {
+			background: #f3f4f6;
+		}
+
+		.suggestion-name {
+			font-weight: 600;
+			color: #1f2937;
+		}
+
+		.suggestion-code {
+			color: #6b7280;
+			font-size: 0.9em;
+		}
+
+		.search-container {
+			position: relative;
+		}
+
 		h1 {
 			font-size: 2.5rem;
 			margin-bottom: 0.5rem;
@@ -447,6 +493,7 @@ export function renderHomePage(states: State[]): string {
 					<input type="text" id="state-search" class="search-input" placeholder="Search for a state..." />
 					<button class="search-btn" onclick="searchState()">Search</button>
 				</div>
+				<div id="search-dropdown" class="search-dropdown"></div>
 			</div>
 		</header>
 		
@@ -684,19 +731,63 @@ export function renderHomePage(states: State[]): string {
 			return text.replace(/[&<>"']/g, m => map[m]);
 		}
 
-		function searchState() {
-			const searchInput = document.getElementById('state-search');
-			const query = searchInput.value.trim().toLowerCase();
-			if (!query) return;
+		let currentSuggestions = [];
+		let selectedSuggestionIndex = -1;
 
-			// Find matching state
-			const state = stateData.find(s =>
-				s.name.toLowerCase().includes(query) ||
-				s.code.toLowerCase() === query
-			);
+		function showSuggestions(query) {
+			const dropdown = document.getElementById('search-dropdown');
+			if (!query.trim()) {
+				dropdown.style.display = 'none';
+				return;
+			}
 
-			if (state) {
+			// Find matching states (top 4)
+			const matches = stateData.filter(s =>
+				s.name.toLowerCase().includes(query.toLowerCase()) ||
+				s.code.toLowerCase().includes(query.toLowerCase())
+			).slice(0, 4);
+
+			if (matches.length === 0) {
+				dropdown.style.display = 'none';
+				return;
+			}
+
+			currentSuggestions = matches;
+			selectedSuggestionIndex = -1;
+
+			const suggestionsHtml = matches.map((state, index) =>
+				'<div class="search-suggestion" data-index="' + index + '">' +
+					'<div class="suggestion-name">' + state.name + '</div>' +
+					'<div class="suggestion-code">' + state.code + '</div>' +
+				'</div>'
+			).join('');
+
+			dropdown.innerHTML = suggestionsHtml;
+			dropdown.style.display = 'block';
+
+			// Add click handlers
+			dropdown.querySelectorAll('.search-suggestion').forEach((el, index) => {
+				el.addEventListener('click', () => selectSuggestion(index));
+			});
+		}
+
+		function hideSuggestions() {
+			document.getElementById('search-dropdown').style.display = 'none';
+			selectedSuggestionIndex = -1;
+		}
+
+		function highlightSuggestion(index) {
+			const suggestions = document.querySelectorAll('.search-suggestion');
+			suggestions.forEach((el, i) => {
+				el.classList.toggle('highlighted', i === index);
+			});
+		}
+
+		function selectSuggestion(index) {
+			if (index >= 0 && index < currentSuggestions.length) {
+				const state = currentSuggestions[index];
 				loadStateDetails(state.code);
+
 				// Highlight the state on the map
 				document.querySelectorAll('.state-path').forEach(path => {
 					path.classList.remove('selected');
@@ -705,15 +796,69 @@ export function renderHomePage(states: State[]): string {
 				if (statePath) {
 					statePath.classList.add('selected');
 				}
-			} else {
-				alert('State not found. Please try again.');
+
+				// Update search input and hide dropdown
+				document.getElementById('state-search').value = state.name;
+				hideSuggestions();
 			}
 		}
 
-		// Add Enter key support for search
-		document.getElementById('state-search').addEventListener('keypress', function(e) {
-			if (e.key === 'Enter') {
+		function searchState() {
+			const searchInput = document.getElementById('state-search');
+			const query = searchInput.value.trim().toLowerCase();
+
+			if (selectedSuggestionIndex >= 0) {
+				// If a suggestion is highlighted, select it
+				selectSuggestion(selectedSuggestionIndex);
+			} else if (query) {
+				// Try to find exact match
+				const state = stateData.find(s =>
+					s.name.toLowerCase() === query ||
+					s.code.toLowerCase() === query
+				);
+
+				if (state) {
+					selectSuggestion(currentSuggestions.indexOf(state));
+				} else {
+					alert('State not found. Please select from suggestions or try a different search.');
+				}
+			}
+		}
+
+		// Add input event listener for suggestions
+		document.getElementById('state-search').addEventListener('input', function(e) {
+			showSuggestions(e.target.value);
+		});
+
+		// Add keyboard navigation
+		document.getElementById('state-search').addEventListener('keydown', function(e) {
+			const dropdown = document.getElementById('search-dropdown');
+
+			if (dropdown.style.display === 'block') {
+				if (e.key === 'ArrowDown') {
+					e.preventDefault();
+					selectedSuggestionIndex = Math.min(selectedSuggestionIndex + 1, currentSuggestions.length - 1);
+					highlightSuggestion(selectedSuggestionIndex);
+				} else if (e.key === 'ArrowUp') {
+					e.preventDefault();
+					selectedSuggestionIndex = Math.max(selectedSuggestionIndex - 1, -1);
+					highlightSuggestion(selectedSuggestionIndex);
+				} else if (e.key === 'Enter') {
+					e.preventDefault();
+					searchState();
+				} else if (e.key === 'Escape') {
+					hideSuggestions();
+				}
+			} else if (e.key === 'Enter') {
 				searchState();
+			}
+		});
+
+		// Hide suggestions when clicking outside
+		document.addEventListener('click', function(e) {
+			const searchContainer = document.querySelector('.search-container');
+			if (!searchContainer.contains(e.target)) {
+				hideSuggestions();
 			}
 		});
 	</script>
