@@ -293,6 +293,70 @@ export function renderElectionHub(states: any[]): string {
 			padding-top: 2rem;
 		}
 
+		.candidate-buttons {
+			display: flex;
+			gap: 1rem;
+			justify-content: center;
+			margin: 1.5rem 0;
+			flex-wrap: wrap;
+		}
+
+		.candidate-btn {
+			display: flex;
+			align-items: center;
+			gap: 0.75rem;
+			padding: 1rem 1.5rem;
+			border-radius: 12px;
+			text-decoration: none;
+			color: white;
+			font-weight: 600;
+			transition: all 0.3s ease;
+			box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+			border: 2px solid transparent;
+			min-width: 220px;
+			justify-content: center;
+		}
+
+		.candidate-btn:hover {
+			transform: translateY(-2px);
+			box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+		}
+
+		.trump-btn {
+			background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
+			border-color: #dc2626;
+		}
+
+		.trump-btn:hover {
+			background: linear-gradient(135deg, #b91c1c 0%, #991b1b 100%);
+			border-color: #b91c1c;
+		}
+
+		.harris-btn {
+			background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+			border-color: #2563eb;
+		}
+
+		.harris-btn:hover {
+			background: linear-gradient(135deg, #1d4ed8 0%, #1e40af 100%);
+			border-color: #1d4ed8;
+		}
+
+		.candidate-icon {
+			font-size: 1.5rem;
+		}
+
+		.candidate-name {
+			font-size: 1.1rem;
+			font-weight: 700;
+		}
+
+		.candidate-label {
+			font-size: 0.85rem;
+			opacity: 0.9;
+			font-weight: 400;
+		}
+
 		@media (max-width: 768px) {
 			nav {
 				flex-direction: column;
@@ -301,6 +365,15 @@ export function renderElectionHub(states: any[]): string {
 
 			.title {
 				font-size: 2rem;
+			}
+
+			.candidate-buttons {
+				flex-direction: column;
+				align-items: center;
+			}
+
+			.candidate-btn {
+				min-width: 200px;
 			}
 
 			.election-results {
@@ -322,6 +395,18 @@ export function renderElectionHub(states: any[]): string {
 		<header>
 			<h1 class="title">Voter Politician Tool</h1>
 			<p class="subtitle">Presidential Election Results & Data Hub</p>
+			<div class="candidate-buttons">
+				<a href="https://web.archive.org/web/20241010000624/https://www.donaldjtrump.com/platform" target="_blank" class="candidate-btn trump-btn">
+					<span class="candidate-icon">🇺🇸</span>
+					<span class="candidate-name">Donald J. Trump</span>
+					<span class="candidate-label">Platform & Agenda</span>
+				</a>
+				<a href="https://web.archive.org/web/20241005024829/https://kamalaharris.com/issues/" target="_blank" class="candidate-btn harris-btn">
+					<span class="candidate-icon">🇺🇸</span>
+					<span class="candidate-name">Kamala Harris</span>
+					<span class="candidate-label">Issues & Platform</span>
+				</a>
+			</div>
 			<nav>
 				<a href="/">State Map</a>
 				<a href="/issues">Issues Hub</a>

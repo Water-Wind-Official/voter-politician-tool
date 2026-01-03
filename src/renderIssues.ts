@@ -195,11 +195,53 @@ export function renderIssuesPage(democratIssues: Issue[], republicanIssues: Issu
 			border-left-color: #6b7280;
 		}
 
+		.issue-header {
+			display: flex;
+			justify-content: space-between;
+			align-items: center;
+			cursor: pointer;
+			padding: 0.5rem 0;
+		}
+
+		.issue-header:hover {
+			background: rgba(0,0,0,0.02);
+			border-radius: 6px;
+			margin: -0.5rem -0.5rem 0 -0.5rem;
+			padding: 1rem;
+		}
+
 		.issue-title {
 			font-size: 1.2rem;
 			font-weight: 600;
-			margin-bottom: 0.5rem;
 			color: #1f2937;
+			flex: 1;
+		}
+
+		.issue-arrow {
+			font-size: 0.8rem;
+			color: #6b7280;
+			transition: transform 0.3s ease;
+			margin-left: 0.5rem;
+		}
+
+		.issue-description {
+			color: #6b7280;
+			line-height: 1.6;
+			margin-top: 0.5rem;
+			max-height: 0;
+			overflow: hidden;
+			transition: max-height 0.3s ease, margin-top 0.3s ease, opacity 0.3s ease;
+			opacity: 0;
+		}
+
+		.issue-description:not(.collapsed) {
+			max-height: 500px;
+			margin-top: 1rem;
+			opacity: 1;
+		}
+
+		.issue-header.expanded .issue-arrow {
+			transform: rotate(180deg);
 		}
 
 		.issue-links {
@@ -336,8 +378,11 @@ export function renderIssuesPage(democratIssues: Issue[], republicanIssues: Issu
 				${democratIssues.length > 0 ?
 					democratIssues.map(issue => `
 						<div class="issue-item democrat-issue">
-							<div class="issue-title">${escapeHtml(issue.title)}</div>
-							${issue.description ? `<div class="issue-description">${escapeHtml(issue.description)}</div>` : ''}
+							<div class="issue-header" onclick="toggleIssueDescription(this)">
+								<div class="issue-title">${escapeHtml(issue.title)}</div>
+								${issue.description ? '<div class="issue-arrow">▼</div>' : ''}
+							</div>
+							${issue.description ? `<div class="issue-description collapsed">${escapeHtml(issue.description)}</div>` : ''}
 							${issue.category ? `<div class="issue-category">${escapeHtml(issue.category)}</div>` : ''}
 							${renderIssueLinks(issue)}
 						</div>
@@ -359,8 +404,11 @@ export function renderIssuesPage(democratIssues: Issue[], republicanIssues: Issu
 				${bothIssues.length > 0 ?
 					bothIssues.map(issue => `
 						<div class="issue-item both-issue">
-							<div class="issue-title">${escapeHtml(issue.title)}</div>
-							${issue.description ? `<div class="issue-description">${escapeHtml(issue.description)}</div>` : ''}
+							<div class="issue-header" onclick="toggleIssueDescription(this)">
+								<div class="issue-title">${escapeHtml(issue.title)}</div>
+								${issue.description ? '<div class="issue-arrow">▼</div>' : ''}
+							</div>
+							${issue.description ? `<div class="issue-description collapsed">${escapeHtml(issue.description)}</div>` : ''}
 							${issue.category ? `<div class="issue-category">${escapeHtml(issue.category)}</div>` : ''}
 							${renderIssueLinks(issue)}
 						</div>
@@ -389,8 +437,11 @@ export function renderIssuesPage(democratIssues: Issue[], republicanIssues: Issu
 				${republicanIssues.length > 0 ?
 					republicanIssues.map(issue => `
 						<div class="issue-item republican-issue">
-							<div class="issue-title">${escapeHtml(issue.title)}</div>
-							${issue.description ? `<div class="issue-description">${escapeHtml(issue.description)}</div>` : ''}
+							<div class="issue-header" onclick="toggleIssueDescription(this)">
+								<div class="issue-title">${escapeHtml(issue.title)}</div>
+								${issue.description ? '<div class="issue-arrow">▼</div>' : ''}
+							</div>
+							${issue.description ? `<div class="issue-description collapsed">${escapeHtml(issue.description)}</div>` : ''}
 							${issue.category ? `<div class="issue-category">${escapeHtml(issue.category)}</div>` : ''}
 							${renderIssueLinks(issue)}
 						</div>
@@ -403,6 +454,25 @@ export function renderIssuesPage(democratIssues: Issue[], republicanIssues: Issu
 			</div>
 		</div>
 	</div>
+
+	<script>
+		function toggleIssueDescription(headerElement) {
+			const description = headerElement.parentElement.querySelector('.issue-description');
+			const arrow = headerElement.querySelector('.issue-arrow');
+
+			if (description && arrow) {
+				const isCollapsed = description.classList.contains('collapsed');
+
+				if (isCollapsed) {
+					description.classList.remove('collapsed');
+					headerElement.classList.add('expanded');
+				} else {
+					description.classList.add('collapsed');
+					headerElement.classList.remove('expanded');
+				}
+			}
+		}
+	</script>
 </body>
 </html>
 	`;
