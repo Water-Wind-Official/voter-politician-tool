@@ -917,6 +917,12 @@ export function renderHomePage(states: State[]): string {
 				if (item.chamber === 'Candidate') {
 					// Navigate to candidate profile
 					window.location.href = '/' + (item.id === 'trump' ? 'trump' : 'harris');
+					hideSuggestions();
+					return;
+				} else if (item.chamber === 'house' || item.chamber === 'senate') {
+					// Navigate to representative profile (works for both senators and house members)
+					window.location.href = '/representative/' + item.id;
+					hideSuggestions();
 					return;
 				} else {
 					// Handle state selection
