@@ -106,9 +106,9 @@ Harris sought the Democratic nomination for president in the 2024 election and b
 		body {
 			font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
 			background:
-				radial-gradient(circle at 20% 50%, rgba(120, 119, 198, 0.3) 0%, transparent 50%),
-				radial-gradient(circle at 80% 20%, rgba(255, 255, 255, 0.15) 0%, transparent 50%),
-				radial-gradient(circle at 40% 80%, rgba(120, 119, 198, 0.3) 0%, transparent 50%),
+				radial-gradient(circle at 20% 50%, rgba(59, 130, 246, 0.15) 0%, transparent 50%),
+				radial-gradient(circle at 80% 20%, rgba(255, 255, 255, 0.1) 0%, transparent 50%),
+				radial-gradient(circle at 40% 80%, rgba(59, 130, 246, 0.15) 0%, transparent 50%),
 				linear-gradient(135deg, #0f172a 0%, #1e293b 25%, #334155 50%, #475569 75%, #64748b 100%);
 			min-height: 100vh;
 			padding: 2rem;
@@ -153,18 +153,34 @@ Harris sought the Democratic nomination for president in the 2024 election and b
 		}
 
 		.profile-header {
-			background: white;
-			border-radius: 12px;
+			background: linear-gradient(135deg, rgba(30, 41, 59, 0.95) 0%, rgba(51, 65, 85, 0.95) 100%);
+			backdrop-filter: blur(20px);
+			border: 1px solid rgba(148, 163, 184, 0.2);
+			border-radius: 16px;
 			padding: 3rem;
 			margin-bottom: 2rem;
-			box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+			box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(148, 163, 184, 0.1);
 			text-align: center;
 			position: relative;
+		}
+
+		.profile-header::before {
+			content: '';
+			position: absolute;
+			top: 0;
+			left: 0;
+			right: 0;
+			bottom: 0;
+			background: linear-gradient(135deg, rgba(59, 130, 246, 0.1) 0%, rgba(239, 68, 68, 0.1) 100%);
+			border-radius: 16px;
+			pointer-events: none;
 		}
 
 		.candidate-flag {
 			font-size: 4rem;
 			margin-bottom: 1rem;
+			position: relative;
+			z-index: 1;
 		}
 
 		.candidate-name {
@@ -175,6 +191,7 @@ Harris sought the Democratic nomination for president in the 2024 election and b
 			letter-spacing: -0.025em;
 			position: relative;
 			z-index: 1;
+			text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
 		}
 
 		.candidate-position {
@@ -198,6 +215,8 @@ Harris sought the Democratic nomination for president in the 2024 election and b
 			box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
 			position: relative;
 			z-index: 1;
+			text-transform: uppercase;
+			letter-spacing: 0.5px;
 		}
 
 		.bio-section {
@@ -380,6 +399,8 @@ Harris sought the Democratic nomination for president in the 2024 election and b
 
 			.profile-header {
 				padding: 2rem 1rem;
+				margin-left: 0;
+				margin-right: 0;
 			}
 
 			.candidate-name {

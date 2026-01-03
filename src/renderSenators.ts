@@ -207,11 +207,6 @@ export function renderSenatorHub(senators: Representative[]): string {
 			z-index: 1;
 		}
 
-		.senator-card:hover {
-			transform: translateY(-2px);
-			box-shadow: 0 8px 25px rgba(0, 0, 0, 0.25);
-			border-color: rgba(148, 163, 184, 0.4);
-		}
 		
 		.senator-card:last-child {
 			margin-bottom: 0;
@@ -253,18 +248,18 @@ export function renderSenatorHub(senators: Representative[]): string {
 			color: #f1f5f9;
 		}
 
-		.senator-link {
-			display: inline-block;
-			margin-top: 0.5rem;
-			color: #93c5fd;
+		.senator-card-link {
 			text-decoration: none;
-			font-weight: 500;
-			transition: color 0.3s ease;
+			color: inherit;
+			display: block;
+			transition: all 0.3s ease;
+			cursor: pointer;
 		}
 
-		.senator-link:hover {
-			color: #dbeafe;
-			text-decoration: underline;
+		.senator-card-link:hover .senator-card {
+			transform: translateY(-4px);
+			box-shadow: 0 12px 30px rgba(0, 0, 0, 0.3);
+			border-color: rgba(59, 130, 246, 0.5);
 		}
 		
 		.party-badge {
@@ -409,22 +404,35 @@ export function renderSenatorHub(senators: Representative[]): string {
 						<div class="state-header">${stateCode}</div>
 						${stateSenators.map(senator => {
 							const partyClass = senator.party?.toLowerCase() || 'independent';
-							return `
-								<div class="senator-card">
-									${renderPartyIcon(senator.party)}
-									<div class="senator-name">${escapeHtml(senator.name)}</div>
-									<div class="senator-details">
-										${senator.party ? `<span class="party-badge ${partyClass}">${escapeHtml(senator.party)}</span>` : ''}
-										${senator.term_start && senator.term_end ? `
-											<div><strong>Term:</strong> ${formatDate(senator.term_start)} - ${formatDate(senator.term_end)}</div>
-										` : ''}
-										${senator.office_phone ? `<div><strong>Phone:</strong> ${escapeHtml(senator.office_phone)}</div>` : ''}
-										${senator.email ? `<div><strong>Email:</strong> ${escapeHtml(senator.email)}</div>` : ''}
-										${senator.website ? `<div><strong>Website:</strong> <a href="${escapeHtml(senator.website)}" target="_blank" style="color: #667eea;">Visit</a></div>` : ''}
-									</div>
-									${senator.id ? `<a href="/representative/${senator.id}" class="senator-link">View Full Profile →</a>` : ''}
+							const cardContent = `
+								${renderPartyIcon(senator.party)}
+								<div class="senator-name">${escapeHtml(senator.name)}</div>
+								<div class="senator-details">
+									${senator.party ? `<span class="party-badge ${partyClass}">${escapeHtml(senator.party)}</span>` : ''}
+									${senator.term_start && senator.term_end ? `
+										<div><strong>Term:</strong> ${formatDate(senator.term_start)} - ${formatDate(senator.term_end)}</div>
+									` : ''}
+									${senator.office_phone ? `<div><strong>Phone:</strong> ${escapeHtml(senator.office_phone)}</div>` : ''}
+									${senator.email ? `<div><strong>Email:</strong> ${escapeHtml(senator.email)}</div>` : ''}
+									${senator.website ? `<div><strong>Website:</strong> <a href="${escapeHtml(senator.website)}" target="_blank" style="color: #667eea;">Visit</a></div>` : ''}
 								</div>
 							`;
+
+							if (senator.id) {
+								return `
+									<a href="/representative/${senator.id}" class="senator-card-link">
+										<div class="senator-card">
+											${cardContent}
+										</div>
+									</a>
+								`;
+							} else {
+								return `
+									<div class="senator-card">
+										${cardContent}
+									</div>
+								`;
+							}
 						}).join('')}
 					</div>
 				`;

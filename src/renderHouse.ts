@@ -215,11 +215,6 @@ export function renderHouseHub(houseMembers: Representative[]): string {
 			z-index: 1;
 		}
 
-		.member-card:hover {
-			transform: translateY(-2px);
-			box-shadow: 0 8px 25px rgba(0, 0, 0, 0.25);
-			border-color: rgba(148, 163, 184, 0.4);
-		}
 		
 		.member-card:last-child {
 			margin-bottom: 0;
@@ -261,18 +256,18 @@ export function renderHouseHub(houseMembers: Representative[]): string {
 			color: #f1f5f9;
 		}
 		
-		.member-link {
-			display: inline-block;
-			margin-top: 0.5rem;
-			color: #93c5fd;
+		.member-card-link {
 			text-decoration: none;
-			font-weight: 500;
-			transition: color 0.3s ease;
+			color: inherit;
+			display: block;
+			transition: all 0.3s ease;
+			cursor: pointer;
 		}
 
-		.member-link:hover {
-			color: #dbeafe;
-			text-decoration: underline;
+		.member-card-link:hover .member-card {
+			transform: translateY(-4px);
+			box-shadow: 0 12px 30px rgba(0, 0, 0, 0.3);
+			border-color: rgba(59, 130, 246, 0.5);
 		}
 		
 		.party-badge {
@@ -418,20 +413,33 @@ export function renderHouseHub(houseMembers: Representative[]): string {
 						<div class="members-container">
 						${stateMembers.map(member => {
 							const partyClass = member.party?.toLowerCase() || 'independent';
-							return `
-								<div class="member-card">
-									${renderPartyIcon(member.party)}
-									<div class="member-name">${escapeHtml(member.name)}</div>
-									<div class="member-details">
-										${member.party ? `<span class="party-badge ${partyClass}">${escapeHtml(member.party)}</span>` : ''}
-										${member.office_phone ? `<div><strong>Phone:</strong> ${escapeHtml(member.office_phone)}</div>` : ''}
-										${member.office_address ? `<div><strong>Office:</strong> ${escapeHtml(member.office_address)}</div>` : ''}
-										${member.email ? `<div><strong>Email:</strong> ${escapeHtml(member.email)}</div>` : ''}
-										${member.website ? `<div><strong>Website:</strong> <a href="${escapeHtml(member.website)}" target="_blank" style="color: #667eea;">Visit</a></div>` : ''}
-									</div>
-									${member.id ? `<a href="/representative/${member.id}" class="member-link">View Full Profile →</a>` : ''}
+							const cardContent = `
+								${renderPartyIcon(member.party)}
+								<div class="member-name">${escapeHtml(member.name)}</div>
+								<div class="member-details">
+									${member.party ? `<span class="party-badge ${partyClass}">${escapeHtml(member.party)}</span>` : ''}
+									${member.office_phone ? `<div><strong>Phone:</strong> ${escapeHtml(member.office_phone)}</div>` : ''}
+									${member.office_address ? `<div><strong>Office:</strong> ${escapeHtml(member.office_address)}</div>` : ''}
+									${member.email ? `<div><strong>Email:</strong> ${escapeHtml(member.email)}</div>` : ''}
+									${member.website ? `<div><strong>Website:</strong> <a href="${escapeHtml(member.website)}" target="_blank" style="color: #667eea;">Visit</a></div>` : ''}
 								</div>
 							`;
+
+							if (member.id) {
+								return `
+									<a href="/representative/${member.id}" class="member-card-link">
+										<div class="member-card">
+											${cardContent}
+										</div>
+									</a>
+								`;
+							} else {
+								return `
+									<div class="member-card">
+										${cardContent}
+									</div>
+								`;
+							}
 						}).join('')}
 						</div>
 					</div>
