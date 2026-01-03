@@ -701,7 +701,7 @@ export function renderHomePage(states: State[]): string {
 				document.querySelectorAll('.state-path').forEach(path => {
 					path.classList.remove('selected');
 				});
-				const statePath = document.querySelector(`[data-state="${state.code}"]`);
+				const statePath = document.querySelector('[data-state="' + state.code + '"]');
 				if (statePath) {
 					statePath.classList.add('selected');
 				}
@@ -801,6 +801,6 @@ function generateUSMapSVG(states: State[]): string {
 		// Create a rounded rectangle for each state
 		const path = `M ${coords.x} ${coords.y} L ${coords.x + coords.w} ${coords.y} L ${coords.x + coords.w} ${coords.y + coords.h} L ${coords.x} ${coords.y + coords.h} Z`;
 		
-		return `<path class="state-path ${electoralClass} ${hasData}" data-state="${code}" d="${path}" />`;
+		return '<path class="state-path ' + electoralClass + ' ' + hasData + '" data-state="' + code + '" d="' + path + '" />';
 	}).join('\n');
 }
