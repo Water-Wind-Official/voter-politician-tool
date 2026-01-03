@@ -57,10 +57,7 @@ export function renderElectionHub(states: any[]): string {
 			font-size: 2.5rem;
 			font-weight: 800;
 			margin-bottom: 0.5rem;
-			background: linear-gradient(135deg, #60a5fa 0%, #a78bfa 25%, #f472b6 50%, #fbbf24 75%, #34d399 100%);
-			-webkit-background-clip: text;
-			-webkit-text-fill-color: transparent;
-			background-clip: text;
+			color: #ffffff;
 			letter-spacing: -0.025em;
 		}
 
@@ -297,21 +294,25 @@ export function renderElectionHub(states: any[]): string {
 
 		.download-btn {
 			display: inline-block;
-			background: linear-gradient(135deg, #60a5fa 0%, #a78bfa 25%, #f472b6 50%, #fbbf24 75%, #34d399 100%);
+			background: linear-gradient(135deg, rgba(59, 130, 246, 0.9) 0%, rgba(37, 99, 235, 0.9) 100%);
 			color: white;
 			text-decoration: none;
-			padding: 1rem 2rem;
-			border-radius: 12px;
+			padding: 0.875rem 1.75rem;
+			border-radius: 8px;
 			font-weight: 600;
-			transition: all 0.3s ease;
+			font-size: 0.95rem;
+			transition: all 0.2s ease;
 			margin-top: 1rem;
-			border: 1px solid rgba(255, 255, 255, 0.2);
-			box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+			border: 1px solid rgba(59, 130, 246, 0.3);
+			box-shadow: 0 2px 8px rgba(59, 130, 246, 0.2);
+			backdrop-filter: blur(10px);
 		}
 
 		.download-btn:hover {
-			transform: translateY(-3px) scale(1.02);
-			box-shadow: 0 8px 25px rgba(59, 130, 246, 0.5);
+			background: linear-gradient(135deg, rgba(59, 130, 246, 1) 0%, rgba(37, 99, 235, 1) 100%);
+			transform: translateY(-1px);
+			box-shadow: 0 4px 16px rgba(59, 130, 246, 0.4);
+			border-color: rgba(59, 130, 246, 0.5);
 		}
 
 		.state-grid {

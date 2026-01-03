@@ -109,40 +109,6 @@ export function renderHomePage(states: State[]): string {
 			z-index: 1;
 		}
 
-		.search-type-selector {
-			display: flex;
-			gap: 0.5rem;
-			flex-wrap: wrap;
-			justify-content: center;
-			margin-bottom: 1rem;
-		}
-
-		.search-type-btn {
-			padding: 0.5rem 1rem;
-			background: rgba(148, 163, 184, 0.2);
-			backdrop-filter: blur(10px);
-			border: 1px solid rgba(148, 163, 184, 0.3);
-			border-radius: 8px;
-			cursor: pointer;
-			font-weight: 600;
-			font-size: 0.9rem;
-			transition: all 0.3s ease;
-			color: #cbd5e1;
-		}
-
-		.search-type-btn.active {
-			background: linear-gradient(135deg, #60a5fa 0%, #a78bfa 50%, #f472b6 100%);
-			color: white;
-			border-color: rgba(59, 130, 246, 0.5);
-			box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
-		}
-
-		.search-type-btn:hover:not(.active) {
-			background: rgba(148, 163, 184, 0.3);
-			border-color: rgba(148, 163, 184, 0.5);
-			color: #f1f5f9;
-			transform: translateY(-1px);
-		}
 
 		.search-bar {
 			display: flex;
@@ -612,7 +578,6 @@ export function renderHomePage(states: State[]): string {
 	<div class="container">
 		<header>
 			<h1>Voter Politician Tool</h1>
-			<p class="subtitle" style="opacity: 0.95;">Click on any state to view representatives and voter information</p>
 			<nav>
 				<a href="/issues">Issues Hub</a>
 				<a href="/senators">Senate Hub</a>
@@ -620,11 +585,6 @@ export function renderHomePage(states: State[]): string {
 				<a href="/election">Election Hub</a>
 			</nav>
 			<div class="search-container">
-				<div class="search-type-selector">
-					<button class="search-type-btn active" data-type="all" onclick="setSearchType('all')">All</button>
-					<button class="search-type-btn" data-type="states" onclick="setSearchType('states')">States</button>
-					<button class="search-type-btn" data-type="representatives" onclick="setSearchType('representatives')">Representatives</button>
-				</div>
 				<div class="search-bar">
 					<input type="text" id="search-input" class="search-input" placeholder="Search for states, representatives, or candidates..." />
 					<button class="search-btn" onclick="performSearch()">Search</button>
@@ -653,26 +613,7 @@ export function renderHomePage(states: State[]): string {
 	
 	<script>
 		const stateData = ${JSON.stringify(states)};
-		let currentSearchType = 'all';
-
-		function setSearchType(type) {
-			currentSearchType = type;
-			document.querySelectorAll('.search-type-btn').forEach(btn => {
-				btn.classList.remove('active');
-			});
-			document.querySelector('[data-type="' + type + '"]').classList.add('active');
-
-			const searchInput = document.getElementById('search-input');
-			const placeholderText = {
-				'all': 'Search for states, representatives, or candidates...',
-				'states': 'Search for a state...',
-				'representatives': 'Search for representatives or candidates...'
-			}[type] || 'Search for states, representatives, or candidates...';
-
-			searchInput.placeholder = placeholderText;
-			searchInput.value = '';
-			hideSuggestions();
-		}
+		const currentSearchType = 'all';
 
 		// Add click handlers to all state paths
 		document.querySelectorAll('.state-path').forEach(path => {
@@ -904,16 +845,14 @@ export function renderHomePage(states: State[]): string {
 			let matches = [];
 
 			try {
-				if (currentSearchType === 'states' || currentSearchType === 'all') {
-					// Find matching states
-					const stateMatches = stateData.filter(s =>
-						s.name.toLowerCase().includes(query.toLowerCase()) ||
-						s.code.toLowerCase().includes(query.toLowerCase())
-					);
-					matches = [...matches, ...stateMatches];
-				}
+				// Find matching states
+				const stateMatches = stateData.filter(s =>
+					s.name.toLowerCase().includes(query.toLowerCase()) ||
+					s.code.toLowerCase().includes(query.toLowerCase())
+				);
+				matches = [...matches, ...stateMatches];
 
-				if (currentSearchType === 'representatives' || currentSearchType === 'all') {
+				// Find matching representatives and candidates
 					// Add presidential candidates
 					const candidates = [
 						{ id: 'trump', name: 'Donald J. Trump', party: 'Republican', chamber: 'Candidate', state_code: 'National' },

@@ -137,6 +137,7 @@ export function renderSenatorHub(senators: Representative[]): string {
 			border: 1px solid rgba(59, 130, 246, 0.3);
 			border-left: 4px solid #60a5fa;
 			padding: 1rem;
+			margin-top: 3rem;
 			margin-bottom: 2rem;
 			border-radius: 12px;
 			position: relative;
