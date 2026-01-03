@@ -145,7 +145,7 @@ export function renderAdminLogin(): string {
 }
 
 export function renderAdminDashboard(data: any): string {
-	const { states, representatives, voterData, votes, issues } = data;
+	const { states, representatives, voterData, issues } = data;
 	
 	return `
 <!DOCTYPE html>
@@ -422,8 +422,8 @@ export function renderAdminDashboard(data: any): string {
 			<div class="stat-label">States with Voter Data</div>
 		</div>
 		<div class="stat-card">
-			<div class="stat-value">${votes.length}</div>
-			<div class="stat-label">Votes</div>
+			<div class="stat-value">${issues ? issues.length : 0}</div>
+			<div class="stat-label">Issues</div>
 		</div>
 		<div class="stat-card">
 			<div class="stat-value">${issues ? issues.length : 0}</div>
@@ -435,7 +435,6 @@ export function renderAdminDashboard(data: any): string {
 		<button class="tab active" onclick="showTab('representatives', event)">Representatives</button>
 		<button class="tab" onclick="showTab('voter-data', event)">Voter Data</button>
 		<button class="tab" onclick="showTab('electoral-data', event)">Electoral Data</button>
-		<button class="tab" onclick="showTab('stances', event)">Stances</button>
 		<button class="tab" onclick="showTab('issues', event)">Issues</button>
 	</div>
 	
@@ -564,54 +563,6 @@ export function renderAdminDashboard(data: any): string {
 		</div>
 	</div>
 	
-	<div id="stances" class="tab-content">
-		<div class="card">
-			<div class="card-header">
-				<h2 class="card-title">Stances</h2>
-				<button class="btn" onclick="openModal('stance-modal')">+ Add Stance</button>
-			</div>
-			<table class="table">
-				<thead>
-					<tr>
-						<th>Stance</th>
-						<th>Bill</th>
-						<th>Party in Favor</th>
-						<th>Party in Opposition</th>
-						<th>Vote Count</th>
-						<th>Citation</th>
-						<th>Date</th>
-						<th>Actions</th>
-					</tr>
-				</thead>
-				<tbody>
-					${votes.map((v) => {
-						let voteCount = '-';
-						if (v.votes_in_favor && v.total_votes) {
-							voteCount = v.votes_in_favor + '/' + v.total_votes;
-						} else if (v.votes_in_favor && v.votes_opposed) {
-							voteCount = v.votes_in_favor + '/' + (v.votes_in_favor + v.votes_opposed);
-						}
-						const citation = v.page_line ? (v.page_line + (v.exact_terminology ? ' - ' + v.exact_terminology.substring(0, 50) + '...' : '')) : (v.exact_terminology ? v.exact_terminology.substring(0, 50) + '...' : '-');
-						return `
-						<tr>
-							<td>${escapeHtml(v.stance || '-')}</td>
-							<td>${escapeHtml(v.bill_title || v.bill_number || '-')}</td>
-							<td>${escapeHtml(v.party_in_favor || '-')}</td>
-							<td>${escapeHtml(v.party_in_opposition || '-')}</td>
-							<td>${voteCount}</td>
-							<td style="max-width: 200px; font-size: 0.85rem;">${escapeHtml(citation)}</td>
-							<td>${v.date || '-'}</td>
-							<td>
-								<button class="btn btn-small" onclick="editStance(${v.id})">Edit</button>
-							</td>
-						</tr>
-					`;
-					}).join('')}
-				</tbody>
-			</table>
-		</div>
-	</div>
-
 	<div id="issues" class="tab-content">
 		<div class="card">
 			<div class="card-header">
@@ -897,114 +848,6 @@ export function renderAdminDashboard(data: any): string {
 		</div>
 	</div>
 	
-	<!-- Stance Modal -->
-	<div id="stance-modal" class="modal">
-		<div class="modal-content">
-			<h2 style="margin-bottom: 1rem;">Add/Edit Stance</h2>
-			<div style="background: #f0f9ff; border-left: 4px solid #3b82f6; padding: 1rem; margin-bottom: 1.5rem; border-radius: 4px;">
-				<p style="margin: 0; font-size: 0.9rem; color: #1e40af;">
-					<strong>📋 Official Vote Sources:</strong> Use official government sources:
-					<a href="https://www.congress.gov/votes" target="_blank" style="color: #3b82f6; text-decoration: underline;">Congress.gov Votes</a> | 
-					<a href="https://www.house.gov/the-house-explained/the-legislative-process/votes" target="_blank" style="color: #3b82f6; text-decoration: underline;">House Votes</a> | 
-					<a href="https://www.senate.gov/legislative/votes.htm" target="_blank" style="color: #3b82f6; text-decoration: underline;">Senate Votes</a>
-				</p>
-			</div>
-			<form id="stance-form" onsubmit="saveStance(event)">
-				<div class="form-grid">
-					<div class="form-group" style="grid-column: 1 / -1;">
-						<label>Stance *</label>
-						<input type="text" name="stance" required placeholder="e.g., Support for Healthcare Reform" />
-						<small style="color: #666; font-size: 0.85rem;">The stance/position on the issue</small>
-					</div>
-					<div class="form-group" style="grid-column: 1 / -1;">
-						<label>Bill *</label>
-						<input type="text" name="bill_title" required placeholder="e.g., H.R. 1234 - Healthcare Reform Act" />
-						<small style="color: #666; font-size: 0.85rem;">Bill name or number</small>
-					</div>
-					<div class="form-group" style="grid-column: 1 / -1;">
-						<label>Exact Terminology from Bill *</label>
-						<textarea name="exact_terminology" rows="4" required placeholder="Paste the exact text from the bill that supports this stance..."></textarea>
-						<small style="color: #666; font-size: 0.85rem;">The exact quote from the bill that supports this stance claim. This is required to back up the stance.</small>
-					</div>
-					<div class="form-group">
-						<label>Page + Line Number *</label>
-						<input type="text" name="page_line" required placeholder="e.g., Page 45, Line 12" />
-						<small style="color: #666; font-size: 0.85rem;">Citation location in the bill (e.g., "Page 45, Line 12" or "Section 3, Line 8")</small>
-					</div>
-					<div class="form-group">
-						<label>Chamber *</label>
-						<select name="chamber" required>
-							<option value="house">House of Representatives</option>
-							<option value="senate">Senate</option>
-						</select>
-					</div>
-					<div class="form-group">
-						<label>Date *</label>
-						<input type="date" name="date" required />
-					</div>
-					<div class="form-group">
-						<label>Party in Favor</label>
-						<select name="party_in_favor">
-							<option value="">None</option>
-							<option value="Democrat">Democrat</option>
-							<option value="Republican">Republican</option>
-							<option value="Both">Both</option>
-							<option value="Mixed">Mixed</option>
-						</select>
-						<small style="color: #666; font-size: 0.85rem;">Party that favored this stance</small>
-					</div>
-					<div class="form-group">
-						<label>Party in Opposition</label>
-						<select name="party_in_opposition">
-							<option value="">None</option>
-							<option value="Democrat">Democrat</option>
-							<option value="Republican">Republican</option>
-							<option value="Both">Both</option>
-							<option value="Mixed">Mixed</option>
-						</select>
-						<small style="color: #666; font-size: 0.85rem;">Party that opposed this stance</small>
-					</div>
-					<div class="form-group">
-						<label>Votes in Favor</label>
-						<input type="number" name="votes_in_favor" min="0" placeholder="e.g., 250" />
-						<small style="color: #666; font-size: 0.85rem;">Number of votes in favor</small>
-					</div>
-					<div class="form-group">
-						<label>Votes Opposed</label>
-						<input type="number" name="votes_opposed" min="0" placeholder="e.g., 185" />
-						<small style="color: #666; font-size: 0.85rem;">Number of votes opposed</small>
-					</div>
-					<div class="form-group">
-						<label>Total Votes</label>
-						<input type="number" name="total_votes" min="0" placeholder="e.g., 435" />
-						<small style="color: #666; font-size: 0.85rem;">Total votes cast (will auto-calculate if votes in favor + opposed provided)</small>
-					</div>
-					<div class="form-group">
-						<label>Result</label>
-						<select name="result">
-							<option value="">None</option>
-							<option value="Passed">Passed</option>
-							<option value="Failed">Failed</option>
-							<option value="Tied">Tied</option>
-						</select>
-					</div>
-				</div>
-				<div style="background: #fef3c7; border-left: 4px solid #f59e0b; padding: 1rem; margin-top: 1.5rem; border-radius: 4px;">
-					<p style="margin: 0; font-size: 0.85rem; color: #92400e;">
-						<strong>⚠️ Legal Notice:</strong> Only enter voting data from official government sources. 
-						All vote records are public information from Congress.gov, House.gov, or Senate.gov.
-						<strong>Citation Required:</strong> You must provide the exact terminology and page+line number to back up your stance claim.
-					</p>
-				</div>
-				<div style="display: flex; gap: 1rem; margin-top: 1.5rem;">
-					<button type="submit" class="btn btn-success">Save Stance</button>
-					<button type="button" class="btn btn-secondary" onclick="closeModal('stance-modal')">Cancel</button>
-				</div>
-				<input type="hidden" name="id" />
-			</form>
-		</div>
-	</div>
-
 	<!-- Issue Modal -->
 	<div id="issue-modal" class="modal">
 		<div class="modal-content">
@@ -1302,69 +1145,6 @@ export function renderAdminDashboard(data: any): string {
 			fetch('/admin/logout', { method: 'POST' }).then(function() {
 				window.location.href = '/admin/login';
 			});
-		}
-		
-		async function saveStance(e) {
-			e.preventDefault();
-			const formData = new FormData(e.target);
-			const data = Object.fromEntries(formData);
-			const id = data.id;
-			
-			// Convert numeric fields
-			if (data.votes_in_favor) data.votes_in_favor = parseInt(data.votes_in_favor);
-			if (data.votes_opposed) data.votes_opposed = parseInt(data.votes_opposed);
-			if (data.total_votes) data.total_votes = parseInt(data.total_votes);
-			
-			// Auto-calculate total votes if not provided
-			if (!data.total_votes && data.votes_in_favor && data.votes_opposed) {
-				data.total_votes = parseInt(data.votes_in_favor) + parseInt(data.votes_opposed);
-			}
-			
-			// Generate a unique roll_id if not provided
-			if (!data.propublica_roll_id) {
-				data.propublica_roll_id = 'stance-' + Date.now();
-			}
-			
-			try {
-				const url = '/api/admin/stance' + (id ? '/' + id : '');
-				const response = await fetch(url, {
-					method: id ? 'PUT' : 'POST',
-					headers: { 'Content-Type': 'application/json' },
-					body: JSON.stringify(data)
-				});
-				
-				if (response.ok) {
-					location.reload();
-				} else {
-					alert('Error saving stance');
-				}
-			} catch (error) {
-				alert('Error: ' + (error.message || 'Unknown error'));
-			}
-		}
-		
-		window.editStance = async function(id) {
-			const stance = currentData.votes.find(function(v) { return v.id === id; });
-			if (!stance) return;
-			
-			const form = document.getElementById('stance-form');
-			if (!form) return;
-			
-			Object.keys(stance).forEach(function(key) {
-				const input = form.querySelector('[name="' + key + '"]');
-				if (input) {
-					if (input.type === 'date' && stance[key]) {
-						input.value = stance[key].split('T')[0];
-					} else if (input.tagName === 'TEXTAREA' || input.tagName === 'SELECT') {
-						input.value = stance[key] || '';
-					} else {
-						input.value = stance[key] || '';
-					}
-				}
-			});
-			const idInput = form.querySelector('[name="id"]');
-			if (idInput) idInput.value = id.toString();
-			openModal('stance-modal');
 		}
 		
 		function escapeHtml(text) {

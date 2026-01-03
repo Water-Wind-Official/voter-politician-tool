@@ -268,14 +268,12 @@ async function handleAdminDashboard(request: Request, env: Env): Promise<Respons
 	const voterData = await Promise.all(
 		states.map(s => getVoterDataByState(env.DB, s.code))
 	).then(results => results.filter(r => r !== null));
-	const votes = await getAllVotes(env.DB);
 	const issues = await getAllIssues(env.DB);
 
 	return new Response(renderAdminDashboard({
 		states,
 		representatives,
 		voterData,
-		votes,
 		issues
 	}), {
 		headers: { 'Content-Type': 'text/html' }
@@ -356,22 +354,6 @@ async function handleAdminApi(request: Request, env: Env, path: string): Promise
 		return Response.json({ success: true, id });
 	}
 
-	// Stances (votes)
-	if (path === '/api/admin/stance' && request.method === 'POST') {
-		const body = await request.json() as any;
-		const id = await createVote(env.DB, body);
-		return Response.json({ success: true, id });
-	}
-
-	if (path.startsWith('/api/admin/stance/') && request.method === 'PUT') {
-		const id = parseInt(path.split('/')[4]);
-		if (isNaN(id)) {
-			return new Response('Invalid ID', { status: 400 });
-		}
-		const body = await request.json() as any;
-		await updateVote(env.DB, id, body);
-		return Response.json({ success: true });
-	}
 
 	// Electoral data
 	if (path === '/api/admin/electoral' && request.method === 'POST') {
