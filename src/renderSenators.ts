@@ -127,10 +127,28 @@ export function renderSenatorHub(senators: Representative[]): string {
 			padding: 1rem;
 			margin-bottom: 1rem;
 			border-left: 4px solid #667eea;
+			position: relative;
 		}
 		
 		.senator-card:last-child {
 			margin-bottom: 0;
+		}
+
+		.party-icon {
+			position: absolute;
+			top: 1rem;
+			right: 1rem;
+			width: 40px;
+			height: 40px;
+			animation: bounce 2s infinite;
+		}
+
+		.donkey-icon {
+			filter: drop-shadow(0 0 10px rgba(59, 130, 246, 0.5));
+		}
+
+		.elephant-icon {
+			filter: drop-shadow(0 0 10px rgba(239, 68, 68, 0.5));
 		}
 		
 		.senator-name {
@@ -220,6 +238,18 @@ export function renderSenatorHub(senators: Representative[]): string {
 				grid-template-columns: 1fr;
 			}
 		}
+
+		@keyframes bounce {
+			0%, 20%, 50%, 80%, 100% {
+				transform: translateY(0);
+			}
+			40% {
+				transform: translateY(-10px);
+			}
+			60% {
+				transform: translateY(-5px);
+			}
+		}
 	</style>
 </head>
 <body>
@@ -275,6 +305,7 @@ export function renderSenatorHub(senators: Representative[]): string {
 							const partyClass = senator.party?.toLowerCase() || 'independent';
 							return `
 								<div class="senator-card">
+									${renderPartyIcon(senator.party)}
 									<div class="senator-name">${escapeHtml(senator.name)}</div>
 									<div class="senator-details">
 										${senator.party ? `<span class="party-badge ${partyClass}">${escapeHtml(senator.party)}</span>` : ''}
@@ -319,4 +350,16 @@ function formatDate(dateString: string | null | undefined): string {
 	} catch {
 		return dateString;
 	}
+}
+
+function renderPartyIcon(party: string | null): string {
+	if (!party) return '';
+
+	const normalizedParty = party.toLowerCase();
+	if (normalizedParty === 'democrat') {
+		return `<img class="party-icon donkey-icon" src="https://content.mycutegraphics.com/graphics/animal/horse-head.png" alt="Donkey" />`;
+	} else if (normalizedParty === 'republican') {
+		return `<img class="party-icon elephant-icon" src="https://content.mycutegraphics.com/graphics/animal/cute-elephant.png" alt="Elephant" />`;
+	}
+	return '';
 }

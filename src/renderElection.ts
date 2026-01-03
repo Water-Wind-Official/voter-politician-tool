@@ -435,21 +435,21 @@ export function renderElectionHub(states: any[]): string {
 			<div class="candidate-links">
 				<h3>2024 Presidential Candidates</h3>
 				<div class="candidate-links-grid">
-					<a href="https://web.archive.org/web/20241010000624/https://www.donaldjtrump.com/platform" target="_blank" class="candidate-link trump-link">
+					<a href="/trump" class="candidate-link trump-link">
 						<div class="candidate-header">
 							<span class="candidate-flag">🇺🇸</span>
 							<span class="candidate-name">Donald J. Trump</span>
 							<span class="candidate-party">(Republican)</span>
 						</div>
-						<div class="candidate-description">View Trump's official campaign platform and policy positions</div>
+						<div class="candidate-description">View Trump's official profile, campaign platform, and policy positions</div>
 					</a>
-					<a href="https://web.archive.org/web/20241005024829/https://kamalaharris.com/issues/" target="_blank" class="candidate-link harris-link">
+					<a href="/harris" class="candidate-link harris-link">
 						<div class="candidate-header">
 							<span class="candidate-flag">🇺🇸</span>
 							<span class="candidate-name">Kamala Harris</span>
 							<span class="candidate-party">(Democrat)</span>
 						</div>
-						<div class="candidate-description">View Harris's official campaign issues and policy positions</div>
+						<div class="candidate-description">View Harris's official profile, campaign issues, and policy positions</div>
 					</a>
 				</div>
 			</div>

@@ -7,6 +7,7 @@ import { renderSenatorHub } from "./renderSenators";
 import { renderHouseHub } from "./renderHouse";
 import { renderElectionHub } from "./renderElection";
 import { renderIssuesPage } from "./renderIssues";
+import { renderCandidateProfile } from "./renderCandidates";
 import {
 	getAllStates,
 	getStateByCode,
@@ -65,6 +66,14 @@ export default {
 
 		if (path === '/issues') {
 			return handleIssuesPage(request, env);
+		}
+
+		if (path === '/trump' || path === '/donald-trump') {
+			return handleCandidatePage(request, env, 'trump');
+		}
+
+		if (path === '/harris' || path === '/kamala-harris') {
+			return handleCandidatePage(request, env, 'harris');
 		}
 
 		if (path.startsWith('/representative/')) {
@@ -144,6 +153,12 @@ async function handleIssuesPage(request: Request, env: Env): Promise<Response> {
 	});
 }
 
+async function handleCandidatePage(request: Request, env: Env, candidate: 'trump' | 'harris'): Promise<Response> {
+	return new Response(renderCandidateProfile(candidate), {
+		headers: { "content-type": "text/html" },
+	});
+}
+
 async function handleRepresentativePage(request: Request, env: Env, id: number): Promise<Response> {
 	const representative = await getRepresentative(env.DB, id);
 
@@ -205,6 +220,43 @@ async function handleApiRequest(request: Request, env: Env, path: string): Promi
 				return new Response('Not found', { status: 404 });
 			}
 			return Response.json({ representative });
+		}
+	}
+
+	// Search endpoints
+	if (path.startsWith('/api/search/')) {
+		const searchType = path.split('/')[3];
+		const url = new URL(request.url);
+		const query = url.searchParams.get('q') || '';
+
+		if (!query.trim()) {
+			return Response.json({ results: [] });
+		}
+
+		if (searchType === 'senators') {
+			const senators = await getAllSenators(env.DB);
+			const results = senators.filter(senator =>
+				senator.name.toLowerCase().includes(query.toLowerCase()) ||
+				senator.state_code.toLowerCase().includes(query.toLowerCase())
+			).slice(0, 10);
+
+			return Response.json({ results });
+		} else if (searchType === 'house') {
+			const houseMembers = await getAllHouseMembers(env.DB);
+			const results = houseMembers.filter(member =>
+				member.name.toLowerCase().includes(query.toLowerCase()) ||
+				member.state_code.toLowerCase().includes(query.toLowerCase())
+			).slice(0, 10);
+
+			return Response.json({ results });
+		} else if (searchType === 'representatives') {
+			const representatives = await getAllRepresentatives(env.DB);
+			const results = representatives.filter(rep =>
+				rep.name.toLowerCase().includes(query.toLowerCase()) ||
+				rep.state_code.toLowerCase().includes(query.toLowerCase())
+			).slice(0, 10);
+
+			return Response.json({ results });
 		}
 	}
 
