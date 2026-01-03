@@ -633,8 +633,8 @@ export async function getIssue(db: D1Database, id: number): Promise<Issue | null
 export async function createIssue(db: D1Database, data: Omit<Issue, 'id' | 'created_at' | 'updated_at'>): Promise<number> {
 	const result = await db
 		.prepare(`
-			INSERT INTO issues (title, description, party, category, priority, is_active)
-			VALUES (?, ?, ?, ?, ?, ?)
+			INSERT INTO issues (title, description, party, category, priority, is_active, link1, link2, link3, link4, link5, link6)
+			VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
 		`)
 		.bind(
 			data.title,
@@ -642,7 +642,13 @@ export async function createIssue(db: D1Database, data: Omit<Issue, 'id' | 'crea
 			data.party,
 			data.category || null,
 			data.priority || 0,
-			data.is_active ? 1 : 0
+			data.is_active ? 1 : 0,
+			data.link1 || null,
+			data.link2 || null,
+			data.link3 || null,
+			data.link4 || null,
+			data.link5 || null,
+			data.link6 || null
 		)
 		.run();
 
@@ -680,6 +686,30 @@ export async function updateIssue(db: D1Database, id: number, data: Partial<Omit
 	if (data.is_active !== undefined) {
 		updates.push('is_active = ?');
 		values.push(data.is_active ? 1 : 0);
+	}
+	if (data.link1 !== undefined) {
+		updates.push('link1 = ?');
+		values.push(data.link1);
+	}
+	if (data.link2 !== undefined) {
+		updates.push('link2 = ?');
+		values.push(data.link2);
+	}
+	if (data.link3 !== undefined) {
+		updates.push('link3 = ?');
+		values.push(data.link3);
+	}
+	if (data.link4 !== undefined) {
+		updates.push('link4 = ?');
+		values.push(data.link4);
+	}
+	if (data.link5 !== undefined) {
+		updates.push('link5 = ?');
+		values.push(data.link5);
+	}
+	if (data.link6 !== undefined) {
+		updates.push('link6 = ?');
+		values.push(data.link6);
 	}
 
 	if (updates.length > 0) {

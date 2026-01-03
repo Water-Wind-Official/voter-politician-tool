@@ -202,6 +202,42 @@ export function renderIssuesPage(democratIssues: Issue[], republicanIssues: Issu
 			color: #1f2937;
 		}
 
+		.issue-links {
+			position: absolute;
+			bottom: 0.5rem;
+			right: 0.5rem;
+			display: flex;
+			gap: 0.25rem;
+		}
+
+		.issue-link-superscript {
+			display: inline-block;
+			width: 1rem;
+			height: 1rem;
+			line-height: 1rem;
+			text-align: center;
+			font-size: 0.7rem;
+			font-weight: bold;
+			background: rgba(59, 130, 246, 0.1);
+			color: #2563eb;
+			border-radius: 50%;
+			text-decoration: none;
+			transition: all 0.2s;
+			border: 1px solid rgba(59, 130, 246, 0.2);
+		}
+
+		.issue-link-superscript:hover {
+			background: #2563eb;
+			color: white;
+			transform: scale(1.1);
+		}
+
+		/* Ensure issue items are positioned relatively for absolute positioning of links */
+		.issue-item {
+			position: relative;
+			padding-bottom: 2rem; /* Make room for the superscript links */
+		}
+
 		.issue-description {
 			color: #6b7280;
 			line-height: 1.5;
@@ -303,6 +339,7 @@ export function renderIssuesPage(democratIssues: Issue[], republicanIssues: Issu
 							<div class="issue-title">${escapeHtml(issue.title)}</div>
 							${issue.description ? `<div class="issue-description">${escapeHtml(issue.description)}</div>` : ''}
 							${issue.category ? `<div class="issue-category">${escapeHtml(issue.category)}</div>` : ''}
+							${renderIssueLinks(issue)}
 						</div>
 					`).join('') :
 					`<div class="empty-state">
@@ -325,6 +362,7 @@ export function renderIssuesPage(democratIssues: Issue[], republicanIssues: Issu
 							<div class="issue-title">${escapeHtml(issue.title)}</div>
 							${issue.description ? `<div class="issue-description">${escapeHtml(issue.description)}</div>` : ''}
 							${issue.category ? `<div class="issue-category">${escapeHtml(issue.category)}</div>` : ''}
+							${renderIssueLinks(issue)}
 						</div>
 					`).join('') :
 					`<div class="empty-state">
@@ -354,6 +392,7 @@ export function renderIssuesPage(democratIssues: Issue[], republicanIssues: Issu
 							<div class="issue-title">${escapeHtml(issue.title)}</div>
 							${issue.description ? `<div class="issue-description">${escapeHtml(issue.description)}</div>` : ''}
 							${issue.category ? `<div class="issue-category">${escapeHtml(issue.category)}</div>` : ''}
+							${renderIssueLinks(issue)}
 						</div>
 					`).join('') :
 					`<div class="empty-state">
@@ -367,6 +406,22 @@ export function renderIssuesPage(democratIssues: Issue[], republicanIssues: Issu
 </body>
 </html>
 	`;
+}
+
+function renderIssueLinks(issue: any): string {
+	const links = [];
+	if (issue.link1) links.push({ url: issue.link1, number: 1 });
+	if (issue.link2) links.push({ url: issue.link2, number: 2 });
+	if (issue.link3) links.push({ url: issue.link3, number: 3 });
+	if (issue.link4) links.push({ url: issue.link4, number: 4 });
+	if (issue.link5) links.push({ url: issue.link5, number: 5 });
+	if (issue.link6) links.push({ url: issue.link6, number: 6 });
+
+	if (links.length === 0) return '';
+
+	return `<div class="issue-links">
+		${links.map(link => `<a href="${escapeHtml(link.url)}" target="_blank" class="issue-link-superscript">${link.number}</a>`).join('')}
+	</div>`;
 }
 
 function escapeHtml(text: string): string {

@@ -618,6 +618,18 @@ export function renderAdminDashboard(data: any): string {
 						<label>Active</label>
 						<input type="checkbox" name="is_active" checked>
 					</div>
+					<div class="form-group" style="grid-column: 1 / -1;">
+						<label>Reference Links</label>
+						<small style="color: #666; font-size: 0.85rem; margin-bottom: 0.5rem; display: block;">Add up to 6 reference links. Link 1 will appear as a superscript digit on the issue.</small>
+						<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem;">
+							<input type="url" name="link1" placeholder="Link 1 (main reference)">
+							<input type="url" name="link2" placeholder="Link 2">
+							<input type="url" name="link3" placeholder="Link 3">
+							<input type="url" name="link4" placeholder="Link 4">
+							<input type="url" name="link5" placeholder="Link 5">
+							<input type="url" name="link6" placeholder="Link 6">
+						</div>
+					</div>
 				</div>
 				<div style="margin-top: 1.5rem; display: flex; gap: 1rem; justify-content: flex-end;">
 					<button type="button" class="btn btn-secondary" onclick="closeModal('issue-modal')">Cancel</button>
