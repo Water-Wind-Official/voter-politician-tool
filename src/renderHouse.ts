@@ -292,7 +292,6 @@ export function renderHouseHub(houseMembers: Representative[]): string {
 								<div class="member-card">
 									<div class="member-name">${escapeHtml(member.name)}</div>
 									<div class="member-details">
-										<div><strong>District:</strong> ${districtDisplay}</div>
 										${member.party ? `<span class="party-badge ${partyClass}">${escapeHtml(member.party)}</span>` : ''}
 										${member.office_phone ? `<div><strong>Phone:</strong> ${escapeHtml(member.office_phone)}</div>` : ''}
 										${member.office_address ? `<div><strong>Office:</strong> ${escapeHtml(member.office_address)}</div>` : ''}

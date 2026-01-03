@@ -53,7 +53,51 @@ export function renderHomePage(states: State[]): string {
 		nav a:hover {
 			text-decoration: underline;
 		}
-		
+
+		.search-container {
+			margin-top: 1rem;
+			padding-top: 1rem;
+			border-top: 1px solid #e5e7eb;
+			display: flex;
+			justify-content: center;
+		}
+
+		.search-bar {
+			display: flex;
+			gap: 0.5rem;
+			max-width: 500px;
+			width: 100%;
+		}
+
+		.search-input {
+			flex: 1;
+			padding: 0.75rem 1rem;
+			border: 2px solid #e5e7eb;
+			border-radius: 8px;
+			font-size: 1rem;
+			transition: border-color 0.2s;
+		}
+
+		.search-input:focus {
+			outline: none;
+			border-color: #667eea;
+		}
+
+		.search-btn {
+			padding: 0.75rem 1.5rem;
+			background: #667eea;
+			color: white;
+			border: none;
+			border-radius: 8px;
+			cursor: pointer;
+			font-weight: 600;
+			transition: background 0.2s;
+		}
+
+		.search-btn:hover {
+			background: #5a67d8;
+		}
+
 		h1 {
 			font-size: 2.5rem;
 			margin-bottom: 0.5rem;
@@ -398,6 +442,12 @@ export function renderHomePage(states: State[]): string {
 				<a href="/house">House Hub</a>
 				<a href="/election">Election Hub</a>
 			</nav>
+			<div class="search-container">
+				<div class="search-bar">
+					<input type="text" id="state-search" class="search-input" placeholder="Search for a state..." />
+					<button class="search-btn" onclick="searchState()">Search</button>
+				</div>
+			</div>
 		</header>
 		
 		<div class="map-container">
@@ -634,6 +684,39 @@ export function renderHomePage(states: State[]): string {
 			};
 			return text.replace(/[&<>"']/g, m => map[m]);
 		}
+
+		function searchState() {
+			const searchInput = document.getElementById('state-search');
+			const query = searchInput.value.trim().toLowerCase();
+			if (!query) return;
+
+			// Find matching state
+			const state = stateData.find(s =>
+				s.name.toLowerCase().includes(query) ||
+				s.code.toLowerCase() === query
+			);
+
+			if (state) {
+				loadStateDetails(state.code);
+				// Highlight the state on the map
+				document.querySelectorAll('.state-path').forEach(path => {
+					path.classList.remove('selected');
+				});
+				const statePath = document.querySelector(`[data-state="${state.code}"]`);
+				if (statePath) {
+					statePath.classList.add('selected');
+				}
+			} else {
+				alert('State not found. Please try again.');
+			}
+		}
+
+		// Add Enter key support for search
+		document.getElementById('state-search').addEventListener('keypress', function(e) {
+			if (e.key === 'Enter') {
+				searchState();
+			}
+		});
 	</script>
 </body>
 </html>
