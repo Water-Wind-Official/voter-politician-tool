@@ -194,27 +194,20 @@ export function renderHouseHub(houseMembers: Representative[]): string {
 		.state-header .party-counts {
 			display: flex;
 			align-items: center;
-			gap: 0.25rem;
-			font-size: 1.1rem;
+			gap: 0.5rem;
+			font-size: 1.2rem;
 			font-weight: 700;
-			color: #f1f5f9;
 		}
 
-		.party-separator {
-			color: rgba(148, 163, 184, 0.6);
-			font-weight: 400;
-		}
-		
-		.state-header .party-counts .republican-count {
-			color: #f87171;
-		}
-
-		.state-header .party-counts .democrat-count {
-			color: #60a5fa;
+		.loser-count, .winner-count {
+			min-width: 1.2em;
+			text-align: center;
 		}
 
 		.state-header .party-counts .independent-count {
 			color: #94a3b8;
+			font-size: 0.9rem;
+			margin-left: 0.5rem;
 		}
 		
 		.members-container {
@@ -422,29 +415,44 @@ export function renderHouseHub(houseMembers: Representative[]): string {
 				const democratCount = stateMembers.filter(m => m.party === 'Democrat').length;
 				const independentCount = stateMembers.filter(m => m.party === 'Independent').length;
 
-				// Determine winning party for state icon
-				let winningParty = '';
-				let winningIcon = '';
+				// Determine winning party and create display format
+				let winnerIcon = '';
+				let loserCount = '';
+				let winnerCount = '';
+				let loserColor = '';
+				let winnerColor = '';
+
 				if (republicanCount > democratCount) {
-					winningParty = 'Republican';
-					winningIcon = '<img class="state-party-icon elephant-icon" src="https://content.mycutegraphics.com/graphics/animal/cute-elephant.png" alt="Republican" />';
+					// Republicans win
+					winnerIcon = '<img class="state-party-icon elephant-icon" src="https://content.mycutegraphics.com/graphics/animal/cute-elephant.png" alt="Republican" />';
+					loserCount = democratCount.toString();
+					winnerCount = republicanCount.toString();
+					loserColor = '#60a5fa'; // blue for democrats (losers)
+					winnerColor = '#f87171'; // red for republicans (winners)
 				} else if (democratCount > republicanCount) {
-					winningParty = 'Democrat';
-					winningIcon = '<img class="state-party-icon donkey-icon" src="https://content.mycutegraphics.com/graphics/animal/horse-head.png" alt="Democrat" />';
-				} else if (independentCount > 0) {
-					winningParty = 'Independent';
-					winningIcon = '';
+					// Democrats win
+					winnerIcon = '<img class="state-party-icon donkey-icon" src="https://content.mycutegraphics.com/graphics/animal/horse-head.png" alt="Democrat" />';
+					loserCount = republicanCount.toString();
+					winnerCount = democratCount.toString();
+					loserColor = '#f87171'; // red for republicans (losers)
+					winnerColor = '#60a5fa'; // blue for democrats (winners)
+				} else {
+					// Tie or independents only
+					winnerIcon = '';
+					loserCount = republicanCount.toString();
+					winnerCount = democratCount.toString();
+					loserColor = '#f87171';
+					winnerColor = '#60a5fa';
 				}
 
 				return `
 					<div class="state-section">
 						<div class="state-header">
 							<span>${stateCode}</span>
-							${winningIcon}
 							<div class="party-counts">
-								<span class="republican-count">${republicanCount}</span>
-								<span class="party-separator">-</span>
-								<span class="democrat-count">${democratCount}</span>
+								<span class="loser-count" style="color: ${loserColor}">${loserCount}</span>
+								${winnerIcon}
+								<span class="winner-count" style="color: ${winnerColor}">${winnerCount}</span>
 								${independentCount > 0 ? `<span class="independent-count">(Ind. ${independentCount})</span>` : ''}
 							</div>
 						</div>
