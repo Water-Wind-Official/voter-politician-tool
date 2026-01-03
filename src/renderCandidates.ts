@@ -171,10 +171,7 @@ Harris sought the Democratic nomination for president in the 2024 election and b
 			font-size: 3rem;
 			font-weight: 800;
 			margin-bottom: 0.5rem;
-			background: linear-gradient(135deg, #60a5fa 0%, #a78bfa 25%, #f472b6 50%, #fbbf24 75%, #34d399 100%);
-			-webkit-background-clip: text;
-			-webkit-text-fill-color: transparent;
-			background-clip: text;
+			color: #ffffff;
 			letter-spacing: -0.025em;
 			position: relative;
 			z-index: 1;

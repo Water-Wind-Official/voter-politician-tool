@@ -435,10 +435,7 @@ export function renderHomePage(states: State[]): string {
 		.data-value {
 			font-size: 1.5rem;
 			font-weight: 700;
-			background: linear-gradient(135deg, #60a5fa 0%, #a78bfa 50%, #f472b6 100%);
-			-webkit-background-clip: text;
-			-webkit-text-fill-color: transparent;
-			background-clip: text;
+			color: #60a5fa;
 		}
 		
 		.representatives-section {
@@ -560,7 +557,7 @@ export function renderHomePage(states: State[]): string {
 		}
 
 		.tab.active {
-			background: linear-gradient(135deg, #60a5fa 0%, #a78bfa 50%, #f472b6 100%);
+			background: linear-gradient(135deg, #60a5fa 0%, #3b82f6 100%);
 			color: white;
 			border-color: rgba(59, 130, 246, 0.5);
 			box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);

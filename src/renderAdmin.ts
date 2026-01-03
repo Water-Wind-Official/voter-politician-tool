@@ -71,10 +71,7 @@ export function renderAdminLogin(): string {
 		h1 {
 			font-size: 2rem;
 			margin-bottom: 0.5rem;
-			background: linear-gradient(135deg, #60a5fa 0%, #a78bfa 25%, #f472b6 50%, #fbbf24 75%, #34d399 100%);
-			-webkit-background-clip: text;
-			-webkit-text-fill-color: transparent;
-			background-clip: text;
+			color: #ffffff;
 			font-weight: 800;
 			letter-spacing: -0.025em;
 			text-align: center;
@@ -132,7 +129,7 @@ export function renderAdminLogin(): string {
 		.btn {
 			width: 100%;
 			padding: 0.75rem;
-			background: linear-gradient(135deg, #60a5fa 0%, #a78bfa 50%, #f472b6 100%);
+			background: linear-gradient(135deg, #60a5fa 0%, #3b82f6 100%);
 			color: white;
 			border: none;
 			border-radius: 12px;

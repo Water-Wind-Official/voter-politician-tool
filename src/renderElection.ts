@@ -414,10 +414,7 @@ export function renderElectionHub(states: any[]): string {
 		.stat-value {
 			font-size: 2rem;
 			font-weight: 700;
-			background: linear-gradient(135deg, #60a5fa 0%, #a78bfa 50%, #f472b6 100%);
-			-webkit-background-clip: text;
-			-webkit-text-fill-color: transparent;
-			background-clip: text;
+			color: #60a5fa;
 			margin-bottom: 0.5rem;
 		}
 
