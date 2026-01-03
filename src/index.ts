@@ -891,10 +891,30 @@ function renderStateRepresentatives(reps: any[], chamber: string, currentRepId: 
 		
 		body {
 			font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-			background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+			background:
+				radial-gradient(circle at 20% 50%, rgba(59, 130, 246, 0.15) 0%, transparent 50%),
+				radial-gradient(circle at 80% 20%, rgba(255, 255, 255, 0.1) 0%, transparent 50%),
+				radial-gradient(circle at 40% 80%, rgba(59, 130, 246, 0.15) 0%, transparent 50%),
+				linear-gradient(135deg, #0f172a 0%, #1e293b 25%, #334155 50%, #475569 75%, #64748b 100%);
 			min-height: 100vh;
 			padding: 2rem;
-			color: #333;
+			color: #f1f5f9;
+			position: relative;
+		}
+
+		body::before {
+			content: '';
+			position: fixed;
+			top: 0;
+			left: 0;
+			right: 0;
+			bottom: 0;
+			background:
+				radial-gradient(circle at 30% 20%, rgba(59, 130, 246, 0.1) 0%, transparent 40%),
+				radial-gradient(circle at 70% 80%, rgba(239, 68, 68, 0.08) 0%, transparent 40%),
+				radial-gradient(circle at 50% 50%, rgba(16, 185, 129, 0.05) 0%, transparent 50%);
+			pointer-events: none;
+			z-index: -1;
 		}
 
 		.container {
@@ -905,10 +925,17 @@ function renderStateRepresentatives(reps: any[], chamber: string, currentRepId: 
 		.back-link {
 			display: inline-block;
 			margin-bottom: 1rem;
-			color: white;
+			color: #93c5fd;
 			text-decoration: none;
 			font-weight: 600;
 			opacity: 0.9;
+			transition: all 0.3s ease;
+		}
+
+		.back-link:hover {
+			opacity: 1;
+			color: #dbeafe;
+			transform: translateX(-2px);
 		}
 		
 		.back-link:hover {
@@ -916,67 +943,108 @@ function renderStateRepresentatives(reps: any[], chamber: string, currentRepId: 
 		}
 		
 		.profile-header {
-			background: white;
-			border-radius: 12px;
+			background: linear-gradient(135deg, rgba(30, 41, 59, 0.95) 0%, rgba(51, 65, 85, 0.95) 100%);
+			backdrop-filter: blur(20px);
+			border: 1px solid rgba(148, 163, 184, 0.2);
+			border-radius: 16px;
 			padding: 2rem;
 			margin-bottom: 2rem;
-			box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+			box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(148, 163, 184, 0.1);
+			position: relative;
 		}
-		
+
+		.profile-header::before {
+			content: '';
+			position: absolute;
+			top: 0;
+			left: 0;
+			right: 0;
+			bottom: 0;
+			background: linear-gradient(135deg, rgba(59, 130, 246, 0.1) 0%, rgba(239, 68, 68, 0.1) 100%);
+			border-radius: 16px;
+			pointer-events: none;
+		}
+
 		.profile-name {
 			font-size: 2.5rem;
 			margin-bottom: 1rem;
-			color: #333;
+			color: #ffffff;
+			font-weight: 800;
+			letter-spacing: -0.025em;
+			position: relative;
+			z-index: 1;
+			text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
 		}
 		
 		.profile-details {
 			display: grid;
 			grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-			gap: 1rem;
+			gap: 1.5rem;
 			margin-top: 1.5rem;
+			position: relative;
+			z-index: 1;
 		}
-		
+
 		.detail-item {
-			display: flex;
-			flex-direction: column;
+			background: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.05) 100%);
+			backdrop-filter: blur(10px);
+			border: 1px solid rgba(148, 163, 184, 0.2);
+			border-radius: 12px;
+			padding: 1rem;
+			text-align: center;
+			transition: all 0.3s ease;
 		}
-		
+
+		.detail-item:hover {
+			transform: translateY(-2px);
+			box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+			border-color: rgba(148, 163, 184, 0.4);
+		}
+
 		.detail-label {
 			font-size: 0.85rem;
-			color: #666;
+			color: #94a3b8;
 			text-transform: uppercase;
-			letter-spacing: 0.5px;
-			margin-bottom: 0.25rem;
+			letter-spacing: 1px;
+			margin-bottom: 0.5rem;
+			opacity: 0.9;
 		}
-		
+
 		.detail-value {
-			font-size: 1.1rem;
-			font-weight: 600;
-			color: #333;
+			font-size: 1.2rem;
+			font-weight: 700;
+			color: #f1f5f9;
 		}
 		
 		.badge {
 			display: inline-block;
-			padding: 0.5rem 1rem;
-			border-radius: 20px;
-			font-size: 0.9rem;
-			font-weight: 600;
-			margin-top: 0.5rem;
+			padding: 0.75rem 1.5rem;
+			border-radius: 25px;
+			font-size: 1rem;
+			font-weight: 700;
+			margin-top: 1rem;
+			position: relative;
+			z-index: 1;
+			text-transform: uppercase;
+			letter-spacing: 0.5px;
 		}
-		
+
 		.badge-democrat {
-			background: #3b82f6;
+			background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
 			color: white;
+			box-shadow: 0 0 15px rgba(59, 130, 246, 0.4);
 		}
-		
+
 		.badge-republican {
-			background: #ef4444;
+			background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
 			color: white;
+			box-shadow: 0 0 15px rgba(239, 68, 68, 0.4);
 		}
-		
+
 		.badge-independent {
-			background: #6b7280;
+			background: linear-gradient(135deg, #6b7280 0%, #4b5563 100%);
 			color: white;
+			box-shadow: 0 0 15px rgba(107, 114, 128, 0.4);
 		}
 		
 		.social-links {
@@ -1002,117 +1070,194 @@ function renderStateRepresentatives(reps: any[], chamber: string, currentRepId: 
 
 		/* State section styles */
 		.state-section {
-			background: white;
-			border-radius: 12px;
+			background: linear-gradient(135deg, rgba(30, 41, 59, 0.95) 0%, rgba(51, 65, 85, 0.9) 100%);
+			backdrop-filter: blur(20px);
+			border: 1px solid rgba(148, 163, 184, 0.2);
+			border-radius: 16px;
 			padding: 2rem;
 			margin-bottom: 2rem;
-			box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+			box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(148, 163, 184, 0.1);
+			position: relative;
+		}
+
+		.state-section::before {
+			content: '';
+			position: absolute;
+			top: 0;
+			left: 0;
+			right: 0;
+			bottom: 0;
+			background: linear-gradient(135deg, rgba(59, 130, 246, 0.05) 0%, rgba(239, 68, 68, 0.05) 100%);
+			border-radius: 16px;
+			pointer-events: none;
 		}
 
 		.state-section h2 {
 			font-size: 1.8rem;
 			margin-bottom: 1.5rem;
-			color: #333;
-			border-bottom: 2px solid #e5e7eb;
+			color: #f1f5f9;
+			font-weight: 700;
+			border-bottom: 2px solid rgba(148, 163, 184, 0.3);
 			padding-bottom: 0.5rem;
+			position: relative;
+			z-index: 1;
+			text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
 		}
 
 		.state-data-grid {
 			display: grid;
 			grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-			gap: 1rem;
+			gap: 1.5rem;
 			margin-bottom: 2rem;
+			position: relative;
+			z-index: 1;
 		}
 
 		.state-data-card {
-			background: #f9fafb;
-			padding: 1rem;
-			border-radius: 8px;
-			border-left: 4px solid #667eea;
+			background: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.05) 100%);
+			backdrop-filter: blur(10px);
+			padding: 1.5rem;
+			border-radius: 12px;
+			border-left: 4px solid #60a5fa;
+			border: 1px solid rgba(148, 163, 184, 0.2);
+			box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+			transition: all 0.3s ease;
+			position: relative;
+			z-index: 1;
+			text-align: center;
+		}
+
+		.state-data-card:hover {
+			transform: translateY(-2px);
+			box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+			border-color: rgba(148, 163, 184, 0.4);
 		}
 
 		.state-data-label {
-			font-size: 0.85rem;
-			color: #666;
+			font-size: 0.9rem;
+			color: #94a3b8;
 			text-transform: uppercase;
-			letter-spacing: 0.5px;
-			margin-bottom: 0.25rem;
+			letter-spacing: 1px;
+			margin-bottom: 0.5rem;
+			opacity: 0.9;
 		}
 
 		.state-data-value {
-			font-size: 1.5rem;
+			font-size: 1.8rem;
 			font-weight: 700;
-			color: #333;
+			color: #60a5fa;
 		}
 
 		.state-representatives-section {
+			background: linear-gradient(135deg, rgba(30, 41, 59, 0.95) 0%, rgba(51, 65, 85, 0.9) 100%);
+			backdrop-filter: blur(20px);
+			border: 1px solid rgba(148, 163, 184, 0.2);
+			border-radius: 16px;
+			padding: 2rem;
 			margin-top: 2rem;
+			box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(148, 163, 184, 0.1);
+			position: relative;
+		}
+
+		.state-representatives-section::before {
+			content: '';
+			position: absolute;
+			top: 0;
+			left: 0;
+			right: 0;
+			bottom: 0;
+			background: linear-gradient(135deg, rgba(59, 130, 246, 0.05) 0%, rgba(239, 68, 68, 0.05) 100%);
+			border-radius: 16px;
+			pointer-events: none;
 		}
 
 		.state-representatives-section h3 {
-			font-size: 1.5rem;
-			margin-bottom: 1rem;
-			color: #333;
+			font-size: 1.8rem;
+			margin-bottom: 1.5rem;
+			color: #f1f5f9;
+			font-weight: 700;
+			padding-bottom: 0.5rem;
+			border-bottom: 2px solid rgba(148, 163, 184, 0.3);
+			position: relative;
+			z-index: 1;
+			text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
 		}
 
 		.chamber-tabs {
 			display: flex;
 			gap: 1rem;
 			margin-bottom: 1.5rem;
+			position: relative;
+			z-index: 1;
 		}
 
 		.tab {
 			padding: 0.75rem 1.5rem;
-			background: #e5e7eb;
-			border: none;
+			background: rgba(148, 163, 184, 0.2);
+			backdrop-filter: blur(10px);
+			border: 1px solid rgba(148, 163, 184, 0.3);
 			border-radius: 8px;
 			cursor: pointer;
 			font-weight: 600;
-			transition: all 0.2s;
+			transition: all 0.3s ease;
+			color: #cbd5e1;
 		}
 
 		.tab.active {
-			background: #667eea;
+			background: linear-gradient(135deg, #60a5fa 0%, #3b82f6 100%);
 			color: white;
+			border-color: rgba(59, 130, 246, 0.5);
+			box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
 		}
 
 		.tab:hover:not(.active) {
-			background: #d1d5db;
+			background: rgba(148, 163, 184, 0.3);
+			border-color: rgba(148, 163, 184, 0.5);
+			color: #f1f5f9;
+			transform: translateY(-1px);
 		}
 
 		.state-representatives-grid {
 			display: grid;
 			grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
 			gap: 1.5rem;
+			position: relative;
+			z-index: 1;
 		}
 
 		.state-representative-card {
-			background: #f9fafb;
-			border-radius: 8px;
+			background: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.05) 100%);
+			backdrop-filter: blur(10px);
+			border: 1px solid rgba(148, 163, 184, 0.2);
+			border-radius: 12px;
 			padding: 1.5rem;
-			border-left: 4px solid #667eea;
-			transition: transform 0.2s, box-shadow 0.2s;
+			border-left: 4px solid #60a5fa;
+			transition: all 0.3s ease;
 			cursor: pointer;
 			text-decoration: none;
 			color: inherit;
 			display: block;
+			box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+			position: relative;
+			z-index: 1;
 		}
 
 		.state-representative-card:hover {
 			transform: translateY(-4px);
-			box-shadow: 0 8px 16px rgba(0,0,0,0.15);
+			box-shadow: 0 12px 30px rgba(0, 0, 0, 0.25);
+			border-color: rgba(148, 163, 184, 0.4);
 		}
 
 		.state-representative-card.current {
 			border-left-color: #10b981;
-			background: #f0fdf4;
+			background: linear-gradient(135deg, rgba(16, 185, 129, 0.1) 0%, rgba(5, 150, 105, 0.05) 100%);
 		}
 
 		.state-representative-name {
 			font-size: 1.25rem;
 			font-weight: 700;
 			margin-bottom: 0.5rem;
-			color: #333;
+			color: #f1f5f9;
 		}
 
 		.state-representative-info {
@@ -1120,6 +1265,8 @@ function renderStateRepresentatives(reps: any[], chamber: string, currentRepId: 
 			flex-direction: column;
 			gap: 0.5rem;
 			margin-top: 0.5rem;
+			color: #cbd5e1;
+			font-size: 0.9rem;
 		}
 
 		.state-info-item {
