@@ -425,10 +425,6 @@ export function renderAdminDashboard(data: any): string {
 			<div class="stat-value">${issues ? issues.length : 0}</div>
 			<div class="stat-label">Issues</div>
 		</div>
-		<div class="stat-card">
-			<div class="stat-value">${issues ? issues.length : 0}</div>
-			<div class="stat-label">Issues</div>
-		</div>
 	</div>
 	
 	<div class="tabs">
@@ -562,7 +558,7 @@ export function renderAdminDashboard(data: any): string {
 			</table>
 		</div>
 	</div>
-	
+
 	<div id="issues" class="tab-content">
 		<div class="card">
 			<div class="card-header">
@@ -847,7 +843,7 @@ export function renderAdminDashboard(data: any): string {
 			</form>
 		</div>
 	</div>
-	
+
 	<!-- Issue Modal -->
 	<div id="issue-modal" class="modal">
 		<div class="modal-content">
@@ -1146,7 +1142,7 @@ export function renderAdminDashboard(data: any): string {
 				window.location.href = '/admin/login';
 			});
 		}
-		
+
 		function escapeHtml(text) {
 			if (!text) return '';
 			const map = {
