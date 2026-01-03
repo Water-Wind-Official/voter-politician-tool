@@ -6,7 +6,7 @@ import { renderAdminLogin, renderAdminDashboard } from "./renderAdmin";
 import { renderSenatorHub } from "./renderSenators";
 import { renderHouseHub } from "./renderHouse";
 import { renderElectionHub } from "./renderElection";
-import { renderIssuesPage } from "./renderIssues";
+// import { renderIssuesPage } from "./renderIssues";
 import {
 	getAllStates,
 	getStateByCode,
@@ -35,78 +35,14 @@ import {
 } from "./db";
 
 export default {
-	async fetch(request: Request, env: Env): Promise<Response> {
-		const url = new URL(request.url);
-		const path = url.pathname;
-
-		// API endpoints
-		if (path.startsWith('/api/')) {
-			return handleApiRequest(request, env, path);
-		}
-
-		// Admin API endpoints (before admin dashboard check)
-		if (path.startsWith('/api/admin/')) {
-			return handleAdminApi(request, env, path);
-		}
-
-		// Web pages
-		if (path === '/' || path === '/index.html') {
-			return handleHomePage(request, env);
-		}
-
-		if (path === '/senators' || path === '/senator-hub') {
-			return handleSenatorHub(request, env);
-		}
-
-		if (path === '/house' || path === '/house-hub') {
-			return handleHouseHub(request, env);
-		}
-
-		if (path === '/election' || path === '/election-hub') {
-			return handleElectionHub(request, env);
-		}
-
-		if (path === '/issues') {
-			return handleIssuesPage(request, env);
-		}
-
-		if (path.startsWith('/representative/')) {
-			const id = parseInt(path.split('/')[2]);
-			if (!isNaN(id)) {
-				return handleRepresentativePage(request, env, id);
-			}
-		}
-
-		// Legacy politician route for backward compatibility
-		if (path.startsWith('/politician/')) {
-			const id = parseInt(path.split('/')[2]);
-			if (!isNaN(id)) {
-				return handleRepresentativePage(request, env, id);
-			}
-		}
-
-		// Admin routes
-		if (path === '/admin' || path === '/admin/') {
-			return handleAdminDashboard(request, env);
-		}
-
-		if (path === '/admin/login') {
-			return handleAdminLogin(request, env);
-		}
-
-		if (path === '/admin/logout') {
-			return handleAdminLogout(request, env);
-		}
-
-		// 404
-		return new Response('Not Found', { status: 404 });
+	async fetch(request: Request): Promise<Response> {
+		return new Response('Worker is working!');
 	},
-} satisfies ExportedHandler<Env>;
+};
 
 async function handleHomePage(request: Request, env: Env): Promise<Response> {
-	const states = await getAllStates(env.DB);
-
-	return new Response(renderHomePage(states), {
+	// Temporarily return simple response for debugging
+	return new Response('<h1>Site is working</h1>', {
 		headers: { "content-type": "text/html" },
 	});
 }
@@ -262,22 +198,27 @@ async function handleAdminDashboard(request: Request, env: Env): Promise<Respons
 	if (!checkAdminAuth(request)) {
 		return Response.redirect(new URL('/admin/login', request.url).toString(), 302);
 		}
-		
-	const states = await getAllStates(env.DB);
-	const representatives = await getAllRepresentatives(env.DB);
-	const voterData = await Promise.all(
-		states.map(s => getVoterDataByState(env.DB, s.code))
-	).then(results => results.filter(r => r !== null));
-	const issues = await getAllIssues(env.DB);
 
-	return new Response(renderAdminDashboard({
-		states,
-		representatives,
-		voterData,
-		issues
-	}), {
-		headers: { 'Content-Type': 'text/html' }
-	});
+	try {
+		const states = await getAllStates(env.DB);
+		const representatives = await getAllRepresentatives(env.DB);
+		const voterData = await Promise.all(
+			states.map(s => getVoterDataByState(env.DB, s.code))
+		).then(results => results.filter(r => r !== null));
+		const issues = await getAllIssues(env.DB);
+
+		return new Response(renderAdminDashboard({
+			states,
+			representatives,
+			voterData,
+			issues
+		}), {
+			headers: { 'Content-Type': 'text/html' }
+		});
+	} catch (error) {
+		console.error('Error in handleAdminDashboard:', error);
+		return new Response('Internal Server Error: ' + (error as Error).message, { status: 500 });
+	}
 }
 
 async function handleAdminApi(request: Request, env: Env, path: string): Promise<Response> {

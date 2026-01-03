@@ -608,10 +608,16 @@ export async function createVote(db: D1Database, data: Partial<VoteData>): Promi
 
 // Issues management functions
 export async function getAllIssues(db: D1Database): Promise<Issue[]> {
-	const result = await db
-		.prepare('SELECT * FROM issues WHERE is_active = 1 ORDER BY priority DESC, created_at DESC')
-		.all();
-	return result.results as Issue[];
+	try {
+		const result = await db
+			.prepare('SELECT id, title, description, party, category, priority, is_active, created_at, updated_at FROM issues ORDER BY priority DESC, created_at DESC')
+			.all();
+		return result.results as Issue[];
+	} catch (error) {
+		console.error('Error in getAllIssues:', error);
+		// Return empty array if table doesn't exist or query fails
+		return [];
+	}
 }
 
 export async function getIssuesByParty(db: D1Database, party: string): Promise<Issue[]> {
