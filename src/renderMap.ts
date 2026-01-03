@@ -527,16 +527,16 @@ export function renderHomePage(states: State[]): string {
 									<div class="data-value">\${formatNumber(data.voterData.voting_age_population)}</div>
 								</div>
 							\` : ''}
-							\${data.voterData.voter_turnout_percentage ? \`
+							\${data.voterData.total_voted && data.voterData.total_registered_voters ? \`
 								<div class="data-card">
 									<div class="data-label">Registered Voter Turnout</div>
-									<div class="data-value">\${data.voterData.voter_turnout_percentage.toFixed(1)}%</div>
+									<div class="data-value">\${(((data.voterData.total_voted / data.voterData.total_registered_voters) * 100).toFixed(1))}%</div>
 								</div>
 							\` : ''}
-							\${data.voterData.citizen_turnout_percentage ? \`
+							\${data.voterData.total_voted && data.voterData.voting_age_population ? \`
 								<div class="data-card">
 									<div class="data-label">Citizen Turnout (18+)</div>
-									<div class="data-value">\${data.voterData.citizen_turnout_percentage.toFixed(1)}%</div>
+									<div class="data-value">\${(((data.voterData.total_voted / data.voterData.voting_age_population) * 100).toFixed(1))}%</div>
 								</div>
 							\` : ''}
 						</div>

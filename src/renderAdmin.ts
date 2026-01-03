@@ -483,8 +483,8 @@ export function renderAdminDashboard(data: any): string {
 					<tr>
 						<th>State</th>
 						<th>Registered Voters</th>
-						<th>Registered Voter Turnout</th>
-						<th>Citizen Turnout (18+)</th>
+						<th>Reg. Voter Turnout*</th>
+						<th>Citizen Turnout (18+)*</th>
 						<th>Year</th>
 						<th>Actions</th>
 					</tr>
@@ -494,8 +494,8 @@ export function renderAdminDashboard(data: any): string {
 						<tr>
 							<td>${v.state_code}</td>
 							<td>${v.total_registered_voters ? v.total_registered_voters.toLocaleString() : '-'}</td>
-							<td>${v.voter_turnout_percentage ? v.voter_turnout_percentage.toFixed(1) + '%' : '-'}</td>
-							<td>${v.citizen_turnout_percentage ? v.citizen_turnout_percentage.toFixed(1) + '%' : '-'}</td>
+							<td>${v.total_voted && v.total_registered_voters ? (((v.total_voted / v.total_registered_voters) * 100).toFixed(1)) + '%' : '-'}</td>
+							<td>${v.total_voted && v.voting_age_population ? (((v.total_voted / v.voting_age_population) * 100).toFixed(1)) + '%' : '-'}</td>
 							<td>${v.data_year || '-'}</td>
 							<td>
 								<button class="btn btn-small" onclick="editVoterData('${v.state_code}', ${v.data_year})">Edit</button>
@@ -769,16 +769,6 @@ export function renderAdminDashboard(data: any): string {
 						<label>Voting Age Population</label>
 						<input type="number" name="voting_age_population" min="0" placeholder="e.g., 8500000" />
 						<small style="color: #666; font-size: 0.85rem;">Population age 18+ (Census data)</small>
-					</div>
-					<div class="form-group">
-						<label>Registered Voter Turnout %</label>
-						<input type="number" name="voter_turnout_percentage" min="0" max="100" step="0.1" placeholder="e.g., 85.4" />
-						<small style="color: #666; font-size: 0.85rem;">Percentage of registered voters who voted (0-100)</small>
-					</div>
-					<div class="form-group">
-						<label>Citizen Turnout % (18+)</label>
-						<input type="number" name="citizen_turnout_percentage" min="0" max="100" step="0.1" placeholder="e.g., 58.7" />
-						<small style="color: #666; font-size: 0.85rem;">Percentage of citizens age 18+ who voted (0-100)</small>
 					</div>
 					<div class="form-group">
 						<label>Last Election Date</label>
@@ -1076,8 +1066,6 @@ export function renderAdminDashboard(data: any): string {
 			if (data.total_registered_voters) data.total_registered_voters = parseInt(data.total_registered_voters);
 			if (data.total_population) data.total_population = parseInt(data.total_population);
 			if (data.voting_age_population) data.voting_age_population = parseInt(data.voting_age_population);
-			if (data.voter_turnout_percentage) data.voter_turnout_percentage = parseFloat(data.voter_turnout_percentage);
-			if (data.citizen_turnout_percentage) data.citizen_turnout_percentage = parseFloat(data.citizen_turnout_percentage);
 			
 			try {
 				const response = await fetch('/api/admin/voter-data', {
