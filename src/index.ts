@@ -1,5 +1,6 @@
 /// <reference types="../worker-configuration.d.ts" />
 
+// Main Cloudflare Worker entry point for Voter Politician Tool
 import { renderHomePage } from "./renderMap";
 import { renderPoliticianProfile } from "./renderHtml";
 import { renderAdminLogin, renderAdminDashboard } from "./renderAdmin";
