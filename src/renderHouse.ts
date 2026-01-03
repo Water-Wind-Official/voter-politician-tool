@@ -181,6 +181,7 @@ export function renderHouseHub(houseMembers: Representative[]): string {
 			width: 32px;
 			height: 32px;
 			flex-shrink: 0;
+			animation: bounce 2s infinite;
 		}
 
 		.state-party-icon.donkey-icon {
@@ -421,6 +422,7 @@ export function renderHouseHub(houseMembers: Representative[]): string {
 				let winnerCount = '';
 				let loserColor = '';
 				let winnerColor = '';
+				let stateColor = '#60a5fa'; // default blue
 
 				if (republicanCount > democratCount) {
 					// Republicans win
@@ -429,6 +431,7 @@ export function renderHouseHub(houseMembers: Representative[]): string {
 					winnerCount = republicanCount.toString();
 					loserColor = '#60a5fa'; // blue for democrats (losers)
 					winnerColor = '#f87171'; // red for republicans (winners)
+					stateColor = '#f87171'; // red for republican states
 				} else if (democratCount > republicanCount) {
 					// Democrats win
 					winnerIcon = '<img class="state-party-icon donkey-icon" src="https://content.mycutegraphics.com/graphics/animal/horse-head.png" alt="Democrat" />';
@@ -436,6 +439,7 @@ export function renderHouseHub(houseMembers: Representative[]): string {
 					winnerCount = democratCount.toString();
 					loserColor = '#f87171'; // red for republicans (losers)
 					winnerColor = '#60a5fa'; // blue for democrats (winners)
+					stateColor = '#60a5fa'; // blue for democratic states
 				} else {
 					// Tie or independents only
 					winnerIcon = '';
@@ -443,12 +447,13 @@ export function renderHouseHub(houseMembers: Representative[]): string {
 					winnerCount = democratCount.toString();
 					loserColor = '#f87171';
 					winnerColor = '#60a5fa';
+					stateColor = '#94a3b8'; // gray for tied states
 				}
 
 				return `
 					<div class="state-section">
 						<div class="state-header">
-							<span>${stateCode}</span>
+							<span style="color: ${stateColor}">${stateCode}</span>
 							<div class="party-counts">
 								<span class="loser-count" style="color: ${loserColor}">${loserCount}</span>
 								${winnerIcon}
