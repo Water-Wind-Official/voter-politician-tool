@@ -141,12 +141,12 @@ async function handleRepresentativePage(request: Request, env: Env, id: number):
 	// For now, we'll show the profile without votes until we migrate the data
 	const votes: any[] = []; // TODO: Migrate voting records to use representative_id
 
-	return new Response(renderRepresentativeProfile(representative, votes, {
+	return new Response(renderRepresentativeProfile(representative, votes, state ? {
 		state,
 		representatives: stateRepresentatives,
 		voterData,
 		demographics
-	}), {
+	} : null), {
 		headers: { "content-type": "text/html" },
 	});
 }
@@ -1139,11 +1139,10 @@ function renderStateRepresentatives(reps: any[], chamber: string, currentRepId: 
 						🌐 Official Website
 					</a>
 				` : ''}
-				${stateData?.state?.webpage ? `
-					<a href="${generateCongressGovUrl(stateData.state.webpage, representative.chamber)}" target="_blank" class="social-link">
-						🏛️ Congress.gov
-					</a>
-				` : ''}
+				${stateData?.state?.webpage && representative?.chamber ? (() => {
+					const url = generateCongressGovUrl(stateData.state.webpage, representative.chamber);
+					return url && url !== '#' ? `<a href="${url}" target="_blank" class="social-link">🏛️ Congress.gov</a>` : '';
+				})() : ''}
 			</div>
 		</div>
 
@@ -1235,6 +1234,10 @@ function formatFullDate(dateString: string | null | undefined): string {
 	} catch {
 		return dateString;
 	}
+}
+
+function formatNumber(num: number): string {
+	return new Intl.NumberFormat('en-US').format(num);
 }
 
 function generateCongressGovUrl(stateName: string, chamber: string): string {
