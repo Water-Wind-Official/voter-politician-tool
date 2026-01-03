@@ -435,6 +435,14 @@ export function renderElectionHub(states: any[]): string {
 			margin-top: 1rem;
 		}
 
+		.popular-vote-link {
+			text-decoration: none;
+			color: inherit;
+			display: block;
+			transition: all 0.3s ease;
+			cursor: pointer;
+		}
+
 		.popular-vote-card {
 			background: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.05) 100%);
 			backdrop-filter: blur(10px);
@@ -447,9 +455,9 @@ export function renderElectionHub(states: any[]): string {
 			z-index: 1;
 		}
 
-		.popular-vote-card:hover {
-			transform: translateY(-3px) scale(1.01);
-			box-shadow: 0 8px 25px rgba(0, 0, 0, 0.25);
+		.popular-vote-link:hover .popular-vote-card {
+			transform: translateY(-4px) scale(1.02);
+			box-shadow: 0 12px 30px rgba(0, 0, 0, 0.3);
 		}
 
 		.popular-vote-card.trump {
@@ -564,18 +572,22 @@ export function renderElectionHub(states: any[]): string {
 			<div class="popular-vote-section">
 				<h3 style="color: #f1f5f9; margin-bottom: 1rem; font-size: 1.3rem;">Popular Vote Results</h3>
 				<div class="popular-vote-grid">
-					<div class="popular-vote-card trump">
-						<div class="candidate-name">Donald J. Trump (R)</div>
-						<div class="popular-votes">~77 million votes</div>
-						<div class="popular-percentage">~50.9%</div>
-						<div class="popular-margin">Winner by ~6.6 million votes</div>
-					</div>
-					<div class="popular-vote-card harris">
-						<div class="candidate-name">Kamala Harris (D)</div>
-						<div class="popular-votes">~70.4 million votes</div>
-						<div class="popular-percentage">~46.5%</div>
-						<div class="popular-margin">Margin: ~4.4%</div>
-					</div>
+					<a href="/trump" class="popular-vote-link">
+						<div class="popular-vote-card trump">
+							<div class="candidate-name">Donald J. Trump (R)</div>
+							<div class="popular-votes">~77 million votes</div>
+							<div class="popular-percentage">~50.9%</div>
+							<div class="popular-margin">Winner by ~6.6 million votes</div>
+						</div>
+					</a>
+					<a href="/harris" class="popular-vote-link">
+						<div class="popular-vote-card harris">
+							<div class="candidate-name">Kamala Harris (D)</div>
+							<div class="popular-votes">~70.4 million votes</div>
+							<div class="popular-percentage">~46.5%</div>
+							<div class="popular-margin">Margin: ~4.4%</div>
+						</div>
+					</a>
 				</div>
 			</div>
 

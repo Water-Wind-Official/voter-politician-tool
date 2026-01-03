@@ -177,11 +177,32 @@ export function renderHouseHub(houseMembers: Representative[]): string {
 			text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
 		}
 		
+		.state-party-icon {
+			width: 32px;
+			height: 32px;
+			flex-shrink: 0;
+		}
+
+		.state-party-icon.donkey-icon {
+			filter: drop-shadow(0 0 8px rgba(59, 130, 246, 0.4));
+		}
+
+		.state-party-icon.elephant-icon {
+			filter: drop-shadow(0 0 8px rgba(239, 68, 68, 0.4));
+		}
+
 		.state-header .party-counts {
 			display: flex;
-			gap: 0.75rem;
-			font-size: 1rem;
-			font-weight: 600;
+			align-items: center;
+			gap: 0.25rem;
+			font-size: 1.1rem;
+			font-weight: 700;
+			color: #f1f5f9;
+		}
+
+		.party-separator {
+			color: rgba(148, 163, 184, 0.6);
+			font-weight: 400;
 		}
 		
 		.state-header .party-counts .republican-count {
@@ -400,21 +421,37 @@ export function renderHouseHub(houseMembers: Representative[]): string {
 				const republicanCount = stateMembers.filter(m => m.party === 'Republican').length;
 				const democratCount = stateMembers.filter(m => m.party === 'Democrat').length;
 				const independentCount = stateMembers.filter(m => m.party === 'Independent').length;
+
+				// Determine winning party for state icon
+				let winningParty = '';
+				let winningIcon = '';
+				if (republicanCount > democratCount) {
+					winningParty = 'Republican';
+					winningIcon = '<img class="state-party-icon elephant-icon" src="https://content.mycutegraphics.com/graphics/animal/cute-elephant.png" alt="Republican" />';
+				} else if (democratCount > republicanCount) {
+					winningParty = 'Democrat';
+					winningIcon = '<img class="state-party-icon donkey-icon" src="https://content.mycutegraphics.com/graphics/animal/horse-head.png" alt="Democrat" />';
+				} else if (independentCount > 0) {
+					winningParty = 'Independent';
+					winningIcon = '';
+				}
+
 				return `
 					<div class="state-section">
 						<div class="state-header">
 							<span>${stateCode}</span>
+							${winningIcon}
 							<div class="party-counts">
-								<span class="republican-count">R ${republicanCount}</span>
-								<span class="democrat-count">D ${democratCount}</span>
-								${independentCount > 0 ? `<span class="independent-count">Ind. ${independentCount}</span>` : ''}
+								<span class="republican-count">${republicanCount}</span>
+								<span class="party-separator">-</span>
+								<span class="democrat-count">${democratCount}</span>
+								${independentCount > 0 ? `<span class="independent-count">(Ind. ${independentCount})</span>` : ''}
 							</div>
 						</div>
 						<div class="members-container">
 						${stateMembers.map(member => {
 							const partyClass = member.party?.toLowerCase() || 'independent';
 							const cardContent = `
-								${renderPartyIcon(member.party)}
 								<div class="member-name">${escapeHtml(member.name)}</div>
 								<div class="member-details">
 									${member.party ? `<span class="party-badge ${partyClass}">${escapeHtml(member.party)}</span>` : ''}
