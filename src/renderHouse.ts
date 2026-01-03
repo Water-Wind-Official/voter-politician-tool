@@ -29,10 +29,30 @@ export function renderHouseHub(houseMembers: Representative[]): string {
 		
 		body {
 			font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-			background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+			background:
+				radial-gradient(circle at 20% 50%, rgba(120, 119, 198, 0.3) 0%, transparent 50%),
+				radial-gradient(circle at 80% 20%, rgba(255, 255, 255, 0.15) 0%, transparent 50%),
+				radial-gradient(circle at 40% 80%, rgba(120, 119, 198, 0.3) 0%, transparent 50%),
+				linear-gradient(135deg, #0f172a 0%, #1e293b 25%, #334155 50%, #475569 75%, #64748b 100%);
 			min-height: 100vh;
 			padding: 2rem;
-			color: #333;
+			color: #f1f5f9;
+			position: relative;
+		}
+
+		body::before {
+			content: '';
+			position: fixed;
+			top: 0;
+			left: 0;
+			right: 0;
+			bottom: 0;
+			background:
+				radial-gradient(circle at 30% 20%, rgba(59, 130, 246, 0.1) 0%, transparent 40%),
+				radial-gradient(circle at 70% 80%, rgba(239, 68, 68, 0.08) 0%, transparent 40%),
+				radial-gradient(circle at 50% 50%, rgba(16, 185, 129, 0.05) 0%, transparent 50%);
+			pointer-events: none;
+			z-index: -1;
 		}
 		
 		.container {
@@ -41,43 +61,74 @@ export function renderHouseHub(houseMembers: Representative[]): string {
 		}
 		
 		header {
-			background: white;
-			border-radius: 12px;
-			padding: 2rem;
+			background: linear-gradient(135deg, rgba(30, 41, 59, 0.95) 0%, rgba(51, 65, 85, 0.95) 100%);
+			backdrop-filter: blur(20px);
+			border: 1px solid rgba(148, 163, 184, 0.2);
+			border-radius: 16px;
+			padding: 2.5rem;
 			margin-bottom: 2rem;
-			box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+			box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(148, 163, 184, 0.1);
+			position: relative;
+		}
+
+		header::before {
+			content: '';
+			position: absolute;
+			top: 0;
+			left: 0;
+			right: 0;
+			bottom: 0;
+			background: linear-gradient(135deg, rgba(59, 130, 246, 0.1) 0%, rgba(239, 68, 68, 0.1) 100%);
+			border-radius: 16px;
+			pointer-events: none;
 		}
 		
 		h1 {
 			font-size: 2.5rem;
 			margin-bottom: 0.5rem;
-			background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+			background: linear-gradient(135deg, #60a5fa 0%, #a78bfa 25%, #f472b6 50%, #fbbf24 75%, #34d399 100%);
 			-webkit-background-clip: text;
 			-webkit-text-fill-color: transparent;
 			background-clip: text;
+			font-weight: 800;
+			letter-spacing: -0.025em;
+			position: relative;
+			z-index: 1;
 		}
 		
 		.subtitle {
-			color: #666;
+			color: #cbd5e1;
 			font-size: 1.1rem;
 			margin-bottom: 1rem;
+			opacity: 0.9;
+			position: relative;
+			z-index: 1;
 		}
-		
+
 		nav {
-			margin-top: 1rem;
-			padding-top: 1rem;
-			border-top: 1px solid #e5e7eb;
+			margin-top: 1.5rem;
+			padding-top: 1.5rem;
+			border-top: 1px solid rgba(148, 163, 184, 0.3);
+			position: relative;
+			z-index: 1;
 		}
-		
+
 		nav a {
-			color: #667eea;
+			color: #93c5fd;
 			text-decoration: none;
 			margin-right: 1rem;
-			font-weight: 500;
+			font-weight: 600;
+			padding: 0.5rem 1rem;
+			border-radius: 8px;
+			transition: all 0.3s ease;
+			border: 1px solid transparent;
 		}
-		
+
 		nav a:hover {
-			text-decoration: underline;
+			background: rgba(59, 130, 246, 0.2);
+			border-color: rgba(59, 130, 246, 0.5);
+			color: #dbeafe;
+			transform: translateY(-1px);
 		}
 		
 		.members-grid {
@@ -88,27 +139,45 @@ export function renderHouseHub(houseMembers: Representative[]): string {
 		}
 		
 		.state-section {
-			background: white;
-			border-radius: 12px;
+			background: linear-gradient(135deg, rgba(30, 41, 59, 0.95) 0%, rgba(51, 65, 85, 0.9) 100%);
+			backdrop-filter: blur(20px);
+			border: 1px solid rgba(148, 163, 184, 0.2);
+			border-radius: 16px;
 			padding: 1.5rem;
-			box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+			box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(148, 163, 184, 0.1);
 			max-height: 500px;
 			overflow-y: auto;
 			display: flex;
 			flex-direction: column;
+			position: relative;
+		}
+
+		.state-section::before {
+			content: '';
+			position: absolute;
+			top: 0;
+			left: 0;
+			right: 0;
+			bottom: 0;
+			background: linear-gradient(135deg, rgba(59, 130, 246, 0.05) 0%, rgba(239, 68, 68, 0.05) 100%);
+			border-radius: 16px;
+			pointer-events: none;
 		}
 		
 		.state-header {
 			font-size: 1.5rem;
 			font-weight: 700;
 			margin-bottom: 1rem;
-			color: #667eea;
-			border-bottom: 2px solid #e5e7eb;
+			color: #60a5fa;
+			border-bottom: 2px solid rgba(148, 163, 184, 0.3);
 			padding-bottom: 0.5rem;
 			display: flex;
 			align-items: center;
 			gap: 1rem;
 			flex-shrink: 0;
+			position: relative;
+			z-index: 1;
+			text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
 		}
 		
 		.state-header .party-counts {
@@ -119,15 +188,15 @@ export function renderHouseHub(houseMembers: Representative[]): string {
 		}
 		
 		.state-header .party-counts .republican-count {
-			color: #ef4444;
+			color: #f87171;
 		}
-		
+
 		.state-header .party-counts .democrat-count {
-			color: #3b82f6;
+			color: #60a5fa;
 		}
-		
+
 		.state-header .party-counts .independent-count {
-			color: #6b7280;
+			color: #94a3b8;
 		}
 		
 		.members-container {
@@ -136,12 +205,23 @@ export function renderHouseHub(houseMembers: Representative[]): string {
 		}
 		
 		.member-card {
-			background: #f9fafb;
-			border-radius: 8px;
+			background: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.05) 100%);
+			backdrop-filter: blur(10px);
+			border: 1px solid rgba(148, 163, 184, 0.2);
+			border-radius: 12px;
 			padding: 1rem;
 			margin-bottom: 1rem;
-			border-left: 4px solid #667eea;
+			border-left: 4px solid #60a5fa;
+			transition: all 0.3s ease;
+			box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 			position: relative;
+			z-index: 1;
+		}
+
+		.member-card:hover {
+			transform: translateY(-2px);
+			box-shadow: 0 8px 25px rgba(0, 0, 0, 0.25);
+			border-color: rgba(148, 163, 184, 0.4);
 		}
 		
 		.member-card:last-child {
@@ -169,30 +249,32 @@ export function renderHouseHub(houseMembers: Representative[]): string {
 			font-size: 1.2rem;
 			font-weight: 600;
 			margin-bottom: 0.5rem;
-			color: #1f2937;
+			color: #f1f5f9;
 		}
-		
+
 		.member-details {
 			display: flex;
 			flex-direction: column;
 			gap: 0.25rem;
 			font-size: 0.9rem;
-			color: #6b7280;
+			color: #cbd5e1;
 		}
-		
+
 		.member-details strong {
-			color: #374151;
+			color: #f1f5f9;
 		}
 		
 		.member-link {
 			display: inline-block;
 			margin-top: 0.5rem;
-			color: #667eea;
+			color: #93c5fd;
 			text-decoration: none;
 			font-weight: 500;
+			transition: color 0.3s ease;
 		}
-		
+
 		.member-link:hover {
+			color: #dbeafe;
 			text-decoration: underline;
 		}
 		
@@ -206,45 +288,69 @@ export function renderHouseHub(houseMembers: Representative[]): string {
 		}
 		
 		.party-badge.democrat {
-			background: #3b82f6;
+			background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
 			color: white;
+			box-shadow: 0 0 10px rgba(59, 130, 246, 0.3);
 		}
-		
+
 		.party-badge.republican {
-			background: #ef4444;
+			background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
 			color: white;
+			box-shadow: 0 0 10px rgba(239, 68, 68, 0.3);
 		}
-		
+
 		.party-badge.independent {
-			background: #6b7280;
+			background: linear-gradient(135deg, #6b7280 0%, #4b5563 100%);
 			color: white;
+			box-shadow: 0 0 10px rgba(107, 114, 128, 0.3);
 		}
 		
 		.stats {
-			background: white;
-			border-radius: 12px;
+			background: linear-gradient(135deg, rgba(30, 41, 59, 0.95) 0%, rgba(51, 65, 85, 0.9) 100%);
+			backdrop-filter: blur(20px);
+			border: 1px solid rgba(148, 163, 184, 0.2);
+			border-radius: 16px;
 			padding: 1.5rem;
 			margin-bottom: 2rem;
-			box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+			box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(148, 163, 184, 0.1);
 			display: grid;
 			grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
 			gap: 1rem;
+			position: relative;
 		}
-		
+
+		.stats::before {
+			content: '';
+			position: absolute;
+			top: 0;
+			left: 0;
+			right: 0;
+			bottom: 0;
+			background: linear-gradient(135deg, rgba(59, 130, 246, 0.05) 0%, rgba(239, 68, 68, 0.05) 100%);
+			border-radius: 16px;
+			pointer-events: none;
+		}
+
 		.stat-item {
 			text-align: center;
+			position: relative;
+			z-index: 1;
 		}
-		
+
 		.stat-value {
 			font-size: 2rem;
 			font-weight: 700;
-			color: #667eea;
+			background: linear-gradient(135deg, #60a5fa 0%, #a78bfa 50%, #f472b6 100%);
+			-webkit-background-clip: text;
+			-webkit-text-fill-color: transparent;
+			background-clip: text;
 		}
-		
+
 		.stat-label {
-			color: #6b7280;
+			color: #cbd5e1;
 			font-size: 0.9rem;
 			margin-top: 0.25rem;
+			opacity: 0.9;
 		}
 		
 		@media (max-width: 768px) {

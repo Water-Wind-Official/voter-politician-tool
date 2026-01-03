@@ -17,10 +17,30 @@ export function renderIssuesPage(democratIssues: Issue[], republicanIssues: Issu
 
 		body {
 			font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-			background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+			background:
+				radial-gradient(circle at 20% 50%, rgba(120, 119, 198, 0.3) 0%, transparent 50%),
+				radial-gradient(circle at 80% 20%, rgba(255, 255, 255, 0.15) 0%, transparent 50%),
+				radial-gradient(circle at 40% 80%, rgba(120, 119, 198, 0.3) 0%, transparent 50%),
+				linear-gradient(135deg, #0f172a 0%, #1e293b 25%, #334155 50%, #475569 75%, #64748b 100%);
 			min-height: 100vh;
 			padding: 2rem;
-			color: #333;
+			color: #f1f5f9;
+			position: relative;
+		}
+
+		body::before {
+			content: '';
+			position: fixed;
+			top: 0;
+			left: 0;
+			right: 0;
+			bottom: 0;
+			background:
+				radial-gradient(circle at 30% 20%, rgba(59, 130, 246, 0.1) 0%, transparent 40%),
+				radial-gradient(circle at 70% 80%, rgba(239, 68, 68, 0.08) 0%, transparent 40%),
+				radial-gradient(circle at 50% 50%, rgba(16, 185, 129, 0.05) 0%, transparent 50%);
+			pointer-events: none;
+			z-index: -1;
 		}
 
 		.container {
@@ -33,40 +53,75 @@ export function renderIssuesPage(democratIssues: Issue[], republicanIssues: Issu
 		}
 
 		header {
-			background: white;
-			border-radius: 12px;
-			padding: 2rem;
+			background: linear-gradient(135deg, rgba(30, 41, 59, 0.95) 0%, rgba(51, 65, 85, 0.95) 100%);
+			backdrop-filter: blur(20px);
+			border: 1px solid rgba(148, 163, 184, 0.2);
+			border-radius: 16px;
+			padding: 2.5rem;
 			margin-bottom: 2rem;
-			box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+			box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(148, 163, 184, 0.1);
 			grid-column: 1 / -1;
 			text-align: center;
+			position: relative;
+		}
+
+		header::before {
+			content: '';
+			position: absolute;
+			top: 0;
+			left: 0;
+			right: 0;
+			bottom: 0;
+			background: linear-gradient(135deg, rgba(59, 130, 246, 0.1) 0%, rgba(239, 68, 68, 0.1) 100%);
+			border-radius: 16px;
+			pointer-events: none;
 		}
 
 		h1 {
 			font-size: 3rem;
 			margin-bottom: 0.5rem;
-			background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+			background: linear-gradient(135deg, #60a5fa 0%, #a78bfa 25%, #f472b6 50%, #fbbf24 75%, #34d399 100%);
 			-webkit-background-clip: text;
 			-webkit-text-fill-color: transparent;
 			background-clip: text;
+			font-weight: 800;
+			letter-spacing: -0.025em;
+			position: relative;
+			z-index: 1;
 		}
 
 		.subtitle {
-			color: #666;
+			color: #cbd5e1;
 			font-size: 1.2rem;
+			opacity: 0.9;
+			position: relative;
+			z-index: 1;
 		}
 
 		nav {
-			margin-top: 1rem;
-			padding-top: 1rem;
-			border-top: 1px solid #e5e7eb;
+			margin-top: 1.5rem;
+			padding-top: 1.5rem;
+			border-top: 1px solid rgba(148, 163, 184, 0.3);
+			position: relative;
+			z-index: 1;
 		}
 
 		nav a {
-			color: #667eea;
+			color: #93c5fd;
 			text-decoration: none;
-			margin: 0 0.5rem;
-			font-weight: 500;
+			margin: 0 0.75rem;
+			font-weight: 600;
+			padding: 0.5rem 1rem;
+			border-radius: 8px;
+			transition: all 0.3s ease;
+			border: 1px solid transparent;
+		}
+
+		nav a:hover {
+			background: rgba(59, 130, 246, 0.2);
+			border-color: rgba(59, 130, 246, 0.5);
+			color: #dbeafe;
+			transform: translateY(-1px);
 		}
 
 		nav a:hover {
@@ -74,11 +129,26 @@ export function renderIssuesPage(democratIssues: Issue[], republicanIssues: Issu
 		}
 
 		.section {
-			background: white;
-			border-radius: 12px;
+			background: linear-gradient(135deg, rgba(30, 41, 59, 0.95) 0%, rgba(51, 65, 85, 0.9) 100%);
+			backdrop-filter: blur(20px);
+			border: 1px solid rgba(148, 163, 184, 0.2);
+			border-radius: 16px;
 			padding: 2rem;
-			box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+			box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(148, 163, 184, 0.1);
 			min-height: 600px;
+			position: relative;
+		}
+
+		.section::before {
+			content: '';
+			position: absolute;
+			top: 0;
+			left: 0;
+			right: 0;
+			bottom: 0;
+			background: linear-gradient(135deg, rgba(59, 130, 246, 0.05) 0%, rgba(239, 68, 68, 0.05) 100%);
+			border-radius: 16px;
+			pointer-events: none;
 		}
 
 		.democrat-section {
@@ -93,7 +163,7 @@ export function renderIssuesPage(democratIssues: Issue[], republicanIssues: Issu
 			left: 0;
 			right: 0;
 			bottom: 0;
-			background: linear-gradient(135deg, rgba(59, 130, 246, 0.1) 0%, rgba(37, 99, 235, 0.05) 100%);
+			background: linear-gradient(135deg, rgba(59, 130, 246, 0.15) 0%, rgba(37, 99, 235, 0.08) 100%);
 			pointer-events: none;
 		}
 
@@ -109,13 +179,13 @@ export function renderIssuesPage(democratIssues: Issue[], republicanIssues: Issu
 			left: 0;
 			right: 0;
 			bottom: 0;
-			background: linear-gradient(135deg, rgba(239, 68, 68, 0.1) 0%, rgba(220, 38, 38, 0.05) 100%);
+			background: linear-gradient(135deg, rgba(239, 68, 68, 0.15) 0%, rgba(220, 38, 38, 0.08) 100%);
 			pointer-events: none;
 		}
 
 		.center-section {
-			background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
-			border: 2px solid #e5e7eb;
+			background: linear-gradient(135deg, rgba(248, 250, 252, 0.1) 0%, rgba(226, 232, 240, 0.05) 100%);
+			border: 2px solid rgba(148, 163, 184, 0.3);
 		}
 
 		.section-header {
@@ -124,7 +194,7 @@ export function renderIssuesPage(democratIssues: Issue[], republicanIssues: Issu
 			justify-content: center;
 			margin-bottom: 2rem;
 			padding-bottom: 1rem;
-			border-bottom: 2px solid #e5e7eb;
+			border-bottom: 2px solid rgba(148, 163, 184, 0.3);
 			position: relative;
 			z-index: 1;
 		}
@@ -137,62 +207,72 @@ export function renderIssuesPage(democratIssues: Issue[], republicanIssues: Issu
 		}
 
 		.donkey-icon {
-			filter: drop-shadow(0 0 10px rgba(59, 130, 246, 0.5));
+			filter: drop-shadow(0 0 15px rgba(59, 130, 246, 0.6)) brightness(1.1);
 		}
 
 		.elephant-icon {
-			filter: drop-shadow(0 0 10px rgba(239, 68, 68, 0.5));
+			filter: drop-shadow(0 0 15px rgba(239, 68, 68, 0.6)) brightness(1.1);
 		}
 
 		.section-title {
 			font-size: 1.8rem;
 			font-weight: 700;
-			color: #333;
+			color: #f1f5f9;
 			text-align: center;
+			text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
 		}
 
 		.democrat-title {
-			color: #2563eb;
+			color: #60a5fa;
+			text-shadow: 0 0 10px rgba(59, 130, 246, 0.5);
 		}
 
 		.republican-title {
-			color: #dc2626;
+			color: #f87171;
+			text-shadow: 0 0 10px rgba(239, 68, 68, 0.5);
 		}
 
 		.center-title {
-			color: #374151;
+			color: #cbd5e1;
+			text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
 		}
 
 		.issues-list {
 			position: relative;
-			z-index: 1;
+			z-index: 2;
 		}
 
 		.issue-item {
-			background: rgba(255, 255, 255, 0.9);
-			border-radius: 8px;
+			background: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.05) 100%);
+			backdrop-filter: blur(10px);
+			border: 1px solid rgba(148, 163, 184, 0.2);
+			border-radius: 12px;
 			padding: 1.5rem;
 			margin-bottom: 1rem;
 			border-left: 4px solid;
-			transition: transform 0.2s, box-shadow 0.2s;
-			backdrop-filter: blur(10px);
+			transition: all 0.3s ease;
+			box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 		}
 
 		.issue-item:hover {
-			transform: translateY(-2px);
-			box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+			transform: translateY(-3px) scale(1.01);
+			box-shadow: 0 8px 25px rgba(0, 0, 0, 0.25);
+			border-color: rgba(148, 163, 184, 0.4);
 		}
 
 		.democrat-issue {
-			border-left-color: #3b82f6;
+			border-left-color: #60a5fa;
+			box-shadow: 0 0 20px rgba(59, 130, 246, 0.2);
 		}
 
 		.republican-issue {
-			border-left-color: #ef4444;
+			border-left-color: #f87171;
+			box-shadow: 0 0 20px rgba(239, 68, 68, 0.2);
 		}
 
 		.both-issue {
-			border-left-color: #6b7280;
+			border-left-color: #94a3b8;
+			box-shadow: 0 0 20px rgba(148, 163, 184, 0.2);
 		}
 
 		.issue-header {
@@ -213,7 +293,7 @@ export function renderIssuesPage(democratIssues: Issue[], republicanIssues: Issu
 		.issue-title {
 			font-size: 1.2rem;
 			font-weight: 600;
-			color: #1f2937;
+			color: #f1f5f9;
 			flex: 1;
 		}
 
@@ -225,7 +305,7 @@ export function renderIssuesPage(democratIssues: Issue[], republicanIssues: Issu
 		}
 
 		.issue-description {
-			color: #6b7280;
+			color: #cbd5e1;
 			line-height: 1.6;
 			margin-top: 0.5rem;
 			max-height: 0;
@@ -281,7 +361,7 @@ export function renderIssuesPage(democratIssues: Issue[], republicanIssues: Issu
 		}
 
 		.issue-description {
-			color: #6b7280;
+			color: #cbd5e1;
 			line-height: 1.5;
 		}
 
@@ -299,12 +379,13 @@ export function renderIssuesPage(democratIssues: Issue[], republicanIssues: Issu
 		.empty-state {
 			text-align: center;
 			padding: 3rem;
-			color: #6b7280;
+			color: #94a3b8;
 		}
 
 		.empty-state p {
 			font-size: 1.1rem;
 			margin-bottom: 0.5rem;
+			color: #cbd5e1;
 		}
 
 		@keyframes bounce {
@@ -393,7 +474,7 @@ export function renderIssuesPage(democratIssues: Issue[], republicanIssues: Issu
 		<!-- Center Section (Both Parties) -->
 		<div class="section center-section">
 			<div class="section-header">
-				<h2 class="section-title center-title">Bipartisan Issues</h2>
+				<h2 class="section-title center-title">Shared Issues</h2>
 			</div>
 			<div class="issues-list">
 				${bothIssues.length > 0 ?
@@ -409,7 +490,7 @@ export function renderIssuesPage(democratIssues: Issue[], republicanIssues: Issu
 						</div>
 					`).join('') :
 					`<div class="empty-state">
-						<p>No bipartisan issues available</p>
+						<p>No shared issues available</p>
 						<p>Issues that affect both parties will appear here</p>
 					</div>`
 				}

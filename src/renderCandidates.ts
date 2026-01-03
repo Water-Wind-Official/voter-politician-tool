@@ -105,10 +105,30 @@ Harris sought the Democratic nomination for president in the 2024 election and b
 
 		body {
 			font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-			background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+			background:
+				radial-gradient(circle at 20% 50%, rgba(120, 119, 198, 0.3) 0%, transparent 50%),
+				radial-gradient(circle at 80% 20%, rgba(255, 255, 255, 0.15) 0%, transparent 50%),
+				radial-gradient(circle at 40% 80%, rgba(120, 119, 198, 0.3) 0%, transparent 50%),
+				linear-gradient(135deg, #0f172a 0%, #1e293b 25%, #334155 50%, #475569 75%, #64748b 100%);
 			min-height: 100vh;
 			padding: 2rem;
-			color: #333;
+			color: #f1f5f9;
+			position: relative;
+		}
+
+		body::before {
+			content: '';
+			position: fixed;
+			top: 0;
+			left: 0;
+			right: 0;
+			bottom: 0;
+			background:
+				radial-gradient(circle at 30% 20%, rgba(59, 130, 246, 0.1) 0%, transparent 40%),
+				radial-gradient(circle at 70% 80%, rgba(239, 68, 68, 0.08) 0%, transparent 40%),
+				radial-gradient(circle at 50% 50%, rgba(16, 185, 129, 0.05) 0%, transparent 50%);
+			pointer-events: none;
+			z-index: -1;
 		}
 
 		.container {
@@ -119,14 +139,17 @@ Harris sought the Democratic nomination for president in the 2024 election and b
 		.back-link {
 			display: inline-block;
 			margin-bottom: 1rem;
-			color: white;
+			color: #93c5fd;
 			text-decoration: none;
 			font-weight: 600;
 			opacity: 0.9;
+			transition: all 0.3s ease;
 		}
 
 		.back-link:hover {
 			opacity: 1;
+			color: #dbeafe;
+			transform: translateX(-2px);
 		}
 
 		.profile-header {
@@ -146,15 +169,24 @@ Harris sought the Democratic nomination for president in the 2024 election and b
 
 		.candidate-name {
 			font-size: 3rem;
-			font-weight: 700;
-			color: #333;
+			font-weight: 800;
 			margin-bottom: 0.5rem;
+			background: linear-gradient(135deg, #60a5fa 0%, #a78bfa 25%, #f472b6 50%, #fbbf24 75%, #34d399 100%);
+			-webkit-background-clip: text;
+			-webkit-text-fill-color: transparent;
+			background-clip: text;
+			letter-spacing: -0.025em;
+			position: relative;
+			z-index: 1;
 		}
 
 		.candidate-position {
 			font-size: 1.2rem;
-			color: #6b7280;
+			color: #cbd5e1;
 			margin-bottom: 1rem;
+			opacity: 0.9;
+			position: relative;
+			z-index: 1;
 		}
 
 		.party-badge {
@@ -164,8 +196,11 @@ Harris sought the Democratic nomination for president in the 2024 election and b
 			font-size: 1.1rem;
 			font-weight: 600;
 			color: white;
-			background: ${data.partyColor};
+			background: linear-gradient(135deg, ${data.partyColor} 0%, ${data.partyColor.replace('dc2626', 'b91c1c').replace('2563eb', '1d4ed8')} 100%);
 			margin-bottom: 1rem;
+			box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+			position: relative;
+			z-index: 1;
 		}
 
 		.bio-section {
@@ -179,10 +214,13 @@ Harris sought the Democratic nomination for president in the 2024 election and b
 		.section-title {
 			font-size: 1.8rem;
 			font-weight: 700;
-			color: #333;
+			color: #f1f5f9;
 			margin-bottom: 1.5rem;
 			padding-bottom: 0.5rem;
-			border-bottom: 2px solid #e5e7eb;
+			border-bottom: 2px solid rgba(148, 163, 184, 0.3);
+			position: relative;
+			z-index: 1;
+			text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
 		}
 
 		.bio-text {
@@ -199,24 +237,45 @@ Harris sought the Democratic nomination for president in the 2024 election and b
 		}
 
 		.achievement-item {
-			background: #f9fafb;
+			background: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.05) 100%);
+			backdrop-filter: blur(10px);
 			padding: 1.5rem;
-			border-radius: 8px;
+			border-radius: 12px;
 			border-left: 4px solid ${data.partyColor};
-			transition: transform 0.2s;
+			border: 1px solid rgba(148, 163, 184, 0.2);
+			transition: all 0.3s ease;
+			box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+			position: relative;
+			z-index: 1;
 		}
 
 		.achievement-item:hover {
-			transform: translateY(-2px);
-			box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+			transform: translateY(-3px) scale(1.01);
+			box-shadow: 0 8px 25px rgba(0, 0, 0, 0.25);
+			border-color: rgba(148, 163, 184, 0.4);
 		}
 
 		.websites-section {
-			background: white;
-			border-radius: 12px;
+			background: linear-gradient(135deg, rgba(30, 41, 59, 0.95) 0%, rgba(51, 65, 85, 0.9) 100%);
+			backdrop-filter: blur(20px);
+			border: 1px solid rgba(148, 163, 184, 0.2);
+			border-radius: 16px;
 			padding: 2rem;
 			margin-bottom: 2rem;
-			box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+			box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(148, 163, 184, 0.1);
+			position: relative;
+		}
+
+		.websites-section::before {
+			content: '';
+			position: absolute;
+			top: 0;
+			left: 0;
+			right: 0;
+			bottom: 0;
+			background: linear-gradient(135deg, rgba(59, 130, 246, 0.05) 0%, rgba(239, 68, 68, 0.05) 100%);
+			border-radius: 16px;
+			pointer-events: none;
 		}
 
 		.website-links {
@@ -227,24 +286,28 @@ Harris sought the Democratic nomination for president in the 2024 election and b
 		.website-link {
 			display: block;
 			padding: 2rem;
-			border: 2px solid #e5e7eb;
-			border-radius: 12px;
+			border: 2px solid rgba(148, 163, 184, 0.3);
+			border-radius: 16px;
 			text-decoration: none;
 			color: inherit;
 			transition: all 0.3s ease;
-			background: linear-gradient(135deg, #f9fafb 0%, #ffffff 100%);
+			background: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.05) 100%);
+			backdrop-filter: blur(10px);
+			box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+			position: relative;
+			z-index: 1;
 		}
 
 		.website-link:hover {
-			transform: translateY(-4px);
-			box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+			transform: translateY(-6px) scale(1.01);
+			box-shadow: 0 12px 30px rgba(0, 0, 0, 0.25);
 			border-color: ${data.partyColor};
 		}
 
 		.website-title {
 			font-size: 1.3rem;
 			font-weight: 700;
-			color: #1f2937;
+			color: #f1f5f9;
 			margin-bottom: 0.5rem;
 		}
 
@@ -254,18 +317,29 @@ Harris sought the Democratic nomination for president in the 2024 election and b
 			font-weight: 600;
 			margin-bottom: 0.5rem;
 			word-break: break-all;
+			opacity: 0.9;
 		}
 
 		.website-description {
 			font-size: 1rem;
-			color: #6b7280;
+			color: #cbd5e1;
 			line-height: 1.5;
+			opacity: 0.9;
 		}
 
 		.external-link-icon {
 			display: inline-block;
 			margin-left: 0.5rem;
 			font-size: 1rem;
+			opacity: 0.7;
+		}
+
+		/* Navigation hover effects */
+		nav a:hover {
+			background: rgba(59, 130, 246, 0.2);
+			border-color: rgba(59, 130, 246, 0.5);
+			color: #dbeafe;
+			transform: translateY(-1px);
 		}
 
 		@media (max-width: 768px) {
@@ -288,6 +362,17 @@ Harris sought the Democratic nomination for president in the 2024 election and b
 			.website-links {
 				grid-template-columns: 1fr;
 			}
+
+			nav {
+				display: block !important;
+				margin-left: 0 !important;
+				margin-top: 1rem !important;
+			}
+
+			nav a {
+				display: inline-block;
+				margin: 0.25rem 0.5rem !important;
+			}
 		}
 	</style>
 </head>
@@ -296,10 +381,10 @@ Harris sought the Democratic nomination for president in the 2024 election and b
 		<div style="text-align: center; margin-bottom: 1rem;">
 			<a href="/" class="back-link">← Back to Map</a>
 			<nav style="display: inline-block; margin-left: 2rem;">
-				<a href="/issues" style="color: #667eea; text-decoration: none; margin: 0 0.5rem; font-weight: 500;">Issues Hub</a>
-				<a href="/senators" style="color: #667eea; text-decoration: none; margin: 0 0.5rem; font-weight: 500;">Senate Hub</a>
-				<a href="/house" style="color: #667eea; text-decoration: none; margin: 0 0.5rem; font-weight: 500;">House Hub</a>
-				<a href="/election" style="color: #667eea; text-decoration: none; margin: 0 0.5rem; font-weight: 500;">Election Hub</a>
+				<a href="/issues" style="color: #93c5fd; text-decoration: none; margin: 0 0.75rem; font-weight: 600; padding: 0.5rem 1rem; border-radius: 8px; transition: all 0.3s ease; border: 1px solid transparent;">Issues Hub</a>
+				<a href="/senators" style="color: #93c5fd; text-decoration: none; margin: 0 0.75rem; font-weight: 600; padding: 0.5rem 1rem; border-radius: 8px; transition: all 0.3s ease; border: 1px solid transparent;">Senate Hub</a>
+				<a href="/house" style="color: #93c5fd; text-decoration: none; margin: 0 0.75rem; font-weight: 600; padding: 0.5rem 1rem; border-radius: 8px; transition: all 0.3s ease; border: 1px solid transparent;">House Hub</a>
+				<a href="/election" style="color: #93c5fd; text-decoration: none; margin: 0 0.75rem; font-weight: 600; padding: 0.5rem 1rem; border-radius: 8px; transition: all 0.3s ease; border: 1px solid transparent;">Election Hub</a>
 			</nav>
 		</div>
 

@@ -17,10 +17,30 @@ export function renderElectionHub(states: any[]): string {
 
 		body {
 			font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-			background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+			background:
+				radial-gradient(circle at 20% 50%, rgba(120, 119, 198, 0.3) 0%, transparent 50%),
+				radial-gradient(circle at 80% 20%, rgba(255, 255, 255, 0.15) 0%, transparent 50%),
+				radial-gradient(circle at 40% 80%, rgba(120, 119, 198, 0.3) 0%, transparent 50%),
+				linear-gradient(135deg, #0f172a 0%, #1e293b 25%, #334155 50%, #475569 75%, #64748b 100%);
 			min-height: 100vh;
 			padding: 2rem;
-			color: #333;
+			color: #f1f5f9;
+			position: relative;
+		}
+
+		body::before {
+			content: '';
+			position: fixed;
+			top: 0;
+			left: 0;
+			right: 0;
+			bottom: 0;
+			background:
+				radial-gradient(circle at 30% 20%, rgba(59, 130, 246, 0.1) 0%, transparent 40%),
+				radial-gradient(circle at 70% 80%, rgba(239, 68, 68, 0.08) 0%, transparent 40%),
+				radial-gradient(circle at 50% 50%, rgba(16, 185, 129, 0.05) 0%, transparent 50%);
+			pointer-events: none;
+			z-index: -1;
 		}
 
 		.container {
@@ -35,32 +55,54 @@ export function renderElectionHub(states: any[]): string {
 
 		.title {
 			font-size: 2.5rem;
-			font-weight: 700;
-			color: white;
+			font-weight: 800;
 			margin-bottom: 0.5rem;
-			text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+			background: linear-gradient(135deg, #60a5fa 0%, #a78bfa 25%, #f472b6 50%, #fbbf24 75%, #34d399 100%);
+			-webkit-background-clip: text;
+			-webkit-text-fill-color: transparent;
+			background-clip: text;
+			letter-spacing: -0.025em;
 		}
 
 		.subtitle {
-			color: rgba(255, 255, 255, 0.9);
+			color: #cbd5e1;
 			font-size: 1.1rem;
 			margin-bottom: 2rem;
+			opacity: 0.9;
 		}
 
 		.candidate-links {
 			margin-top: 2rem;
 			padding: 2rem;
-			background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
-			border-radius: 12px;
-			border: 1px solid #e5e7eb;
+			background: linear-gradient(135deg, rgba(30, 41, 59, 0.95) 0%, rgba(51, 65, 85, 0.9) 100%);
+			backdrop-filter: blur(20px);
+			border: 1px solid rgba(148, 163, 184, 0.2);
+			border-radius: 16px;
+			box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(148, 163, 184, 0.1);
+			position: relative;
+		}
+
+		.candidate-links::before {
+			content: '';
+			position: absolute;
+			top: 0;
+			left: 0;
+			right: 0;
+			bottom: 0;
+			background: linear-gradient(135deg, rgba(59, 130, 246, 0.05) 0%, rgba(239, 68, 68, 0.05) 100%);
+			border-radius: 16px;
+			pointer-events: none;
 		}
 
 		.candidate-links h3 {
 			font-size: 1.5rem;
 			font-weight: 700;
-			color: #1f2937;
+			color: #f1f5f9;
 			margin-bottom: 1.5rem;
 			text-align: center;
+			position: relative;
+			z-index: 1;
+			text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
 		}
 
 		.candidate-links-grid {
@@ -72,34 +114,41 @@ export function renderElectionHub(states: any[]): string {
 		.candidate-link {
 			display: block;
 			padding: 1.5rem;
-			border-radius: 12px;
+			border-radius: 16px;
 			text-decoration: none;
 			color: inherit;
 			transition: all 0.3s ease;
 			border: 2px solid transparent;
-			background: white;
-			box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+			background: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.05) 100%);
+			backdrop-filter: blur(10px);
+			box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+			position: relative;
+			z-index: 1;
 		}
 
 		.candidate-link:hover {
-			transform: translateY(-2px);
-			box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+			transform: translateY(-4px) scale(1.01);
+			box-shadow: 0 12px 30px rgba(0, 0, 0, 0.25);
 		}
 
 		.trump-link {
-			border-color: #dc2626;
+			border-color: rgba(239, 68, 68, 0.5);
+			box-shadow: 0 0 20px rgba(239, 68, 68, 0.2);
 		}
 
 		.trump-link:hover {
-			background: linear-gradient(135deg, rgba(220, 38, 38, 0.05) 0%, rgba(185, 28, 28, 0.02) 100%);
+			background: linear-gradient(135deg, rgba(239, 68, 68, 0.1) 0%, rgba(220, 38, 38, 0.05) 100%);
+			border-color: rgba(239, 68, 68, 0.8);
 		}
 
 		.harris-link {
-			border-color: #2563eb;
+			border-color: rgba(59, 130, 246, 0.5);
+			box-shadow: 0 0 20px rgba(59, 130, 246, 0.2);
 		}
 
 		.harris-link:hover {
-			background: linear-gradient(135deg, rgba(37, 99, 235, 0.05) 0%, rgba(29, 78, 216, 0.02) 100%);
+			background: linear-gradient(135deg, rgba(59, 130, 246, 0.1) 0%, rgba(37, 99, 235, 0.05) 100%);
+			border-color: rgba(59, 130, 246, 0.8);
 		}
 
 		.candidate-header {
@@ -116,19 +165,21 @@ export function renderElectionHub(states: any[]): string {
 		.candidate-name {
 			font-size: 1.2rem;
 			font-weight: 700;
-			color: #1f2937;
+			color: #f1f5f9;
 		}
 
 		.candidate-party {
 			font-size: 0.9rem;
-			color: #6b7280;
+			color: #94a3b8;
 			font-weight: 500;
+			opacity: 0.9;
 		}
 
 		.candidate-description {
 			font-size: 0.95rem;
-			color: #4b5563;
+			color: #cbd5e1;
 			line-height: 1.5;
+			opacity: 0.9;
 		}
 
 		@media (max-width: 768px) {
@@ -159,33 +210,56 @@ export function renderElectionHub(states: any[]): string {
 		}
 
 		nav a {
-			color: white;
+			color: #93c5fd;
 			text-decoration: none;
 			font-weight: 600;
 			padding: 0.75rem 1.5rem;
-			background: rgba(255, 255, 255, 0.1);
-			border-radius: 8px;
+			background: rgba(59, 130, 246, 0.1);
+			backdrop-filter: blur(10px);
+			border: 1px solid rgba(59, 130, 246, 0.2);
+			border-radius: 12px;
 			transition: all 0.3s ease;
 		}
 
 		nav a:hover {
-			background: rgba(255, 255, 255, 0.2);
+			background: rgba(59, 130, 246, 0.2);
+			border-color: rgba(59, 130, 246, 0.5);
+			color: #dbeafe;
 			transform: translateY(-2px);
+			box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
 		}
 
 		.card {
-			background: white;
-			border-radius: 12px;
+			background: linear-gradient(135deg, rgba(30, 41, 59, 0.95) 0%, rgba(51, 65, 85, 0.9) 100%);
+			backdrop-filter: blur(20px);
+			border: 1px solid rgba(148, 163, 184, 0.2);
+			border-radius: 16px;
 			padding: 2rem;
 			margin-bottom: 2rem;
-			box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+			box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(148, 163, 184, 0.1);
+			position: relative;
+		}
+
+		.card::before {
+			content: '';
+			position: absolute;
+			top: 0;
+			left: 0;
+			right: 0;
+			bottom: 0;
+			background: linear-gradient(135deg, rgba(59, 130, 246, 0.05) 0%, rgba(239, 68, 68, 0.05) 100%);
+			border-radius: 16px;
+			pointer-events: none;
 		}
 
 		.card-title {
 			font-size: 1.5rem;
 			font-weight: 700;
-			color: #333;
+			color: #f1f5f9;
 			margin-bottom: 1rem;
+			position: relative;
+			z-index: 1;
+			text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
 		}
 
 		.election-results {
@@ -217,19 +291,21 @@ export function renderElectionHub(states: any[]): string {
 
 		.download-btn {
 			display: inline-block;
-			background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+			background: linear-gradient(135deg, #60a5fa 0%, #a78bfa 25%, #f472b6 50%, #fbbf24 75%, #34d399 100%);
 			color: white;
 			text-decoration: none;
 			padding: 1rem 2rem;
-			border-radius: 8px;
+			border-radius: 12px;
 			font-weight: 600;
-			transition: transform 0.2s;
+			transition: all 0.3s ease;
 			margin-top: 1rem;
+			border: 1px solid rgba(255, 255, 255, 0.2);
+			box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
 		}
 
 		.download-btn:hover {
-			transform: translateY(-2px);
-			box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+			transform: translateY(-3px) scale(1.02);
+			box-shadow: 0 8px 25px rgba(59, 130, 246, 0.5);
 		}
 
 		.state-grid {
@@ -275,17 +351,18 @@ export function renderElectionHub(states: any[]): string {
 		.electoral-table td {
 			padding: 0.75rem;
 			text-align: left;
-			border-bottom: 1px solid #e5e7eb;
+			border-bottom: 1px solid rgba(148, 163, 184, 0.2);
 		}
 
 		.electoral-table th {
-			background: #f9fafb;
+			background: rgba(51, 65, 85, 0.8);
+			backdrop-filter: blur(10px);
 			font-weight: 600;
-			color: #333;
+			color: #f1f5f9;
 		}
 
 		.electoral-table tr:hover {
-			background: #f9fafb;
+			background: rgba(148, 163, 184, 0.1);
 		}
 
 		.electoral-table .votes-democrat {
@@ -299,11 +376,13 @@ export function renderElectionHub(states: any[]): string {
 		}
 
 		.electoral-table .winner-democrat {
-			background: rgba(59, 130, 246, 0.1);
+			background: rgba(59, 130, 246, 0.15);
+			box-shadow: inset 0 0 10px rgba(59, 130, 246, 0.1);
 		}
 
 		.electoral-table .winner-republican {
-			background: rgba(220, 38, 38, 0.1);
+			background: rgba(239, 68, 68, 0.15);
+			box-shadow: inset 0 0 10px rgba(239, 68, 68, 0.1);
 		}
 
 		.stats-grid {
@@ -314,22 +393,31 @@ export function renderElectionHub(states: any[]): string {
 		}
 
 		.stat-card {
-			background: #f8fafc;
+			background: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.05) 100%);
+			backdrop-filter: blur(10px);
 			padding: 1.5rem;
-			border-radius: 8px;
+			border-radius: 12px;
+			border: 1px solid rgba(148, 163, 184, 0.2);
 			text-align: center;
+			box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+			position: relative;
+			z-index: 1;
 		}
 
 		.stat-value {
 			font-size: 2rem;
 			font-weight: 700;
-			color: #667eea;
+			background: linear-gradient(135deg, #60a5fa 0%, #a78bfa 50%, #f472b6 100%);
+			-webkit-background-clip: text;
+			-webkit-text-fill-color: transparent;
+			background-clip: text;
 			margin-bottom: 0.5rem;
 		}
 
 		.stat-label {
-			color: #6b7280;
+			color: #cbd5e1;
 			font-size: 0.9rem;
+			opacity: 0.9;
 		}
 
 		.popular-vote-section {
@@ -344,51 +432,58 @@ export function renderElectionHub(states: any[]): string {
 		}
 
 		.popular-vote-card {
-			background: #f8fafc;
-			border-radius: 12px;
+			background: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.05) 100%);
+			backdrop-filter: blur(10px);
+			border-radius: 16px;
 			padding: 1.5rem;
-			border: 2px solid #e5e7eb;
-			transition: transform 0.2s;
+			border: 2px solid rgba(148, 163, 184, 0.3);
+			transition: all 0.3s ease;
+			box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+			position: relative;
+			z-index: 1;
 		}
 
 		.popular-vote-card:hover {
-			transform: translateY(-2px);
-			box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+			transform: translateY(-3px) scale(1.01);
+			box-shadow: 0 8px 25px rgba(0, 0, 0, 0.25);
 		}
 
 		.popular-vote-card.trump {
-			border-color: #fecaca;
-			background: linear-gradient(135deg, #fecaca 0%, #ffffff 100%);
+			border-color: rgba(239, 68, 68, 0.5);
+			background: linear-gradient(135deg, rgba(239, 68, 68, 0.1) 0%, rgba(255, 255, 255, 0.05) 100%);
+			box-shadow: 0 0 20px rgba(239, 68, 68, 0.2);
 		}
 
 		.popular-vote-card.harris {
-			border-color: #bfdbfe;
-			background: linear-gradient(135deg, #bfdbfe 0%, #ffffff 100%);
+			border-color: rgba(59, 130, 246, 0.5);
+			background: linear-gradient(135deg, rgba(59, 130, 246, 0.1) 0%, rgba(255, 255, 255, 0.05) 100%);
+			box-shadow: 0 0 20px rgba(59, 130, 246, 0.2);
 		}
 
 		.candidate-name {
 			font-size: 1.2rem;
 			font-weight: 700;
-			color: #333;
+			color: #f1f5f9;
 			margin-bottom: 0.5rem;
 		}
 
 		.popular-votes {
 			font-size: 1.1rem;
 			font-weight: 600;
-			color: #1f2937;
+			color: #f1f5f9;
 			margin-bottom: 0.25rem;
 		}
 
 		.popular-percentage {
 			font-size: 1rem;
-			color: #6b7280;
+			color: #cbd5e1;
 			margin-bottom: 0.25rem;
+			opacity: 0.9;
 		}
 
 		.popular-margin {
 			font-size: 0.9rem;
-			color: #374151;
+			color: #94a3b8;
 			font-weight: 500;
 		}
 

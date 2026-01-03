@@ -17,10 +17,30 @@ export function renderHomePage(states: State[]): string {
 		
 		body {
 			font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-			background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+			background:
+				radial-gradient(circle at 20% 50%, rgba(120, 119, 198, 0.3) 0%, transparent 50%),
+				radial-gradient(circle at 80% 20%, rgba(255, 255, 255, 0.15) 0%, transparent 50%),
+				radial-gradient(circle at 40% 80%, rgba(120, 119, 198, 0.3) 0%, transparent 50%),
+				linear-gradient(135deg, #0f172a 0%, #1e293b 25%, #334155 50%, #475569 75%, #64748b 100%);
 			min-height: 100vh;
 			padding: 2rem;
-			color: #333;
+			color: #f1f5f9;
+			position: relative;
+		}
+
+		body::before {
+			content: '';
+			position: fixed;
+			top: 0;
+			left: 0;
+			right: 0;
+			bottom: 0;
+			background:
+				radial-gradient(circle at 30% 20%, rgba(59, 130, 246, 0.1) 0%, transparent 40%),
+				radial-gradient(circle at 70% 80%, rgba(239, 68, 68, 0.08) 0%, transparent 40%),
+				radial-gradient(circle at 50% 50%, rgba(16, 185, 129, 0.05) 0%, transparent 50%);
+			pointer-events: none;
+			z-index: -1;
 		}
 		
 		.container {
@@ -29,29 +49,53 @@ export function renderHomePage(states: State[]): string {
 		}
 		
 		header {
-			background: white;
-			border-radius: 12px;
-			padding: 2rem;
+			background: linear-gradient(135deg, rgba(30, 41, 59, 0.95) 0%, rgba(51, 65, 85, 0.95) 100%);
+			backdrop-filter: blur(20px);
+			border: 1px solid rgba(148, 163, 184, 0.2);
+			border-radius: 16px;
+			padding: 2.5rem;
 			margin-bottom: 2rem;
-			box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+			box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(148, 163, 184, 0.1);
 			text-align: center;
+			position: relative;
+		}
+
+		header::before {
+			content: '';
+			position: absolute;
+			top: 0;
+			left: 0;
+			right: 0;
+			bottom: 0;
+			background: linear-gradient(135deg, rgba(59, 130, 246, 0.1) 0%, rgba(239, 68, 68, 0.1) 100%);
+			border-radius: 16px;
+			pointer-events: none;
 		}
 		
 		nav {
-			margin-top: 1rem;
-			padding-top: 1rem;
-			border-top: 1px solid #e5e7eb;
+			margin-top: 1.5rem;
+			padding-top: 1.5rem;
+			border-top: 1px solid rgba(148, 163, 184, 0.3);
+			position: relative;
+			z-index: 1;
 		}
-		
+
 		nav a {
-			color: #667eea;
+			color: #93c5fd;
 			text-decoration: none;
-			margin: 0 0.5rem;
-			font-weight: 500;
+			margin: 0 0.75rem;
+			font-weight: 600;
+			padding: 0.5rem 1rem;
+			border-radius: 8px;
+			transition: all 0.3s ease;
+			border: 1px solid transparent;
 		}
-		
+
 		nav a:hover {
-			text-decoration: underline;
+			background: rgba(59, 130, 246, 0.2);
+			border-color: rgba(59, 130, 246, 0.5);
+			color: #dbeafe;
+			transform: translateY(-1px);
 		}
 
 		.search-container {
@@ -100,30 +144,41 @@ export function renderHomePage(states: State[]): string {
 		.search-input {
 			flex: 1;
 			padding: 0.75rem 1rem;
-			border: 2px solid #e5e7eb;
-			border-radius: 8px;
+			border: 2px solid rgba(148, 163, 184, 0.3);
+			border-radius: 12px;
 			font-size: 1rem;
-			transition: border-color 0.2s;
+			transition: all 0.3s ease;
+			background: rgba(255, 255, 255, 0.1);
+			backdrop-filter: blur(10px);
+			color: #f1f5f9;
 		}
 
 		.search-input:focus {
 			outline: none;
-			border-color: #667eea;
+			border-color: #60a5fa;
+			box-shadow: 0 0 20px rgba(59, 130, 246, 0.3);
+			background: rgba(255, 255, 255, 0.15);
+		}
+
+		.search-input::placeholder {
+			color: #94a3b8;
 		}
 
 		.search-btn {
 			padding: 0.75rem 1.5rem;
-			background: #667eea;
+			background: linear-gradient(135deg, #60a5fa 0%, #a78bfa 50%, #f472b6 100%);
 			color: white;
 			border: none;
-			border-radius: 8px;
+			border-radius: 12px;
 			cursor: pointer;
 			font-weight: 600;
-			transition: background 0.2s;
+			transition: all 0.3s ease;
+			border: 1px solid rgba(255, 255, 255, 0.2);
 		}
 
 		.search-btn:hover {
-			background: #5a67d8;
+			transform: translateY(-2px);
+			box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
 		}
 
 		.search-dropdown {
@@ -131,22 +186,24 @@ export function renderHomePage(states: State[]): string {
 			top: 100%;
 			left: 0;
 			right: 0;
-			background: white;
-			border: 2px solid #667eea;
+			background: linear-gradient(135deg, rgba(30, 41, 59, 0.95) 0%, rgba(51, 65, 85, 0.9) 100%);
+			backdrop-filter: blur(20px);
+			border: 2px solid rgba(59, 130, 246, 0.5);
 			border-top: none;
-			border-radius: 0 0 8px 8px;
+			border-radius: 0 0 12px 12px;
 			max-height: 200px;
 			overflow-y: auto;
 			z-index: 1000;
 			display: none;
-			box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+			box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
 		}
 
 		.search-suggestion {
 			padding: 12px 16px;
 			cursor: pointer;
-			border-bottom: 1px solid #e5e7eb;
-			transition: background 0.2s;
+			border-bottom: 1px solid rgba(148, 163, 184, 0.2);
+			transition: all 0.2s ease;
+			color: #f1f5f9;
 		}
 
 		.search-suggestion:last-child {
@@ -155,17 +212,19 @@ export function renderHomePage(states: State[]): string {
 
 		.search-suggestion:hover,
 		.search-suggestion.highlighted {
-			background: #f3f4f6;
+			background: rgba(59, 130, 246, 0.2);
+			border-left: 3px solid #60a5fa;
 		}
 
 		.suggestion-name {
 			font-weight: 600;
-			color: #1f2937;
+			color: #f1f5f9;
 		}
 
 		.suggestion-code {
-			color: #6b7280;
+			color: #cbd5e1;
 			font-size: 0.9em;
+			opacity: 0.9;
 		}
 
 		.search-container {
@@ -175,10 +234,14 @@ export function renderHomePage(states: State[]): string {
 		h1 {
 			font-size: 2.5rem;
 			margin-bottom: 0.5rem;
-			background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+			background: linear-gradient(135deg, #60a5fa 0%, #a78bfa 25%, #f472b6 50%, #fbbf24 75%, #34d399 100%);
 			-webkit-background-clip: text;
 			-webkit-text-fill-color: transparent;
 			background-clip: text;
+			font-weight: 800;
+			letter-spacing: -0.025em;
+			position: relative;
+			z-index: 1;
 		}
 		
 		.subtitle {
@@ -187,15 +250,29 @@ export function renderHomePage(states: State[]): string {
 		}
 
 		.map-container {
-			background: white;
-			border-radius: 12px;
+			background: linear-gradient(135deg, rgba(30, 41, 59, 0.95) 0%, rgba(51, 65, 85, 0.9) 100%);
+			backdrop-filter: blur(20px);
+			border: 1px solid rgba(148, 163, 184, 0.2);
+			border-radius: 16px;
 			padding: 2rem;
 			margin-bottom: 2rem;
-			box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+			box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(148, 163, 184, 0.1);
 			display: flex;
 			flex-direction: column;
 			align-items: center;
 			position: relative;
+		}
+
+		.map-container::before {
+			content: '';
+			position: absolute;
+			top: 0;
+			left: 0;
+			right: 0;
+			bottom: 0;
+			background: linear-gradient(135deg, rgba(59, 130, 246, 0.05) 0%, rgba(239, 68, 68, 0.05) 100%);
+			border-radius: 16px;
+			pointer-events: none;
 		}
 		
 		.map-wrapper {
@@ -273,13 +350,28 @@ export function renderHomePage(states: State[]): string {
 		}
 		
 		.state-details {
-			background: white;
-			border-radius: 12px;
+			background: linear-gradient(135deg, rgba(30, 41, 59, 0.95) 0%, rgba(51, 65, 85, 0.9) 100%);
+			backdrop-filter: blur(20px);
+			border: 1px solid rgba(148, 163, 184, 0.2);
+			border-radius: 16px;
 			padding: 2rem;
-			box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+			box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(148, 163, 184, 0.1);
 			display: none;
+			position: relative;
 		}
-		
+
+		.state-details::before {
+			content: '';
+			position: absolute;
+			top: 0;
+			left: 0;
+			right: 0;
+			bottom: 0;
+			background: linear-gradient(135deg, rgba(59, 130, 246, 0.05) 0%, rgba(239, 68, 68, 0.05) 100%);
+			border-radius: 16px;
+			pointer-events: none;
+		}
+
 		.state-details.active {
 			display: block;
 		}
@@ -296,22 +388,31 @@ export function renderHomePage(states: State[]): string {
 		.state-title {
 			font-size: 2rem;
 			font-weight: 700;
-			color: #333;
+			color: #f1f5f9;
+			text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+			position: relative;
+			z-index: 1;
 		}
 		
 		.close-btn {
-			background: #ef4444;
+			background: linear-gradient(135deg, #f87171 0%, #ef4444 100%);
 			color: white;
 			border: none;
 			padding: 0.5rem 1rem;
-			border-radius: 8px;
+			border-radius: 12px;
 			cursor: pointer;
 			font-weight: 600;
-			transition: background 0.2s;
+			transition: all 0.3s ease;
+			border: 1px solid rgba(255, 255, 255, 0.2);
+			box-shadow: 0 2px 8px rgba(239, 68, 68, 0.3);
+			position: relative;
+			z-index: 1;
 		}
-		
+
 		.close-btn:hover {
-			background: #dc2626;
+			background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+			transform: translateY(-1px);
+			box-shadow: 0 4px 12px rgba(239, 68, 68, 0.5);
 		}
 		
 		.voter-data-section {
@@ -321,7 +422,10 @@ export function renderHomePage(states: State[]): string {
 		.section-title {
 			font-size: 1.5rem;
 			margin-bottom: 1rem;
-			color: #333;
+			color: #f1f5f9;
+			text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+			position: relative;
+			z-index: 1;
 		}
 		
 		.data-grid {
@@ -332,24 +436,33 @@ export function renderHomePage(states: State[]): string {
 		}
 		
 		.data-card {
-			background: #f9fafb;
+			background: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.05) 100%);
+			backdrop-filter: blur(10px);
 			padding: 1rem;
-			border-radius: 8px;
-			border-left: 4px solid #667eea;
+			border-radius: 12px;
+			border-left: 4px solid #60a5fa;
+			border: 1px solid rgba(148, 163, 184, 0.2);
+			box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+			position: relative;
+			z-index: 1;
 		}
 		
 		.data-label {
 			font-size: 0.85rem;
-			color: #666;
+			color: #94a3b8;
 			text-transform: uppercase;
 			letter-spacing: 0.5px;
 			margin-bottom: 0.25rem;
+			opacity: 0.9;
 		}
-		
+
 		.data-value {
 			font-size: 1.5rem;
 			font-weight: 700;
-			color: #333;
+			background: linear-gradient(135deg, #60a5fa 0%, #a78bfa 50%, #f472b6 100%);
+			-webkit-background-clip: text;
+			-webkit-text-fill-color: transparent;
+			background-clip: text;
 		}
 		
 		.representatives-section {
@@ -363,20 +476,26 @@ export function renderHomePage(states: State[]): string {
 		}
 		
 		.representative-card {
-			background: #f9fafb;
-			border-radius: 8px;
+			background: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.05) 100%);
+			backdrop-filter: blur(10px);
+			border-radius: 12px;
 			padding: 1.5rem;
-			border-left: 4px solid #667eea;
-			transition: transform 0.2s, box-shadow 0.2s;
+			border-left: 4px solid #60a5fa;
+			border: 1px solid rgba(148, 163, 184, 0.2);
+			transition: all 0.3s ease;
 			cursor: pointer;
 			text-decoration: none;
 			color: inherit;
 			display: block;
+			box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+			position: relative;
+			z-index: 1;
 		}
-		
+
 		.representative-card:hover {
-			transform: translateY(-4px);
-			box-shadow: 0 8px 16px rgba(0,0,0,0.15);
+			transform: translateY(-6px) scale(1.01);
+			box-shadow: 0 12px 30px rgba(0, 0, 0, 0.25);
+			border-color: rgba(59, 130, 246, 0.5);
 		}
 		
 		.representative-name {
@@ -405,21 +524,25 @@ export function renderHomePage(states: State[]): string {
 			font-size: 0.85rem;
 			font-weight: 600;
 			margin-top: 0.5rem;
+			box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
 		}
-		
+
 		.badge-democrat {
-			background: #3b82f6;
+			background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
 			color: white;
+			box-shadow: 0 0 10px rgba(59, 130, 246, 0.3);
 		}
-		
+
 		.badge-republican {
-			background: #ef4444;
+			background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
 			color: white;
+			box-shadow: 0 0 10px rgba(239, 68, 68, 0.3);
 		}
-		
+
 		.badge-independent {
-			background: #6b7280;
+			background: linear-gradient(135deg, #6b7280 0%, #4b5563 100%);
 			color: white;
+			box-shadow: 0 0 10px rgba(107, 114, 128, 0.3);
 		}
 		
 		.empty-state {
@@ -444,25 +567,34 @@ export function renderHomePage(states: State[]): string {
 			display: flex;
 			gap: 1rem;
 			margin-bottom: 1.5rem;
+			position: relative;
+			z-index: 1;
 		}
-		
+
 		.tab {
 			padding: 0.75rem 1.5rem;
-			background: #e5e7eb;
-			border: none;
-			border-radius: 8px;
+			background: rgba(148, 163, 184, 0.2);
+			backdrop-filter: blur(10px);
+			border: 1px solid rgba(148, 163, 184, 0.3);
+			border-radius: 12px;
 			cursor: pointer;
 			font-weight: 600;
-			transition: all 0.2s;
+			transition: all 0.3s ease;
+			color: #cbd5e1;
 		}
-		
+
 		.tab.active {
-			background: #667eea;
+			background: linear-gradient(135deg, #60a5fa 0%, #a78bfa 50%, #f472b6 100%);
 			color: white;
+			border-color: rgba(59, 130, 246, 0.5);
+			box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
 		}
-		
+
 		.tab:hover:not(.active) {
-			background: #d1d5db;
+			background: rgba(148, 163, 184, 0.3);
+			border-color: rgba(148, 163, 184, 0.5);
+			color: #f1f5f9;
+			transform: translateY(-1px);
 		}
 	</style>
 </head>
@@ -480,9 +612,9 @@ export function renderHomePage(states: State[]): string {
 			<div class="search-container">
 				<div class="search-type-selector">
 					<button class="search-type-btn active" data-type="states" onclick="setSearchType('states')">States</button>
-					<button class="search-type-btn" data-type="senators" onclick="setSearchType('senators')">Senators</button>
-					<button class="search-type-btn" data-type="house" onclick="setSearchType('house')">House Members</button>
-					<button class="search-type-btn" data-type="representatives" onclick="setSearchType('representatives')">All Reps + Candidates</button>
+					<button class="search-type-btn" data-type="representatives" onclick="setSearchType('representatives')">Candidates</button>
+					<a href="/senators" style="text-decoration: none;"><button class="search-type-btn" style="cursor: pointer;">Senate Hub →</button></a>
+					<a href="/house" style="text-decoration: none;"><button class="search-type-btn" style="cursor: pointer;">House Hub →</button></a>
 				</div>
 				<div class="search-bar">
 					<input type="text" id="search-input" class="search-input" placeholder="Search for a state..." />
@@ -519,15 +651,13 @@ export function renderHomePage(states: State[]): string {
 			document.querySelectorAll('.search-type-btn').forEach(btn => {
 				btn.classList.remove('active');
 			});
-			document.querySelector(`[data-type="${type}"]`).classList.add('active');
+			document.querySelector('[data-type="' + type + '"]').classList.add('active');
 
 			const searchInput = document.getElementById('search-input');
 			const placeholderText = {
 				'states': 'Search for a state...',
-				'senators': 'Search for a senator...',
-				'house': 'Search for a house member...',
-				'representatives': 'Search for any representative or presidential candidate...'
-			}[type];
+				'representatives': 'Search for Trump or Harris...'
+			}[type] || 'Search for a state...';
 
 			searchInput.placeholder = placeholderText;
 			searchInput.value = '';
@@ -754,89 +884,78 @@ export function renderHomePage(states: State[]): string {
 		let currentSuggestions = [];
 		let selectedSuggestionIndex = -1;
 
-		async function showSuggestions(query) {
+		function showSuggestions(query) {
 			const dropdown = document.getElementById('search-dropdown');
 			if (!query.trim()) {
 				dropdown.style.display = 'none';
 				return;
 			}
 
-			try {
-				let matches = [];
+			let matches = [];
 
-				if (currentSearchType === 'states') {
-					// Find matching states (top 4)
-					matches = stateData.filter(s =>
-						s.name.toLowerCase().includes(query.toLowerCase()) ||
-						s.code.toLowerCase().includes(query.toLowerCase())
-					).slice(0, 4);
-				} else if (currentSearchType === 'representatives') {
-					// Search for representatives via API (includes senators, house, and candidates)
-					const response = await fetch(`/api/search/${currentSearchType}?q=${encodeURIComponent(query)}`);
-					const data = await response.json();
-					matches = data.results.slice(0, 4);
+			if (currentSearchType === 'states') {
+				// Find matching states (top 4)
+				matches = stateData.filter(s =>
+					s.name.toLowerCase().includes(query.toLowerCase()) ||
+					s.code.toLowerCase().includes(query.toLowerCase())
+				).slice(0, 4);
+			} else if (currentSearchType === 'representatives') {
+				// Search for representatives via API (includes senators, house, and candidates)
+				// For now, just add candidates to the results if they match
+				const candidates = [
+					{ id: 'trump', name: 'Donald J. Trump', party: 'Republican', chamber: 'Candidate' },
+					{ id: 'harris', name: 'Kamala Harris', party: 'Democrat', chamber: 'Candidate' }
+				];
 
-					// Add candidates to the results if they match
-					const candidates = [
-						{ id: 'trump', name: 'Donald J. Trump', party: 'Republican', chamber: 'Candidate' },
-						{ id: 'harris', name: 'Kamala Harris', party: 'Democrat', chamber: 'Candidate' }
-					];
+				const matchingCandidates = candidates.filter(c =>
+					c.name.toLowerCase().includes(query.toLowerCase())
+				);
 
-					const matchingCandidates = candidates.filter(c =>
-						c.name.toLowerCase().includes(query.toLowerCase())
-					);
-
-					matches = [...matchingCandidates, ...matches].slice(0, 4);
-				} else {
-					// Search for representatives via API
-					const response = await fetch(`/api/search/${currentSearchType}?q=${encodeURIComponent(query)}`);
-					const data = await response.json();
-					matches = data.results.slice(0, 4);
-				}
-
-				if (matches.length === 0) {
-					dropdown.style.display = 'none';
-					return;
-				}
-
-				currentSuggestions = matches;
-				selectedSuggestionIndex = -1;
-
-				let suggestionsHtml = '';
-
-				if (currentSearchType === 'states') {
-					suggestionsHtml = matches.map((state, index) =>
-						'<div class="search-suggestion" data-index="' + index + '">' +
-							'<div class="suggestion-name">' + state.name + '</div>' +
-							'<div class="suggestion-code">' + state.code + '</div>' +
-						'</div>'
-					).join('');
-				} else {
-					suggestionsHtml = matches.map((rep, index) => {
-						let displayText = '';
-						if (rep.chamber === 'Candidate') {
-							displayText = rep.party + ' - Presidential Candidate';
-						} else {
-							displayText = rep.state_code + ' - ' + (rep.chamber === 'house' ? 'House' : 'Senate');
-						}
-						return '<div class="search-suggestion" data-index="' + index + '">' +
-							'<div class="suggestion-name">' + rep.name + '</div>' +
-							'<div class="suggestion-code">' + displayText + '</div>' +
-						'</div>';
-					}).join('');
-				}
-
-				dropdown.innerHTML = suggestionsHtml;
-				dropdown.style.display = 'block';
-
-				// Add click handlers
-				dropdown.querySelectorAll('.search-suggestion').forEach((el, index) => {
-					el.addEventListener('click', () => selectSuggestion(index));
-				});
-			} catch (error) {
-				console.error('Search error:', error);
-				dropdown.style.display = 'none';
+				matches = matchingCandidates.slice(0, 4);
+			} else {
+				// For senators and house, we'll add a note that API search is not available in static render
+				matches = [];
 			}
+
+			if (matches.length === 0) {
+				dropdown.style.display = 'none';
+				return;
+			}
+
+			currentSuggestions = matches;
+			selectedSuggestionIndex = -1;
+
+			let suggestionsHtml = '';
+
+			if (currentSearchType === 'states') {
+				suggestionsHtml = matches.map((state, index) =>
+					'<div class="search-suggestion" data-index="' + index + '">' +
+						'<div class="suggestion-name">' + state.name + '</div>' +
+						'<div class="suggestion-code">' + state.code + '</div>' +
+					'</div>'
+				).join('');
+			} else {
+				suggestionsHtml = matches.map((rep, index) => {
+					let displayText = '';
+					if (rep.chamber === 'Candidate') {
+						displayText = rep.party + ' - Presidential Candidate';
+					} else {
+						displayText = rep.state_code + ' - ' + (rep.chamber === 'house' ? 'House' : 'Senate');
+					}
+					return '<div class="search-suggestion" data-index="' + index + '">' +
+						'<div class="suggestion-name">' + rep.name + '</div>' +
+						'<div class="suggestion-code">' + displayText + '</div>' +
+					'</div>';
+				}).join('');
+			}
+
+			dropdown.innerHTML = suggestionsHtml;
+			dropdown.style.display = 'block';
+
+			// Add click handlers
+			dropdown.querySelectorAll('.search-suggestion').forEach((el, index) => {
+				el.addEventListener('click', () => selectSuggestion(index));
+			});
 		}
 
 		function hideSuggestions() {
@@ -903,7 +1022,7 @@ export function renderHomePage(states: State[]): string {
 					} else {
 						alert('State not found. Please select from suggestions or try a different search.');
 					}
-				} else {
+				} else if (currentSearchType === 'representatives') {
 					// Check for exact candidate matches first
 					const candidates = [
 						{ id: 'trump', name: 'Donald J. Trump', party: 'Republican', chamber: 'Candidate' },
@@ -923,8 +1042,10 @@ export function renderHomePage(states: State[]): string {
 					if (currentSuggestions.length > 0) {
 						selectSuggestion(0);
 					} else {
-						alert('No results found. Please try a different search.');
+						alert('No candidate found. Try searching for "Trump" or "Harris".');
 					}
+				} else {
+					alert('Search for senators and house members is not available on this page. Visit the Senate Hub or House Hub for full search functionality.');
 				}
 			}
 		}
