@@ -17,17 +17,6 @@ export interface State {
 	updated_at: string;
 }
 
-export interface District {
-	id: number;
-	state_code: string;
-	district_number: number | null;
-	name: string | null;
-	population: number | null;
-	area_sq_miles: number | null;
-	description: string | null;
-	created_at: string;
-	updated_at: string;
-}
 
 export interface Representative {
 	id: number;
@@ -41,7 +30,6 @@ export interface Representative {
 	party: string | null;
 	chamber: 'house' | 'senate';
 	chamber_type: number | null; // 0 = house, 1 = senate
-	district_id: number | null;
 	office_address: string | null;
 	office_phone: string | null;
 	email: string | null;
@@ -84,7 +72,6 @@ export interface VoterData {
 export interface VoterDemographic {
 	id: number;
 	state_code: string;
-	district_id: number | null;
 	demographic_type: string;
 	category: string;
 	count: number | null;

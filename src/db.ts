@@ -1,7 +1,7 @@
 // Database operations for state-based voter information system
-import type { 
-	Politician, Vote, VotingRecord, 
-	State, Representative, District, VoterData, VoterDemographic 
+import type {
+	Politician, Vote, VotingRecord,
+	State, Representative, VoterData, VoterDemographic
 } from './types';
 
 // Generic politician data interface
@@ -268,57 +268,32 @@ export async function getRepresentativesByState(
 	stateCode: string,
 	chamber?: 'house' | 'senate'
 ): Promise<Representative[]> {
-	try {
-		let query = `
-			SELECT r.*, d.district_number, d.name as district_name
-			FROM representatives r
-			LEFT JOIN districts d ON r.district_id = d.id
-			WHERE r.state_code = ? AND r.is_active = 1
-		`;
-		const params: any[] = [stateCode];
+	let query = `
+		SELECT r.*
+		FROM representatives r
+		WHERE r.state_code = ? AND r.is_active = 1
+	`;
+	const params: any[] = [stateCode];
 
-		if (chamber) {
-			query += ' AND r.chamber = ?';
-			params.push(chamber);
-		}
-
-		query += ' ORDER BY r.chamber, d.district_number, r.last_name';
-
-		const stmt = db.prepare(query);
-		if (params.length > 1) {
-			return (await stmt.bind(...params).all<Representative>()).results;
-		}
-		return (await stmt.bind(stateCode).all<Representative>()).results;
-	} catch (error) {
-		// If districts table doesn't exist, fallback to query without district info
-		let query = `
-			SELECT r.*, NULL as district_number, NULL as district_name
-			FROM representatives r
-			WHERE r.state_code = ? AND r.is_active = 1
-		`;
-		const params: any[] = [stateCode];
-
-		if (chamber) {
-			query += ' AND r.chamber = ?';
-			params.push(chamber);
-		}
-
-		query += ' ORDER BY r.chamber, r.last_name';
-
-		const stmt = db.prepare(query);
-		if (params.length > 1) {
-			return (await stmt.bind(...params).all<Representative>()).results;
-		}
-		return (await stmt.bind(stateCode).all<Representative>()).results;
+	if (chamber) {
+		query += ' AND r.chamber = ?';
+		params.push(chamber);
 	}
+
+	query += ' ORDER BY r.chamber, r.last_name';
+
+	const stmt = db.prepare(query);
+	if (params.length > 1) {
+		return (await stmt.bind(...params).all<Representative>()).results;
+	}
+	return (await stmt.bind(stateCode).all<Representative>()).results;
 }
 
 export async function getRepresentative(db: D1Database, id: number): Promise<Representative | null> {
 	const result = await db
 		.prepare(`
-			SELECT r.*, d.district_number, d.name as district_name
+			SELECT r.*
 			FROM representatives r
-			LEFT JOIN districts d ON r.district_id = d.id
 			WHERE r.id = ?
 		`)
 		.bind(id)
@@ -326,13 +301,6 @@ export async function getRepresentative(db: D1Database, id: number): Promise<Rep
 	return result || null;
 }
 
-export async function getDistrictsByState(db: D1Database, stateCode: string): Promise<District[]> {
-	const result = await db
-		.prepare('SELECT * FROM districts WHERE state_code = ? ORDER BY district_number')
-		.bind(stateCode)
-		.all<District>();
-	return result.results;
-}
 
 export async function getVoterDataByState(
 	db: D1Database,
@@ -352,23 +320,13 @@ export async function getVoterDataByState(
 
 export async function getVoterDemographicsByState(
 	db: D1Database,
-	stateCode: string,
-	districtId?: number
+	stateCode: string
 ): Promise<VoterDemographic[]> {
-	let query = 'SELECT * FROM voter_demographics WHERE state_code = ?';
-	const params: any[] = [stateCode];
-
-	if (districtId) {
-		query += ' AND district_id = ?';
-		params.push(districtId);
-	} else {
-		query += ' AND district_id IS NULL';
-	}
-
-	query += ' ORDER BY demographic_type, category';
-
-	const stmt = db.prepare(query);
-	return (await stmt.bind(...params).all<VoterDemographic>()).results;
+	const result = await db
+		.prepare('SELECT * FROM voter_demographics WHERE state_code = ? ORDER BY demographic_type, category')
+		.bind(stateCode)
+		.all<VoterDemographic>();
+	return result.results;
 }
 
 // Admin functions for CRUD operations
@@ -376,10 +334,9 @@ export async function getVoterDemographicsByState(
 export async function getAllRepresentatives(db: D1Database): Promise<Representative[]> {
 	const result = await db
 		.prepare(`
-			SELECT r.*, d.district_number, d.name as district_name
+			SELECT r.*
 			FROM representatives r
-			LEFT JOIN districts d ON r.district_id = d.id
-			ORDER BY r.state_code, r.chamber, d.district_number, r.last_name
+			ORDER BY r.state_code, r.chamber, r.last_name
 		`)
 		.all<Representative>();
 	return result.results;
@@ -401,11 +358,10 @@ export async function getAllSenators(db: D1Database): Promise<Representative[]> 
 export async function getAllHouseMembers(db: D1Database): Promise<Representative[]> {
 	const result = await db
 		.prepare(`
-			SELECT r.*, d.district_number, d.name as district_name
+			SELECT r.*
 			FROM representatives r
-			LEFT JOIN districts d ON r.district_id = d.id
 			WHERE r.chamber = 'house' AND r.chamber_type = 0
-			ORDER BY r.state_code, d.district_number, r.last_name
+			ORDER BY r.state_code, r.last_name
 		`)
 		.all<Representative>();
 	return result.results;
@@ -416,10 +372,10 @@ export async function createRepresentative(db: D1Database, data: Partial<Represe
 		.prepare(`
 			INSERT INTO representatives (
 				external_id, name, first_name, last_name, middle_name, suffix,
-				state_code, party, chamber, chamber_type, district_id, office_address, office_phone,
+				state_code, party, chamber, chamber_type, office_address, office_phone,
 				email, twitter_handle, facebook_url, website, photo_url, bio,
 				term_start, term_end, is_active
-			) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+			) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
 			RETURNING id
 		`)
 		.bind(
@@ -433,7 +389,6 @@ export async function createRepresentative(db: D1Database, data: Partial<Represe
 			data.party || null,
 			data.chamber || 'house',
 			data.chamber === 'senate' ? 1 : 0,
-			data.district_id || null,
 			data.office_address || null,
 			data.office_phone || null,
 			data.email || null,
@@ -462,7 +417,6 @@ export async function updateRepresentative(db: D1Database, id: number, data: Par
 	if (data.state_code !== undefined) { updates.push('state_code = ?'); values.push(data.state_code); }
 	if (data.party !== undefined) { updates.push('party = ?'); values.push(data.party); }
 	if (data.chamber !== undefined) { updates.push('chamber = ?'); values.push(data.chamber); }
-	if (data.district_id !== undefined) { updates.push('district_id = ?'); values.push(data.district_id); }
 	if (data.office_address !== undefined) { updates.push('office_address = ?'); values.push(data.office_address); }
 	if (data.office_phone !== undefined) { updates.push('office_phone = ?'); values.push(data.office_phone); }
 	if (data.email !== undefined) { updates.push('email = ?'); values.push(data.email); }
@@ -546,14 +500,13 @@ export async function upsertVoterDemographic(db: D1Database, data: Partial<Voter
 	const result = await db
 		.prepare(`
 			INSERT INTO voter_demographics (
-				state_code, district_id, demographic_type, category, count, percentage, data_year
-			) VALUES (?, ?, ?, ?, ?, ?, ?)
+				state_code, demographic_type, category, count, percentage, data_year
+			) VALUES (?, ?, ?, ?, ?, ?)
 			ON CONFLICT DO NOTHING
 			RETURNING id
 		`)
 		.bind(
 			data.state_code || '',
-			data.district_id || null,
 			data.demographic_type || '',
 			data.category || '',
 			data.count || null,
@@ -564,24 +517,6 @@ export async function upsertVoterDemographic(db: D1Database, data: Partial<Voter
 	return result ? result.id : 0;
 }
 
-export async function createDistrict(db: D1Database, data: Partial<District>): Promise<number> {
-	const result = await db
-		.prepare(`
-			INSERT INTO districts (state_code, district_number, name, population, area_sq_miles, description)
-			VALUES (?, ?, ?, ?, ?, ?)
-			RETURNING id
-		`)
-		.bind(
-			data.state_code || '',
-			data.district_number || null,
-			data.name || null,
-			data.population || null,
-			data.area_sq_miles || null,
-			data.description || null
-		)
-		.first<{ id: number }>();
-	return result!.id;
-}
 
 export async function updateVote(db: D1Database, id: number, data: Partial<VoteData>): Promise<void> {
 	const updates: string[] = [];

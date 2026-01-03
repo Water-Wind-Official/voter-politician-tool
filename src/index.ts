@@ -24,7 +24,6 @@ import {
 	getAllVotes,
 	createVote,
 	updateVote,
-	getDistrictsByState,
 	updateStateElectoralData
 } from "./db";
 
