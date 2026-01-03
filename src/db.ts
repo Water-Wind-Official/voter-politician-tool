@@ -268,26 +268,49 @@ export async function getRepresentativesByState(
 	stateCode: string,
 	chamber?: 'house' | 'senate'
 ): Promise<Representative[]> {
-	let query = `
-		SELECT r.*, d.district_number, d.name as district_name
-		FROM representatives r
-		LEFT JOIN districts d ON r.district_id = d.id
-		WHERE r.state_code = ? AND r.is_active = 1
-	`;
-	const params: any[] = [stateCode];
+	try {
+		let query = `
+			SELECT r.*, d.district_number, d.name as district_name
+			FROM representatives r
+			LEFT JOIN districts d ON r.district_id = d.id
+			WHERE r.state_code = ? AND r.is_active = 1
+		`;
+		const params: any[] = [stateCode];
 
-	if (chamber) {
-		query += ' AND r.chamber = ?';
-		params.push(chamber);
+		if (chamber) {
+			query += ' AND r.chamber = ?';
+			params.push(chamber);
+		}
+
+		query += ' ORDER BY r.chamber, d.district_number, r.last_name';
+
+		const stmt = db.prepare(query);
+		if (params.length > 1) {
+			return (await stmt.bind(...params).all<Representative>()).results;
+		}
+		return (await stmt.bind(stateCode).all<Representative>()).results;
+	} catch (error) {
+		// If districts table doesn't exist, fallback to query without district info
+		let query = `
+			SELECT r.*, NULL as district_number, NULL as district_name
+			FROM representatives r
+			WHERE r.state_code = ? AND r.is_active = 1
+		`;
+		const params: any[] = [stateCode];
+
+		if (chamber) {
+			query += ' AND r.chamber = ?';
+			params.push(chamber);
+		}
+
+		query += ' ORDER BY r.chamber, r.last_name';
+
+		const stmt = db.prepare(query);
+		if (params.length > 1) {
+			return (await stmt.bind(...params).all<Representative>()).results;
+		}
+		return (await stmt.bind(stateCode).all<Representative>()).results;
 	}
-
-	query += ' ORDER BY r.chamber, d.district_number, r.last_name';
-
-	const stmt = db.prepare(query);
-	if (params.length > 1) {
-		return (await stmt.bind(...params).all<Representative>()).results;
-	}
-	return (await stmt.bind(stateCode).all<Representative>()).results;
 }
 
 export async function getRepresentative(db: D1Database, id: number): Promise<Representative | null> {
