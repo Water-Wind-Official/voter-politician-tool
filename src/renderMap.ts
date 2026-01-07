@@ -581,18 +581,17 @@ export function renderHomePage(states: State[]): string {
 			position: absolute;
 			top: 0;
 			left: -100%;
-			width: 100%;
+			width: 50%;
 			height: 100%;
 			background: linear-gradient(
 				90deg,
 				transparent,
-				rgba(255, 215, 0, 0.2),
-				rgba(255, 223, 0, 0.3),
-				rgba(255, 215, 0, 0.2),
+				rgba(255, 215, 0, 0.3),
+				rgba(255, 223, 0, 0.4),
+				rgba(255, 215, 0, 0.3),
 				transparent
 			);
-			animation: shimmer-gold 4s ease-in-out infinite;
-			animation-delay: 3s;
+			animation: shimmer-gold 9s ease-in-out infinite;
 			z-index: -1;
 		}
 
@@ -601,11 +600,15 @@ export function renderHomePage(states: State[]): string {
 				left: -100%;
 				opacity: 0;
 			}
-			10% {
+			5% {
 				opacity: 1;
 			}
-			90% {
+			15% {
 				opacity: 1;
+			}
+			20% {
+				left: 100%;
+				opacity: 0;
 			}
 			100% {
 				left: 100%;
