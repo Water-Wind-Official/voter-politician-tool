@@ -47,7 +47,7 @@ export function renderMoneyPage(democratMoney: Money[], republicanMoney: Money[]
 			max-width: 1400px;
 			margin: 0 auto;
 			display: grid;
-			grid-template-columns: 1fr 1.5fr 1fr;
+			grid-template-columns: 1fr 1fr;
 			gap: 2rem;
 			align-items: start;
 		}
