@@ -624,8 +624,7 @@ export function renderHomePage(states: State[]): string {
 			<nav>
 				<a href="/money">Money Hub</a>
 				<a href="/issues" class="issues-shimmer">Issues Hub</a>
-				<a href="/senators">Senate Hub</a>
-				<a href="/house">House Hub</a>
+				<a href="/congress">Congress Hub</a>
 				<a href="/election">Election Hub</a>
 			</nav>
 			<div class="search-container">

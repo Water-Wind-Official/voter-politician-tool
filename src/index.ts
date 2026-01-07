@@ -8,6 +8,7 @@ import { renderHouseHub } from "./renderHouse";
 import { renderElectionHub } from "./renderElection";
 import { renderIssuesPage } from "./renderIssues";
 import { renderMoneyPage } from "./renderMoney";
+import { renderCongressPage } from "./renderCongress";
 import { renderCandidateProfile } from "./renderCandidates";
 import {
 	getAllStates,
@@ -57,6 +58,10 @@ export default {
 		// Web pages
 		if (path === '/' || path === '/index.html') {
 			return handleHomePage(request, env);
+		}
+
+		if (path === '/congress' || path === '/congress-hub') {
+			return handleCongressHub(request, env);
 		}
 
 		if (path === '/senators' || path === '/senator-hub') {
@@ -124,6 +129,12 @@ async function handleHomePage(request: Request, env: Env): Promise<Response> {
 	const states = await getAllStates(env.DB);
 
 	return new Response(renderHomePage(states), {
+		headers: { "content-type": "text/html" },
+	});
+}
+
+async function handleCongressHub(request: Request, env: Env): Promise<Response> {
+	return new Response(renderCongressPage(), {
 		headers: { "content-type": "text/html" },
 	});
 }

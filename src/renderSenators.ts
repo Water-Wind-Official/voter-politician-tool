@@ -91,6 +91,18 @@ export function renderSenatorHub(senators: Representative[]): string {
 			z-index: 1;
 		}
 
+		nav {
+			margin-top: 1.5rem;
+			padding-top: 1.5rem;
+			border-top: 1px solid rgba(148, 163, 184, 0.3);
+			<nav style="display: inline-block; margin-left: 2rem;">
+				<a href="/money" style="color: #93c5fd; text-decoration: none; margin: 0 0.75rem; font-weight: 600; padding: 0.5rem 1rem; border-radius: 8px; transition: all 0.3s ease; border: 1px solid transparent;">Money Hub</a>
+				<a href="/issues" style="color: #93c5fd; text-decoration: none; margin: 0 0.75rem; font-weight: 600; padding: 0.5rem 1rem; border-radius: 8px; transition: all 0.3s ease; border: 1px solid transparent;">Issues Hub</a>
+				<a href="/congress" style="color: #93c5fd; text-decoration: none; margin: 0 0.75rem; font-weight: 600; padding: 0.5rem 1rem; border-radius: 8px; transition: all 0.3s ease; border: 1px solid transparent;">Congress Hub</a>
+				<a href="/election" style="color: #93c5fd; text-decoration: none; margin: 0 0.75rem; font-weight: 600; padding: 0.5rem 1rem; border-radius: 8px; transition: all 0.3s ease; border: 1px solid transparent;">Election Hub</a>
+			</nav>
+		}
+
 		nav a {
 			color: #93c5fd;
 			text-decoration: none;
@@ -373,7 +385,7 @@ export function renderSenatorHub(senators: Representative[]): string {
 				<a href="/">← Back to Map</a>
 				<a href="/money">Money Hub</a>
 				<a href="/issues">Issues Hub</a>
-				<a href="/house">House Hub</a>
+				<a href="/congress">Congress Hub</a>
 				<a href="/election">Election Hub</a>
 			</nav>
 			

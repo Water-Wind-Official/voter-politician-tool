@@ -272,6 +272,26 @@ export function renderMoneyPage(democratMoney: Money[], republicanMoney: Money[]
 			box-shadow: 0 0 20px rgba(148, 163, 184, 0.2);
 		}
 
+		.money-icon {
+			width: 24px;
+			height: 24px;
+			margin-right: 0.75rem;
+			border-radius: 4px;
+			object-fit: cover;
+		}
+
+		.money-cash {
+			width: 24px;
+			height: 24px;
+			margin-right: 0.75rem;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			font-size: 16px;
+			background: rgba(255, 215, 0, 0.2);
+			border-radius: 4px;
+		}
+
 		.money-header {
 			display: flex;
 			justify-content: space-between;
@@ -437,9 +457,9 @@ export function renderMoneyPage(democratMoney: Money[], republicanMoney: Money[]
 			<p class="subtitle">Funding sources, campaign finance, and lobbying activities for political parties</p>
 			<nav>
 				<a href="/">← Back to Map</a>
+				<a href="/money">Money Hub</a>
 				<a href="/issues">Issues Hub</a>
-				<a href="/senators">Senate Hub</a>
-				<a href="/house">House Hub</a>
+				<a href="/congress">Congress Hub</a>
 				<a href="/election">Election Hub</a>
 			</nav>
 		</header>
@@ -455,6 +475,7 @@ export function renderMoneyPage(democratMoney: Money[], republicanMoney: Money[]
 					democratMoney.map(money => `
 						<div class="money-item democrat-money">
 							<div class="money-header" onclick="toggleMoneyDescription(this)">
+								${money.icon_url ? `<img class="money-icon" src="${escapeHtml(money.icon_url)}" alt="Money icon" />` : '<div class="money-cash">💰</div>'}
 								<div class="money-title">${escapeHtml(money.title)}</div>
 								${money.description ? '<div class="money-arrow">▼</div>' : ''}
 							</div>
@@ -471,32 +492,6 @@ export function renderMoneyPage(democratMoney: Money[], republicanMoney: Money[]
 			</div>
 		</div>
 
-		<!-- Center Section (Both Parties) -->
-		<div class="section center-section">
-			<div class="section-header">
-				<h2 class="section-title center-title">Shared Funding</h2>
-			</div>
-			<div class="money-list">
-				${bothMoney.length > 0 ?
-					bothMoney.map(money => `
-						<div class="money-item both-money">
-							<div class="money-header" onclick="toggleMoneyDescription(this)">
-								<div class="money-title">${escapeHtml(money.title)}</div>
-								${money.description ? '<div class="money-arrow">▼</div>' : ''}
-							</div>
-							${money.description ? `<div class="money-description collapsed">${escapeHtml(money.description)}</div>` : ''}
-							${money.category ? `<div class="money-category">${escapeHtml(money.category)}</div>` : ''}
-							${renderMoneyLinks(money)}
-						</div>
-					`).join('') :
-					`<div class="empty-state">
-						<p>No shared funding information available</p>
-						<p>Funding that affects both parties will appear here</p>
-					</div>`
-				}
-			</div>
-		</div>
-
 		<!-- Republicans Section (Right) -->
 		<div class="section republican-section">
 			<div class="section-header">
@@ -508,6 +503,7 @@ export function renderMoneyPage(democratMoney: Money[], republicanMoney: Money[]
 					republicanMoney.map(money => `
 						<div class="money-item republican-money">
 							<div class="money-header" onclick="toggleMoneyDescription(this)">
+								${money.icon_url ? `<img class="money-icon" src="${escapeHtml(money.icon_url)}" alt="Money icon" />` : '<div class="money-cash">💰</div>'}
 								<div class="money-title">${escapeHtml(money.title)}</div>
 								${money.description ? '<div class="money-arrow">▼</div>' : ''}
 							</div>
@@ -523,7 +519,6 @@ export function renderMoneyPage(democratMoney: Money[], republicanMoney: Money[]
 				}
 			</div>
 		</div>
-	</div>
 
 	<script>
 		function toggleMoneyDescription(headerElement) {

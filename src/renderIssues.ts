@@ -101,6 +101,8 @@ export function renderIssuesPage(democratIssues: Issue[], republicanIssues: Issu
 			border-top: 1px solid rgba(148, 163, 184, 0.3);
 			position: relative;
 			z-index: 1;
+			display: inline-block;
+			margin-left: 2rem;
 		}
 
 		nav a {
@@ -439,8 +441,7 @@ export function renderIssuesPage(democratIssues: Issue[], republicanIssues: Issu
 				<a href="/">← Back to Map</a>
 				<a href="/money">Money Hub</a>
 				<a href="/issues">Issues Hub</a>
-				<a href="/senators">Senate Hub</a>
-				<a href="/house">House Hub</a>
+				<a href="/congress">Congress Hub</a>
 				<a href="/election">Election Hub</a>
 			</nav>
 		</header>

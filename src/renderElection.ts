@@ -611,30 +611,124 @@ export function renderElectionHub(states: any[]): string {
 					<div class="stat-card">
 						<div class="stat-value">538</div>
 						<div class="stat-label">Total Electoral Votes</div>
+
+			.candidate-name {
+				font-size: 1.2rem;
+				font-weight: 700;
+				color: #f1f5f9;
+				margin-bottom: 0.5rem;
+			}
+
+			.popular-votes {
+				font-size: 1.1rem;
+				font-weight: 600;
+				color: #f1f5f9;
+				margin-bottom: 0.25rem;
+			}
+
+			.popular-percentage {
+				font-size: 1rem;
+				color: #cbd5e1;
+				margin-bottom: 0.25rem;
+				opacity: 0.9;
+			}
+
+			.popular-margin {
+				font-size: 0.9rem;
+				color: #94a3b8;
+				font-weight: 500;
+			}
+
+			.electoral-section {
+				border-top: 2px solid #e5e7eb;
+				padding-top: 2rem;
+			}
+
+			@media (max-width: 768px) {
+				nav {
+					flex-direction: column;
+					align-items: center;
+				}
+
+				.title {
+					font-size: 2rem;
+				}
+
+				.election-results {
+					grid-template-columns: 1fr;
+				}
+
+				.popular-vote-grid {
+					grid-template-columns: 1fr;
+				}
+
+				.popular-vote-card {
+					text-align: center;
+				}
+			}
+		</style>
+	</head>
+	<body>
+		<div class="container">
+			<header>
+				<h1 class="title">Voter Politician Tool</h1>
+				<p class="subtitle">Presidential Election Results & Data Hub</p>
+				<nav style="display: inline-block; margin-left: 2rem;">
+					<a href="/money" style="color: #93c5fd; text-decoration: none; margin: 0 0.75rem; font-weight: 600; padding: 0.5rem 1rem; border-radius: 8px; transition: all 0.3s ease; border: 1px solid transparent;">Money Hub</a>
+					<a href="/issues" style="color: #93c5fd; text-decoration: none; margin: 0 0.75rem; font-weight: 600; padding: 0.5rem 1rem; border-radius: 8px; transition: all 0.3s ease; border: 1px solid transparent;">Issues Hub</a>
+					<a href="/congress" style="color: #93c5fd; text-decoration: none; margin: 0 0.75rem; font-weight: 600; padding: 0.5rem 1rem; border-radius: 8px; transition: all 0.3s ease; border: 1px solid transparent;">Congress Hub</a>
+					<a href="/election" style="color: #93c5fd; text-decoration: none; margin: 0 0.75rem; font-weight: 600; padding: 0.5rem 1rem; border-radius: 8px; transition: all 0.3s ease; border: 1px solid transparent;">Election Hub</a>
+				</nav><br>
+				<div class="candidate-links">
+					<h3>2024 Presidential Candidates</h3>
+					<div class="candidate-links-grid">
+						<a href="/trump" class="candidate-link trump-link">
+							<div class="candidate-header">
+								<span class="candidate-flag">🇺🇸</span>
+								<span class="candidate-name">Donald J. Trump</span>
+								<span class="candidate-party">(Republican)</span>
+							</div>
+							<div class="candidate-description">View Trump's official profile, campaign platform, and policy positions</div>
+						</a>
+						<a href="/harris" class="candidate-link harris-link">
+							<div class="candidate-header">
+								<span class="candidate-flag">🇺🇸</span>
+								<span class="candidate-name">Kamala Harris</span>
+								<span class="candidate-party">(Democrat)</span>
+							</div>
+							<div class="candidate-description">View Harris's official profile, campaign issues, and policy positions</div>
+						</a>
 					</div>
 				</div>
-			</div>
+			</header>
 
-
-			<div style="text-align: center; margin-top: 2rem;">
-				<a href="https://www.fec.gov/resources/cms-content/documents/2024presgeresults.pdf" class="download-btn" target="_blank">
-					📄 Download Official FEC Results PDF
-				</a>
-			</div>
-
-			<div style="background: linear-gradient(135deg, rgba(59, 130, 246, 0.1) 0%, rgba(37, 99, 235, 0.05) 100%); backdrop-filter: blur(10px); border: 1px solid rgba(59, 130, 246, 0.3); border-left: 4px solid #60a5fa; padding: 1rem; margin-top: 2rem; border-radius: 8px;">
-				<p style="margin: 0; font-size: 0.9rem; color: #cbd5e1;">
-					<strong>📋 Source:</strong>
-					<a href="https://www.fec.gov/resources/cms-content/documents/2024presgeresults.pdf" target="_blank" style="color: #93c5fd; text-decoration: underline;">
-						https://www.fec.gov/resources/cms-content/documents/2024presgeresults.pdf
-					</a>
-					<br><br>
-					This PDF contains the official 2024 presidential election results as certified by state election offices and compiled by the Federal Election Commission.
+			<div class="card">
+				<h2 class="card-title">🗳️ 2024 Presidential Election Results</h2>
+				<p style="color: #cbd5e1; margin-bottom: 1rem;">
+					Official results from the Federal Election Commission (FEC) as reported by state election offices.
 				</p>
-			</div>
 
-		</div>
-
+				<!-- Popular Vote Results -->
+				<div class="popular-vote-section">
+					<h3 style="color: #f1f5f9; margin-bottom: 1rem; font-size: 1.3rem;">Popular Vote Results</h3>
+					<div class="popular-vote-grid">
+						<a href="/trump" class="popular-vote-link">
+							<div class="popular-vote-card trump">
+								<div class="candidate-name">Donald J. Trump (R)</div>
+								<div class="popular-votes">~77 million votes</div>
+								<div class="popular-percentage">~50.9%</div>
+								<div class="popular-margin">Winner by ~6.6 million votes</div>
+							</div>
+						</a>
+						<a href="/harris" class="popular-vote-link">
+							<div class="popular-vote-card harris">
+								<div class="candidate-name">Kamala Harris (D)</div>
+								<div class="popular-votes">~70.4 million votes</div>
+								<div class="popular-percentage">~46.5%</div>
+								<div class="popular-margin">Margin: ~4.4%</div>
+							</div>
+						</a>
+					</div>
 		<div class="card">
 			<h2 class="card-title">📊 State-by-State Electoral Vote Results</h2>
 			<div style="overflow-x: auto;">

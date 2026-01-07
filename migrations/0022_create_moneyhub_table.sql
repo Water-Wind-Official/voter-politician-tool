@@ -8,6 +8,7 @@ CREATE TABLE moneyhub (
     category TEXT,
     priority INTEGER DEFAULT 0,
     is_active INTEGER DEFAULT 1,
+    icon_url TEXT,
     link1 TEXT,
     link2 TEXT,
     link3 TEXT,
