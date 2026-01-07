@@ -395,6 +395,7 @@ export function renderHouseHub(houseMembers: Representative[]): string {
 			
 			<nav>
 				<a href="/">← Back to Map</a>
+				<a href="/money">Money Hub</a>
 				<a href="/issues">Issues Hub</a>
 				<a href="/senators">Senate Hub</a>
 				<a href="/election">Election Hub</a>

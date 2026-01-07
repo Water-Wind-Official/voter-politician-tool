@@ -726,3 +726,121 @@ export async function updateIssue(db: D1Database, id: number, data: Partial<Omit
 export async function deleteIssue(db: D1Database, id: number): Promise<void> {
 	await db.prepare('DELETE FROM issues WHERE id = ?').bind(id).run();
 }
+
+// Money management functions
+export async function getAllMoney(db: D1Database): Promise<Money[]> {
+	const result = await db
+		.prepare('SELECT * FROM moneyhub WHERE is_active = 1 ORDER BY priority DESC, created_at DESC')
+		.all();
+	return result.results as Money[];
+}
+
+export async function getMoneyByParty(db: D1Database, party: string): Promise<Money[]> {
+	const result = await db
+		.prepare('SELECT * FROM moneyhub WHERE party = ? AND is_active = 1 ORDER BY priority DESC, created_at DESC')
+		.bind(party)
+		.all();
+	return result.results as Money[];
+}
+
+export async function getMoney(db: D1Database, id: number): Promise<Money | null> {
+	const result = await db
+		.prepare('SELECT * FROM moneyhub WHERE id = ?')
+		.bind(id)
+		.first();
+	return result as Money | null;
+}
+
+export async function createMoney(db: D1Database, data: Omit<Money, 'id' | 'created_at' | 'updated_at'>): Promise<number> {
+	const result = await db
+		.prepare(`
+			INSERT INTO moneyhub (title, description, party, category, priority, is_active, link1, link2, link3, link4, link5, link6)
+			VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+		`)
+		.bind(
+			data.title,
+			data.description,
+			data.party,
+			data.category,
+			data.priority,
+			data.is_active,
+			data.link1,
+			data.link2,
+			data.link3,
+			data.link4,
+			data.link5,
+			data.link6
+		)
+		.run();
+
+	const idResult = await db.prepare('SELECT last_insert_rowid() as id').first();
+	return idResult!.id;
+}
+
+export async function updateMoney(db: D1Database, id: number, data: Partial<Omit<Money, 'id' | 'created_at' | 'updated_at'>>): Promise<void> {
+	const updates: string[] = [];
+	const values: any[] = [];
+
+	if (data.title !== undefined) {
+		updates.push('title = ?');
+		values.push(data.title);
+	}
+	if (data.description !== undefined) {
+		updates.push('description = ?');
+		values.push(data.description);
+	}
+	if (data.party !== undefined) {
+		updates.push('party = ?');
+		values.push(data.party);
+	}
+	if (data.category !== undefined) {
+		updates.push('category = ?');
+		values.push(data.category);
+	}
+	if (data.priority !== undefined) {
+		updates.push('priority = ?');
+		values.push(data.priority);
+	}
+	if (data.is_active !== undefined) {
+		updates.push('is_active = ?');
+		values.push(data.is_active);
+	}
+	if (data.link1 !== undefined) {
+		updates.push('link1 = ?');
+		values.push(data.link1);
+	}
+	if (data.link2 !== undefined) {
+		updates.push('link2 = ?');
+		values.push(data.link2);
+	}
+	if (data.link3 !== undefined) {
+		updates.push('link3 = ?');
+		values.push(data.link3);
+	}
+	if (data.link4 !== undefined) {
+		updates.push('link4 = ?');
+		values.push(data.link4);
+	}
+	if (data.link5 !== undefined) {
+		updates.push('link5 = ?');
+		values.push(data.link5);
+	}
+	if (data.link6 !== undefined) {
+		updates.push('link6 = ?');
+		values.push(data.link6);
+	}
+
+	if (updates.length > 0) {
+		updates.push('updated_at = CURRENT_TIMESTAMP');
+		values.push(id);
+
+		await db
+			.prepare(`UPDATE moneyhub SET ${updates.join(', ')} WHERE id = ?`)
+			.bind(...values)
+			.run();
+	}
+}
+
+export async function deleteMoney(db: D1Database, id: number): Promise<void> {
+	await db.prepare('DELETE FROM moneyhub WHERE id = ?').bind(id).run();
+}

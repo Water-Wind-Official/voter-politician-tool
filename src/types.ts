@@ -36,6 +36,24 @@ export interface Issue {
 	updated_at: string;
 }
 
+export interface Money {
+	id: number;
+	title: string;
+	description: string | null;
+	party: 'Democrat' | 'Republican' | 'Both';
+	category: string | null;
+	priority: number;
+	is_active: boolean;
+	link1: string | null;
+	link2: string | null;
+	link3: string | null;
+	link4: string | null;
+	link5: string | null;
+	link6: string | null;
+	created_at: string;
+	updated_at: string;
+}
+
 
 export interface Representative {
 	id: number;

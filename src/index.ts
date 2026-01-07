@@ -7,6 +7,7 @@ import { renderSenatorHub } from "./renderSenators";
 import { renderHouseHub } from "./renderHouse";
 import { renderElectionHub } from "./renderElection";
 import { renderIssuesPage } from "./renderIssues";
+import { renderMoneyPage } from "./renderMoney";
 import { renderCandidateProfile } from "./renderCandidates";
 import {
 	getAllStates,
@@ -29,7 +30,13 @@ import {
 	getIssue,
 	createIssue,
 	updateIssue,
-	deleteIssue
+	deleteIssue,
+	getAllMoney,
+	getMoneyByParty,
+	getMoney,
+	createMoney,
+	updateMoney,
+	deleteMoney
 } from "./db";
 
 export default {
@@ -66,6 +73,10 @@ export default {
 
 		if (path === '/issues') {
 			return handleIssuesPage(request, env);
+		}
+
+		if (path === '/money') {
+			return handleMoneyPage(request, env);
 		}
 
 		if (path === '/trump' || path === '/donald-trump') {
@@ -149,6 +160,18 @@ async function handleIssuesPage(request: Request, env: Env): Promise<Response> {
 	]);
 
 	return new Response(renderIssuesPage(democratIssues, republicanIssues, bothIssues), {
+		headers: { "content-type": "text/html" },
+	});
+}
+
+async function handleMoneyPage(request: Request, env: Env): Promise<Response> {
+	const [democratMoney, republicanMoney, bothMoney] = await Promise.all([
+		getMoneyByParty(env.DB, 'Democrat'),
+		getMoneyByParty(env.DB, 'Republican'),
+		getMoneyByParty(env.DB, 'Both')
+	]);
+
+	return new Response(renderMoneyPage(democratMoney, republicanMoney, bothMoney), {
 		headers: { "content-type": "text/html" },
 	});
 }
@@ -318,12 +341,14 @@ async function handleAdminDashboard(request: Request, env: Env): Promise<Respons
 		states.map(s => getVoterDataByState(env.DB, s.code))
 	).then(results => results.filter(r => r !== null));
 	const issues = await getAllIssues(env.DB);
+	const money = await getAllMoney(env.DB);
 
 	return new Response(renderAdminDashboard({
 		states,
 		representatives,
 		voterData,
-		issues
+		issues,
+		money
 	}), {
 		headers: { 'Content-Type': 'text/html' }
 	});
@@ -749,6 +774,37 @@ async function handleAdminApi(request: Request, env: Env, path: string): Promise
 			return new Response('Invalid ID', { status: 400 });
 		}
 		await deleteIssue(env.DB, id);
+		return Response.json({ success: true });
+	}
+
+	// Money management
+	if (path === '/api/admin/money' && request.method === 'GET') {
+		const money = await getAllMoney(env.DB);
+		return Response.json({ money });
+	}
+
+	if (path === '/api/admin/money' && request.method === 'POST') {
+		const body = await request.json() as any;
+		const id = await createMoney(env.DB, body);
+		return Response.json({ success: true, id });
+	}
+
+	if (path.startsWith('/api/admin/money/') && request.method === 'PUT') {
+		const id = parseInt(path.split('/')[4]);
+		if (isNaN(id)) {
+			return new Response('Invalid ID', { status: 400 });
+		}
+		const body = await request.json() as any;
+		await updateMoney(env.DB, id, body);
+		return Response.json({ success: true });
+	}
+
+	if (path.startsWith('/api/admin/money/') && request.method === 'DELETE') {
+		const id = parseInt(path.split('/')[4]);
+		if (isNaN(id)) {
+			return new Response('Invalid ID', { status: 400 });
+		}
+		await deleteMoney(env.DB, id);
 		return Response.json({ success: true });
 	}
 

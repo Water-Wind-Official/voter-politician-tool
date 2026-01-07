@@ -371,6 +371,7 @@ export function renderSenatorHub(senators: Representative[]): string {
 			<p class="subtitle">US Senate Hub - Complete directory of all 100 United States Senators</p>
 			<nav>
 				<a href="/">← Back to Map</a>
+				<a href="/money">Money Hub</a>
 				<a href="/issues">Issues Hub</a>
 				<a href="/house">House Hub</a>
 				<a href="/election">Election Hub</a>

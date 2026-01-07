@@ -1,13 +1,13 @@
-import type { Issue } from './types';
+import type { Money } from './types';
 
-export function renderIssuesPage(democratIssues: Issue[], republicanIssues: Issue[], bothIssues: Issue[]): string {
+export function renderMoneyPage(democratMoney: Money[], republicanMoney: Money[], bothMoney: Money[]): string {
 	return `
 <!DOCTYPE html>
 <html lang="en">
 <head>
 	<meta charset="UTF-8" />
 	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-	<title>Political Issues - Voter Politician Tool</title>
+	<title>Campaign Money & Lobbying - Voter Politician Tool</title>
 	<style>
 		* {
 			margin: 0;
@@ -234,12 +234,12 @@ export function renderIssuesPage(democratIssues: Issue[], republicanIssues: Issu
 			text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
 		}
 
-		.issues-list {
+		.money-list {
 			position: relative;
 			z-index: 2;
 		}
 
-		.issue-item {
+		.money-item {
 			background: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.05) 100%);
 			backdrop-filter: blur(10px);
 			border: 1px solid rgba(148, 163, 184, 0.2);
@@ -251,28 +251,28 @@ export function renderIssuesPage(democratIssues: Issue[], republicanIssues: Issu
 			box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 		}
 
-		.issue-item:hover {
+		.money-item:hover {
 			transform: translateY(-3px) scale(1.01);
 			box-shadow: 0 8px 25px rgba(0, 0, 0, 0.25);
 			border-color: rgba(148, 163, 184, 0.4);
 		}
 
-		.democrat-issue {
+		.democrat-money {
 			border-left-color: #60a5fa;
 			box-shadow: 0 0 20px rgba(59, 130, 246, 0.2);
 		}
 
-		.republican-issue {
+		.republican-money {
 			border-left-color: #f87171;
 			box-shadow: 0 0 20px rgba(239, 68, 68, 0.2);
 		}
 
-		.both-issue {
+		.both-money {
 			border-left-color: #94a3b8;
 			box-shadow: 0 0 20px rgba(148, 163, 184, 0.2);
 		}
 
-		.issue-header {
+		.money-header {
 			display: flex;
 			justify-content: space-between;
 			align-items: center;
@@ -280,28 +280,28 @@ export function renderIssuesPage(democratIssues: Issue[], republicanIssues: Issu
 			padding: 0.5rem 0;
 		}
 
-		.issue-header:hover {
+		.money-header:hover {
 			background: rgba(0,0,0,0.02);
 			border-radius: 6px;
 			margin: -0.5rem -0.5rem 0 -0.5rem;
 			padding: 1rem;
 		}
 
-		.issue-title {
+		.money-title {
 			font-size: 1.2rem;
 			font-weight: 600;
 			color: #f1f5f9;
 			flex: 1;
 		}
 
-		.issue-arrow {
+		.money-arrow {
 			font-size: 0.8rem;
 			color: #6b7280;
 			transition: transform 0.3s ease;
 			margin-left: 0.5rem;
 		}
 
-		.issue-description {
+		.money-description {
 			color: #cbd5e1;
 			line-height: 1.6;
 			margin-top: 0.5rem;
@@ -311,17 +311,17 @@ export function renderIssuesPage(democratIssues: Issue[], republicanIssues: Issu
 			opacity: 0;
 		}
 
-		.issue-description:not(.collapsed) {
+		.money-description:not(.collapsed) {
 			max-height: 500px;
 			margin-top: 1rem;
 			opacity: 1;
 		}
 
-		.issue-header.expanded .issue-arrow {
+		.money-header.expanded .money-arrow {
 			transform: rotate(180deg);
 		}
 
-		.issue-links {
+		.money-links {
 			position: absolute;
 			bottom: 0.5rem;
 			right: 0.5rem;
@@ -329,7 +329,7 @@ export function renderIssuesPage(democratIssues: Issue[], republicanIssues: Issu
 			gap: 0.25rem;
 		}
 
-		.issue-link-superscript {
+		.money-link-superscript {
 			display: inline-block;
 			width: 1rem;
 			height: 1rem;
@@ -345,24 +345,24 @@ export function renderIssuesPage(democratIssues: Issue[], republicanIssues: Issu
 			border: 1px solid rgba(59, 130, 246, 0.2);
 		}
 
-		.issue-link-superscript:hover {
+		.money-link-superscript:hover {
 			background: #2563eb;
 			color: white;
 			transform: scale(1.1);
 		}
 
-		/* Ensure issue items are positioned relatively for absolute positioning of links */
-		.issue-item {
+		/* Ensure money items are positioned relatively for absolute positioning of links */
+		.money-item {
 			position: relative;
 			padding-bottom: 2rem; /* Make room for the superscript links */
 		}
 
-		.issue-description {
+		.money-description {
 			color: #cbd5e1;
 			line-height: 1.5;
 		}
 
-		.issue-category {
+		.money-category {
 			display: inline-block;
 			padding: 0.25rem 0.75rem;
 			background: rgba(148, 163, 184, 0.2);
@@ -433,11 +433,10 @@ export function renderIssuesPage(democratIssues: Issue[], republicanIssues: Issu
 <body>
 	<div class="container">
 		<header>
-			<h1>Political Issues</h1>
-			<p class="subtitle">Key issues being addressed by both major political parties</p>
+			<h1>Campaign Money & Lobbying</h1>
+			<p class="subtitle">Funding sources, campaign finance, and lobbying activities for political parties</p>
 			<nav>
 				<a href="/">← Back to Map</a>
-				<a href="/money">Money Hub</a>
 				<a href="/issues">Issues Hub</a>
 				<a href="/senators">Senate Hub</a>
 				<a href="/house">House Hub</a>
@@ -449,23 +448,23 @@ export function renderIssuesPage(democratIssues: Issue[], republicanIssues: Issu
 		<div class="section democrat-section">
 			<div class="section-header">
 				<img class="section-icon donkey-icon" src="https://content.mycutegraphics.com/graphics/animal/horse-head.png" alt="Horse" />
-				<h2 class="section-title democrat-title">Democratic Issues</h2>
+				<h2 class="section-title democrat-title">Democratic Funding</h2>
 			</div>
-			<div class="issues-list">
-				${democratIssues.length > 0 ?
-					democratIssues.map(issue => `
-						<div class="issue-item democrat-issue">
-							<div class="issue-header" onclick="toggleIssueDescription(this)">
-								<div class="issue-title">${escapeHtml(issue.title)}</div>
-								${issue.description ? '<div class="issue-arrow">▼</div>' : ''}
+			<div class="money-list">
+				${democratMoney.length > 0 ?
+					democratMoney.map(money => `
+						<div class="money-item democrat-money">
+							<div class="money-header" onclick="toggleMoneyDescription(this)">
+								<div class="money-title">${escapeHtml(money.title)}</div>
+								${money.description ? '<div class="money-arrow">▼</div>' : ''}
 							</div>
-							${issue.description ? `<div class="issue-description collapsed">${escapeHtml(issue.description)}</div>` : ''}
-							${issue.category ? `<div class="issue-category">${escapeHtml(issue.category)}</div>` : ''}
-							${renderIssueLinks(issue)}
+							${money.description ? `<div class="money-description collapsed">${escapeHtml(money.description)}</div>` : ''}
+							${money.category ? `<div class="money-category">${escapeHtml(money.category)}</div>` : ''}
+							${renderMoneyLinks(money)}
 						</div>
 					`).join('') :
 					`<div class="empty-state">
-						<p>No Democratic issues available</p>
+						<p>No Democratic funding information available</p>
 						<p>Check back later for updates</p>
 					</div>`
 				}
@@ -475,24 +474,24 @@ export function renderIssuesPage(democratIssues: Issue[], republicanIssues: Issu
 		<!-- Center Section (Both Parties) -->
 		<div class="section center-section">
 			<div class="section-header">
-				<h2 class="section-title center-title">Shared Issues</h2>
+				<h2 class="section-title center-title">Shared Funding</h2>
 			</div>
-			<div class="issues-list">
-				${bothIssues.length > 0 ?
-					bothIssues.map(issue => `
-						<div class="issue-item both-issue">
-							<div class="issue-header" onclick="toggleIssueDescription(this)">
-								<div class="issue-title">${escapeHtml(issue.title)}</div>
-								${issue.description ? '<div class="issue-arrow">▼</div>' : ''}
+			<div class="money-list">
+				${bothMoney.length > 0 ?
+					bothMoney.map(money => `
+						<div class="money-item both-money">
+							<div class="money-header" onclick="toggleMoneyDescription(this)">
+								<div class="money-title">${escapeHtml(money.title)}</div>
+								${money.description ? '<div class="money-arrow">▼</div>' : ''}
 							</div>
-							${issue.description ? `<div class="issue-description collapsed">${escapeHtml(issue.description)}</div>` : ''}
-							${issue.category ? `<div class="issue-category">${escapeHtml(issue.category)}</div>` : ''}
-							${renderIssueLinks(issue)}
+							${money.description ? `<div class="money-description collapsed">${escapeHtml(money.description)}</div>` : ''}
+							${money.category ? `<div class="money-category">${escapeHtml(money.category)}</div>` : ''}
+							${renderMoneyLinks(money)}
 						</div>
 					`).join('') :
 					`<div class="empty-state">
-						<p>No shared issues available</p>
-						<p>Issues that affect both parties will appear here</p>
+						<p>No shared funding information available</p>
+						<p>Funding that affects both parties will appear here</p>
 					</div>`
 				}
 			</div>
@@ -502,23 +501,23 @@ export function renderIssuesPage(democratIssues: Issue[], republicanIssues: Issu
 		<div class="section republican-section">
 			<div class="section-header">
 				<img class="section-icon elephant-icon" src="https://content.mycutegraphics.com/graphics/animal/cute-elephant.png" alt="Elephant" />
-				<h2 class="section-title republican-title">Republican Issues</h2>
+				<h2 class="section-title republican-title">Republican Funding</h2>
 			</div>
-			<div class="issues-list">
-				${republicanIssues.length > 0 ?
-					republicanIssues.map(issue => `
-						<div class="issue-item republican-issue">
-							<div class="issue-header" onclick="toggleIssueDescription(this)">
-								<div class="issue-title">${escapeHtml(issue.title)}</div>
-								${issue.description ? '<div class="issue-arrow">▼</div>' : ''}
+			<div class="money-list">
+				${republicanMoney.length > 0 ?
+					republicanMoney.map(money => `
+						<div class="money-item republican-money">
+							<div class="money-header" onclick="toggleMoneyDescription(this)">
+								<div class="money-title">${escapeHtml(money.title)}</div>
+								${money.description ? '<div class="money-arrow">▼</div>' : ''}
 							</div>
-							${issue.description ? `<div class="issue-description collapsed">${escapeHtml(issue.description)}</div>` : ''}
-							${issue.category ? `<div class="issue-category">${escapeHtml(issue.category)}</div>` : ''}
-							${renderIssueLinks(issue)}
+							${money.description ? `<div class="money-description collapsed">${escapeHtml(money.description)}</div>` : ''}
+							${money.category ? `<div class="money-category">${escapeHtml(money.category)}</div>` : ''}
+							${renderMoneyLinks(money)}
 						</div>
 					`).join('') :
 					`<div class="empty-state">
-						<p>No Republican issues available</p>
+						<p>No Republican funding information available</p>
 						<p>Check back later for updates</p>
 					</div>`
 				}
@@ -527,9 +526,9 @@ export function renderIssuesPage(democratIssues: Issue[], republicanIssues: Issu
 	</div>
 
 	<script>
-		function toggleIssueDescription(headerElement) {
-			const description = headerElement.parentElement.querySelector('.issue-description');
-			const arrow = headerElement.querySelector('.issue-arrow');
+		function toggleMoneyDescription(headerElement) {
+			const description = headerElement.parentElement.querySelector('.money-description');
+			const arrow = headerElement.querySelector('.money-arrow');
 
 			if (description && arrow) {
 				const isCollapsed = description.classList.contains('collapsed');
@@ -549,19 +548,19 @@ export function renderIssuesPage(democratIssues: Issue[], republicanIssues: Issu
 	`;
 }
 
-function renderIssueLinks(issue: any): string {
+function renderMoneyLinks(money: any): string {
 	const links = [];
-	if (issue.link1) links.push({ url: issue.link1, number: 1 });
-	if (issue.link2) links.push({ url: issue.link2, number: 2 });
-	if (issue.link3) links.push({ url: issue.link3, number: 3 });
-	if (issue.link4) links.push({ url: issue.link4, number: 4 });
-	if (issue.link5) links.push({ url: issue.link5, number: 5 });
-	if (issue.link6) links.push({ url: issue.link6, number: 6 });
+	if (money.link1) links.push({ url: money.link1, number: 1 });
+	if (money.link2) links.push({ url: money.link2, number: 2 });
+	if (money.link3) links.push({ url: money.link3, number: 3 });
+	if (money.link4) links.push({ url: money.link4, number: 4 });
+	if (money.link5) links.push({ url: money.link5, number: 5 });
+	if (money.link6) links.push({ url: money.link6, number: 6 });
 
 	if (links.length === 0) return '';
 
-	return `<div class="issue-links">
-		${links.map(link => `<a href="${escapeHtml(link.url)}" target="_blank" class="issue-link-superscript">${link.number}</a>`).join('')}
+	return `<div class="money-links">
+		${links.map(link => `<a href="${escapeHtml(link.url)}" target="_blank" class="money-link-superscript">${link.number}</a>`).join('')}
 	</div>`;
 }
 

@@ -205,7 +205,7 @@ export function renderAdminLogin(): string {
 }
 
 export function renderAdminDashboard(data: any): string {
-	const { states, representatives, voterData, issues } = data;
+	const { states, representatives, voterData, issues, money } = data;
 	
 	return `
 <!DOCTYPE html>
@@ -485,6 +485,10 @@ export function renderAdminDashboard(data: any): string {
 			<div class="stat-value">${issues ? issues.length : 0}</div>
 			<div class="stat-label">Issues</div>
 		</div>
+		<div class="stat-card">
+			<div class="stat-value">${money ? money.length : 0}</div>
+			<div class="stat-label">Money</div>
+		</div>
 	</div>
 	
 	<div class="tabs">
@@ -492,6 +496,7 @@ export function renderAdminDashboard(data: any): string {
 		<button class="tab" onclick="showTab('voter-data', event)">Voter Data</button>
 		<button class="tab" onclick="showTab('electoral-data', event)">Electoral Data</button>
 		<button class="tab" onclick="showTab('issues', event)">Issues</button>
+		<button class="tab" onclick="showTab('money', event)">Money</button>
 	</div>
 	
 	<div id="representatives" class="tab-content active">
@@ -694,6 +699,86 @@ export function renderAdminDashboard(data: any): string {
 				<div style="margin-top: 1.5rem; display: flex; gap: 1rem; justify-content: flex-end;">
 					<button type="button" class="btn btn-secondary" onclick="closeModal('issue-modal')">Cancel</button>
 					<button type="submit" class="btn">Save Issue</button>
+				</div>
+			</form>
+		</div>
+	</div>
+
+	<div id="money" class="tab-content">
+		<div class="card">
+			<div class="card-header">
+				<h2 class="card-title">Campaign Money & Lobbying</h2>
+				<button class="btn" onclick="openModal('money-modal')">+ Add Money Entry</button>
+			</div>
+			<table class="table">
+				<thead>
+					<tr>
+						<th>Title</th>
+						<th>Party</th>
+						<th>Category</th>
+						<th>Priority</th>
+						<th>Status</th>
+						<th>Actions</th>
+					</tr>
+				</thead>
+				<tbody id="money-table-body">
+					<!-- Money entries will be loaded dynamically -->
+				</tbody>
+			</table>
+		</div>
+	</div>
+
+	<!-- Money Modal -->
+	<div id="money-modal" class="modal">
+		<div class="modal-content">
+			<h2 style="margin-bottom: 1rem;">Add/Edit Money Entry</h2>
+			<form id="money-form" onsubmit="saveMoney(event)">
+				<div class="form-grid">
+					<div class="form-group" style="grid-column: 1 / -1;">
+						<label>Title *</label>
+						<input type="text" name="title" required>
+					</div>
+					<div class="form-group" style="grid-column: 1 / -1;">
+						<label>Description</label>
+						<textarea name="description" rows="3"></textarea>
+					</div>
+					<div class="form-group">
+						<label>Party *</label>
+						<select name="party" required>
+							<option value="">Select Party</option>
+							<option value="Democrat">Democrat</option>
+							<option value="Republican">Republican</option>
+							<option value="Both">Both Parties</option>
+						</select>
+					</div>
+					<div class="form-group">
+						<label>Category</label>
+						<input type="text" name="category" placeholder="e.g., Campaign Funding, Lobbying">
+					</div>
+					<div class="form-group">
+						<label>Priority</label>
+						<input type="number" name="priority" value="0" min="0">
+					</div>
+					<div class="form-group">
+						<label>Active</label>
+						<input type="checkbox" name="is_active" checked>
+					</div>
+					<div class="form-group" style="grid-column: 1 / -1;">
+						<label>Reference Links</label>
+						<small style="color: #666; font-size: 0.85rem; margin-bottom: 0.5rem; display: block;">Add up to 6 reference links. Link 1 will appear as a superscript digit on money entry.</small>
+						<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem;">
+							<input type="url" name="link1" placeholder="Link 1 (main reference)">
+							<input type="url" name="link2" placeholder="Link 2">
+							<input type="url" name="link3" placeholder="Link 3">
+							<input type="url" name="link4" placeholder="Link 4">
+							<input type="url" name="link5" placeholder="Link 5">
+							<input type="url" name="link6" placeholder="Link 6">
+						</div>
+					</div>
+				</div>
+				<div style="margin-top: 1.5rem; display: flex; gap: 1rem; justify-content: flex-end;">
+					<button type="button" class="btn btn-secondary" onclick="closeModal('money-modal')">Cancel</button>
+					<button type="submit" class="btn">Save Money Entry</button>
 				</div>
 			</form>
 		</div>
@@ -1375,6 +1460,118 @@ export function renderAdminDashboard(data: any): string {
 			}
 		};
 
+		// Load money entries
+		function loadMoney() {
+			const tbody = document.getElementById('money-table-body');
+			if (!tbody) return;
+
+			if (!window.adminData.money || window.adminData.money.length === 0) {
+				tbody.innerHTML = '<tr><td colspan="6">No money entries found</td></tr>';
+				return;
+			}
+
+			tbody.innerHTML = window.adminData.money.map(function(m) {
+				return '<tr>' +
+					'<td>' + escapeHtml(m.title) + '</td>' +
+					'<td><span class="badge ' + m.party.toLowerCase() + '">' + escapeHtml(m.party) + '</span></td>' +
+					'<td>' + escapeHtml(m.category || '') + '</td>' +
+					'<td>' + m.priority + '</td>' +
+					'<td><span class="badge ' + (m.is_active ? 'active' : 'inactive') + '">' + (m.is_active ? 'Active' : 'Inactive') + '</span></td>' +
+					'<td>' +
+						'<button class="btn btn-sm" onclick="editMoney(' + m.id + ')">Edit</button>' +
+						'<button class="btn btn-sm btn-danger" onclick="deleteMoney(' + m.id + ')">Delete</button>' +
+					'</td>' +
+					'</tr>';
+			}).join('');
+		}
+
+		// Save money entry
+		async function saveMoney(e) {
+			e.preventDefault();
+			const formData = new FormData(e.target);
+			const data = Object.fromEntries(formData);
+
+			// Handle checkbox
+			data.is_active = formData.has('is_active') ? 1 : 0;
+			data.priority = parseInt(data.priority) || 0;
+
+			const id = data.id;
+
+			try {
+				const url = '/api/admin/money' + (id ? '/' + id : '');
+				const response = await fetch(url, {
+					method: id ? 'PUT' : 'POST',
+					headers: { 'Content-Type': 'application/json' },
+					body: JSON.stringify(data)
+				});
+
+				if (response.ok) {
+					location.reload();
+				} else {
+					alert('Error saving money entry');
+				}
+			} catch (error) {
+				alert('Error: ' + (error.message || 'Unknown error'));
+			}
+		}
+
+		// Edit money entry
+		window.editMoney = async function(id) {
+			try {
+				const response = await fetch('/api/admin/money');
+				const data = await response.json();
+				const money = data.money.find(m => m.id === id);
+				if (!money) return;
+
+				const form = document.getElementById('money-form');
+				if (!form) return;
+
+				Object.keys(money).forEach(function(key) {
+					const input = form.querySelector('[name="' + key + '"]');
+					if (input) {
+						if (input.type === 'checkbox') {
+							input.checked = money[key];
+						} else {
+							input.value = money[key] || '';
+						}
+					}
+				});
+
+				// Add hidden ID field
+				let idField = form.querySelector('input[name="id"]');
+				if (!idField) {
+					idField = document.createElement('input');
+					idField.type = 'hidden';
+					idField.name = 'id';
+					form.appendChild(idField);
+				}
+				idField.value = money.id;
+
+				openModal('money-modal');
+			} catch (error) {
+				console.error('Error loading money entry for edit:', error);
+			}
+		};
+
+		// Delete money entry
+		window.deleteMoney = async function(id) {
+			if (!confirm('Are you sure you want to delete this money entry?')) return;
+
+			try {
+				const response = await fetch('/api/admin/money/' + id, {
+					method: 'DELETE'
+				});
+
+				if (response.ok) {
+					loadMoney();
+				} else {
+					alert('Error deleting money entry');
+				}
+			} catch (error) {
+				alert('Error: ' + (error.message || 'Unknown error'));
+			}
+		};
+
 		function escapeHtml(text) {
 			if (!text) return '';
 			const map = {
@@ -1396,9 +1593,11 @@ export function renderAdminDashboard(data: any): string {
 			}
 		}
 		
-		// Initialize district field visibility
+		// Initialize district field visibility and load data
 		document.addEventListener('DOMContentLoaded', function() {
 			toggleDistrictField();
+			loadIssues();
+			loadMoney();
 		});
 	</script>
 </body>

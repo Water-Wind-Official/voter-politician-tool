@@ -535,6 +535,7 @@ export function renderElectionHub(states: any[]): string {
 			<p class="subtitle">Presidential Election Results & Data Hub</p>
 			<nav>
 				<a href="/">State Map</a>
+				<a href="/money">Money Hub</a>
 				<a href="/issues">Issues Hub</a>
 				<a href="/senators">Senate Hub</a>
 				<a href="/house">House Hub</a>

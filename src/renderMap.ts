@@ -576,6 +576,7 @@ export function renderHomePage(states: State[]): string {
 		<header>
 			<h1>Voter Politician Tool</h1>
 			<nav>
+				<a href="/money">Money Hub</a>
 				<a href="/issues">Issues Hub</a>
 				<a href="/senators">Senate Hub</a>
 				<a href="/house">House Hub</a>

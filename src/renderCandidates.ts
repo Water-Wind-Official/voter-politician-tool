@@ -433,6 +433,7 @@ Harris sought the Democratic nomination for president in the 2024 election and b
 		<div style="text-align: center; margin-bottom: 1rem;">
 			<a href="/" class="back-link">← Back to Map</a>
 			<nav style="display: inline-block; margin-left: 2rem;">
+				<a href="/money" style="color: #93c5fd; text-decoration: none; margin: 0 0.75rem; font-weight: 600; padding: 0.5rem 1rem; border-radius: 8px; transition: all 0.3s ease; border: 1px solid transparent;">Money Hub</a>
 				<a href="/issues" style="color: #93c5fd; text-decoration: none; margin: 0 0.75rem; font-weight: 600; padding: 0.5rem 1rem; border-radius: 8px; transition: all 0.3s ease; border: 1px solid transparent;">Issues Hub</a>
 				<a href="/senators" style="color: #93c5fd; text-decoration: none; margin: 0 0.75rem; font-weight: 600; padding: 0.5rem 1rem; border-radius: 8px; transition: all 0.3s ease; border: 1px solid transparent;">Senate Hub</a>
 				<a href="/house" style="color: #93c5fd; text-decoration: none; margin: 0 0.75rem; font-weight: 600; padding: 0.5rem 1rem; border-radius: 8px; transition: all 0.3s ease; border: 1px solid transparent;">House Hub</a>
