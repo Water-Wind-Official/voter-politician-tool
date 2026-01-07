@@ -586,24 +586,30 @@ export function renderHomePage(states: State[]): string {
 			background: linear-gradient(
 				90deg,
 				transparent,
-				rgba(255, 215, 0, 0.6),
-				rgba(255, 223, 0, 0.8),
-				rgba(255, 215, 0, 0.6),
+				rgba(255, 215, 0, 0.2),
+				rgba(255, 223, 0, 0.3),
+				rgba(255, 215, 0, 0.2),
 				transparent
 			);
-			animation: shimmer-gold 3s ease-in-out infinite;
-			animation-delay: 2s;
+			animation: shimmer-gold 4s ease-in-out infinite;
+			animation-delay: 3s;
+			z-index: -1;
 		}
 
 		@keyframes shimmer-gold {
 			0% {
 				left: -100%;
+				opacity: 0;
 			}
-			20%, 80% {
-				left: 100%;
+			10% {
+				opacity: 1;
+			}
+			90% {
+				opacity: 1;
 			}
 			100% {
 				left: 100%;
+				opacity: 0;
 			}
 		}
 	</style>

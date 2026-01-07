@@ -7,7 +7,7 @@ CREATE TABLE moneyhub (
     party TEXT NOT NULL CHECK (party IN ('Democrat', 'Republican', 'Both')),
     category TEXT,
     priority INTEGER DEFAULT 0,
-    is_active BOOLEAN DEFAULT 1,
+    is_active INTEGER DEFAULT 1,
     link1 TEXT,
     link2 TEXT,
     link3 TEXT,
