@@ -569,6 +569,43 @@ export function renderHomePage(states: State[]): string {
 			color: #f1f5f9;
 			transform: translateY(-1px);
 		}
+
+		/* Issues Hub shimmer effect */
+		nav a[href="/issues"] {
+			position: relative;
+			overflow: hidden;
+		}
+
+		nav a[href="/issues"]::before {
+			content: '';
+			position: absolute;
+			top: 0;
+			left: -100%;
+			width: 100%;
+			height: 100%;
+			background: linear-gradient(
+				90deg,
+				transparent,
+				rgba(255, 215, 0, 0.6),
+				rgba(255, 223, 0, 0.8),
+				rgba(255, 215, 0, 0.6),
+				transparent
+			);
+			animation: shimmer-gold 3s ease-in-out infinite;
+			animation-delay: 2s;
+		}
+
+		@keyframes shimmer-gold {
+			0% {
+				left: -100%;
+			}
+			20%, 80% {
+				left: 100%;
+			}
+			100% {
+				left: 100%;
+			}
+		}
 	</style>
 </head>
 <body>
@@ -577,7 +614,7 @@ export function renderHomePage(states: State[]): string {
 			<h1>Voter Politician Tool</h1>
 			<nav>
 				<a href="/money">Money Hub</a>
-				<a href="/issues">Issues Hub</a>
+				<a href="/issues" class="issues-shimmer">Issues Hub</a>
 				<a href="/senators">Senate Hub</a>
 				<a href="/house">House Hub</a>
 				<a href="/election">Election Hub</a>
