@@ -45,6 +45,7 @@ export interface Money {
 	priority: number;
 	is_active: boolean;
 	icon_url: string | null;
+	amount: number | null;
 	link1: string | null;
 	link2: string | null;
 	link3: string | null;

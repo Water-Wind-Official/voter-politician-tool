@@ -1,6 +1,24 @@
 import type { Money } from './types';
 
 export function renderMoneyPage(democratMoney: Money[], republicanMoney: Money[], bothMoney: Money[]): string {
+	// Calculate totals
+	const democratTotal = democratMoney.reduce((sum, money) => sum + (money.amount || 0), 0);
+	const republicanTotal = republicanMoney.reduce((sum, money) => sum + (money.amount || 0), 0);
+	const bothTotal = bothMoney.reduce((sum, money) => sum + (money.amount || 0), 0);
+	const grandTotal = democratTotal + republicanTotal + bothTotal;
+
+	function formatAmount(amount: number): string {
+		if (amount >= 1000000000) {
+			return `$${(amount / 1000000000).toFixed(1)}B`;
+		} else if (amount >= 1000000) {
+			return `$${(amount / 1000000).toFixed(1)}M`;
+		} else if (amount >= 1000) {
+			return `$${(amount / 1000).toFixed(1)}K`;
+		} else {
+			return `$${amount.toLocaleString()}`;
+		}
+	}
+
 	return `
 <!DOCTYPE html>
 <html lang="en">
@@ -395,6 +413,20 @@ export function renderMoneyPage(democratMoney: Money[], republicanMoney: Money[]
 			backdrop-filter: blur(5px);
 		}
 
+		.money-amount {
+			display: inline-block;
+			padding: 0.5rem 1rem;
+			background: linear-gradient(135deg, rgba(34, 197, 94, 0.2) 0%, rgba(16, 185, 129, 0.1) 100%);
+			border: 1px solid rgba(34, 197, 94, 0.3);
+			border-radius: 8px;
+			font-size: 1.1rem;
+			font-weight: 700;
+			margin-top: 0.5rem;
+			color: #22c55e;
+			text-shadow: 0 0 10px rgba(34, 197, 94, 0.3);
+			backdrop-filter: blur(5px);
+		}
+
 		.empty-state {
 			text-align: center;
 			padding: 3rem;
@@ -430,6 +462,71 @@ export function renderMoneyPage(democratMoney: Money[], republicanMoney: Money[]
 			}
 		}
 
+		.total-amounts {
+			background: linear-gradient(135deg, rgba(34, 197, 94, 0.1) 0%, rgba(16, 185, 129, 0.05) 100%);
+			border: 2px solid rgba(34, 197, 94, 0.3);
+			border-radius: 16px;
+			padding: 2rem;
+			margin-bottom: 2rem;
+			text-align: center;
+			backdrop-filter: blur(10px);
+		}
+
+		.total-amounts h3 {
+			color: #22c55e;
+			font-size: 1.5rem;
+			margin-bottom: 1rem;
+			text-shadow: 0 0 10px rgba(34, 197, 94, 0.3);
+		}
+
+		.total-row {
+			display: flex;
+			justify-content: space-around;
+			align-items: center;
+			margin: 1rem 0;
+			flex-wrap: wrap;
+			gap: 1rem;
+		}
+
+		.total-item {
+			display: flex;
+			flex-direction: column;
+			align-items: center;
+			padding: 1rem;
+			background: rgba(255, 255, 255, 0.05);
+			border-radius: 12px;
+			border: 1px solid rgba(148, 163, 184, 0.2);
+			min-width: 150px;
+		}
+
+		.total-label {
+			font-size: 0.9rem;
+			color: #94a3b8;
+			margin-bottom: 0.5rem;
+			font-weight: 500;
+		}
+
+		.total-value {
+			font-size: 1.8rem;
+			font-weight: 800;
+			text-shadow: 0 0 10px rgba(34, 197, 94, 0.3);
+		}
+
+		.democrat-total {
+			color: #60a5fa;
+			text-shadow: 0 0 10px rgba(59, 130, 246, 0.3);
+		}
+
+		.republican-total {
+			color: #f87171;
+			text-shadow: 0 0 10px rgba(239, 68, 68, 0.3);
+		}
+
+		.grand-total {
+			color: #22c55e;
+			text-shadow: 0 0 10px rgba(34, 197, 94, 0.3);
+		}
+
 		@media (max-width: 768px) {
 			body {
 				padding: 1rem;
@@ -446,6 +543,14 @@ export function renderMoneyPage(democratMoney: Money[], republicanMoney: Money[]
 			.section-icon {
 				width: 40px;
 				height: 40px;
+			}
+
+			.total-row {
+				flex-direction: column;
+			}
+
+			.total-value {
+				font-size: 1.4rem;
 			}
 		}
 	</style>
@@ -464,6 +569,25 @@ export function renderMoneyPage(democratMoney: Money[], republicanMoney: Money[]
 			</nav>
 		</header>
 
+		<!-- Total Amounts Section -->
+		<div class="total-amounts">
+			<h3>Total Campaign Funds</h3>
+			<div class="total-row">
+				<div class="total-item">
+					<div class="total-label">Democratic</div>
+					<div class="total-value democrat-total">${formatAmount(democratTotal)}</div>
+				</div>
+				<div class="total-item">
+					<div class="total-label">Republican</div>
+					<div class="total-value republican-total">${formatAmount(republicanTotal)}</div>
+				</div>
+				<div class="total-item">
+					<div class="total-label">Grand Total</div>
+					<div class="total-value grand-total">${formatAmount(grandTotal)}</div>
+				</div>
+			</div>
+		</div>
+
 		<!-- Democrats Section (Left) -->
 		<div class="section democrat-section">
 			<div class="section-header">
@@ -481,6 +605,7 @@ export function renderMoneyPage(democratMoney: Money[], republicanMoney: Money[]
 							</div>
 							${money.description ? `<div class="money-description collapsed">${escapeHtml(money.description)}</div>` : ''}
 							${money.category ? `<div class="money-category">${escapeHtml(money.category)}</div>` : ''}
+							${money.amount ? `<div class="money-amount">${formatAmount(money.amount)}</div>` : ''}
 							${renderMoneyLinks(money)}
 						</div>
 					`).join('') :
@@ -509,6 +634,7 @@ export function renderMoneyPage(democratMoney: Money[], republicanMoney: Money[]
 							</div>
 							${money.description ? `<div class="money-description collapsed">${escapeHtml(money.description)}</div>` : ''}
 							${money.category ? `<div class="money-category">${escapeHtml(money.category)}</div>` : ''}
+							${money.amount ? `<div class="money-amount">${formatAmount(money.amount)}</div>` : ''}
 							${renderMoneyLinks(money)}
 						</div>
 					`).join('') :
