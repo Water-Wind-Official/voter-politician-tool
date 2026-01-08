@@ -65,7 +65,7 @@ export function renderMoneyPage(democratMoney: Money[], republicanMoney: Money[]
 			max-width: 1400px;
 			margin: 0 auto;
 			display: grid;
-			grid-template-columns: 1fr 1fr;
+			grid-template-columns: 1fr 1fr 1fr;
 			gap: 2rem;
 			align-items: start;
 		}
@@ -640,6 +640,35 @@ export function renderMoneyPage(democratMoney: Money[], republicanMoney: Money[]
 					`).join('') :
 					`<div class="empty-state">
 						<p>No Republican funding information available</p>
+						<p>Check back later for updates</p>
+					</div>`
+				}
+			</div>
+		</div>
+
+		<!-- Fact Points Section (Center) -->
+		<div class="section center-section">
+			<div class="section-header">
+				<img class="section-icon" src="https://content.mycutegraphics.com/graphics/animal/cute-elephant.png" alt="Fact" />
+				<h2 class="section-title center-title">Fact Points</h2>
+			</div>
+			<div class="money-list">
+				${bothMoney.length > 0 ?
+					bothMoney.map(money => `
+						<div class="money-item both-money">
+							<div class="money-header" onclick="toggleMoneyDescription(this)">
+								${money.icon_url ? `<img class="money-icon" src="${escapeHtml(money.icon_url)}" alt="Money icon" />` : '<div class="money-cash">💰</div>'}
+								<div class="money-title">${escapeHtml(money.title)}</div>
+								${money.description ? '<div class="money-arrow">▼</div>' : ''}
+							</div>
+							${money.description ? `<div class="money-description collapsed">${escapeHtml(money.description)}</div>` : ''}
+							${money.category ? `<div class="money-category">${escapeHtml(money.category)}</div>` : ''}
+							${money.amount ? `<div class="money-amount">${formatAmount(money.amount)}</div>` : ''}
+							${renderMoneyLinks(money)}
+						</div>
+					`).join('') :
+					`<div class="empty-state">
+						<p>No fact points available</p>
 						<p>Check back later for updates</p>
 					</div>`
 				}
