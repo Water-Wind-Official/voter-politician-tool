@@ -9,11 +9,11 @@ export function renderMoneyPage(democratMoney: Money[], republicanMoney: Money[]
 
 	function formatAmount(amount: number): string {
 		if (amount >= 1000000000) {
-			return `$${(amount / 1000000000).toLocaleString()}B`;
+			return `$${(amount / 1000000000).toLocaleString(undefined, {minimumFractionDigits: 0, maximumFractionDigits: 9})}B`;
 		} else if (amount >= 1000000) {
-			return `$${(amount / 1000000).toLocaleString()}M`;
+			return `$${(amount / 1000000).toLocaleString(undefined, {minimumFractionDigits: 0, maximumFractionDigits: 9})}M`;
 		} else if (amount >= 1000) {
-			return `$${(amount / 1000).toLocaleString()}K`;
+			return `$${(amount / 1000).toLocaleString(undefined, {minimumFractionDigits: 0, maximumFractionDigits: 9})}K`;
 		} else {
 			return `$${amount.toLocaleString()}`;
 		}
@@ -921,11 +921,11 @@ export function renderMoneyPage(democratMoney: Money[], republicanMoney: Money[]
 
 			const formatAmount = (amt) => {
 				if (amt >= 1000000000) {
-					return '$' + (amt / 1000000000).toLocaleString() + 'B';
+					return '$' + (amt / 1000000000).toLocaleString(undefined, {minimumFractionDigits: 0, maximumFractionDigits: 9}) + 'B';
 				} else if (amt >= 1000000) {
-					return '$' + (amt / 1000000).toLocaleString() + 'M';
+					return '$' + (amt / 1000000).toLocaleString(undefined, {minimumFractionDigits: 0, maximumFractionDigits: 9}) + 'M';
 				} else if (amt >= 1000) {
-					return '$' + (amt / 1000).toLocaleString() + 'K';
+					return '$' + (amt / 1000).toLocaleString(undefined, {minimumFractionDigits: 0, maximumFractionDigits: 9}) + 'K';
 				} else {
 					return '$' + parseInt(amt).toLocaleString();
 				}
