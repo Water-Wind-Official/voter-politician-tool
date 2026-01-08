@@ -756,6 +756,11 @@ export function renderAdminDashboard(data: any): string {
 						<input type="text" name="category" placeholder="e.g., Campaign Funding, Lobbying">
 					</div>
 					<div class="form-group">
+						<label>Amount ($)</label>
+						<input type="number" name="amount" placeholder="e.g., 1000000" min="0">
+						<small style="color: #666; font-size: 0.85rem; margin-top: 0.25rem; display: block;">Dollar value of this monetary contribution (optional)</small>
+					</div>
+					<div class="form-group">
 						<label>Icon URL</label>
 						<input type="url" name="icon_url" placeholder="https://example.com/icon.png (optional)">
 						<small style="color: #666; font-size: 0.85rem; margin-top: 0.25rem; display: block;">Leave blank to use default 💰 icon</small>
