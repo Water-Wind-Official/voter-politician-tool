@@ -11,7 +11,7 @@ export function renderMoneyPage(democratMoney: Money[], republicanMoney: Money[]
 		if (amount >= 1000000000) {
 			return `$${(amount / 1000000000).toLocaleString(undefined, {minimumFractionDigits: 0, maximumFractionDigits: 9})}B`;
 		} else if (amount >= 1000000) {
-			return `$${(amount / 1000000).toLocaleString(undefined, {minimumFractionDigits: 0, maximumFractionDigits: 9})}M`;
+			return `$${amount.toLocaleString()}`;
 		} else if (amount >= 1000) {
 			return `$${(amount / 1000).toLocaleString(undefined, {minimumFractionDigits: 0, maximumFractionDigits: 9})}K`;
 		} else {
@@ -923,7 +923,7 @@ export function renderMoneyPage(democratMoney: Money[], republicanMoney: Money[]
 				if (amt >= 1000000000) {
 					return '$' + (amt / 1000000000).toLocaleString(undefined, {minimumFractionDigits: 0, maximumFractionDigits: 9}) + 'B';
 				} else if (amt >= 1000000) {
-					return '$' + (amt / 1000000).toLocaleString(undefined, {minimumFractionDigits: 0, maximumFractionDigits: 9}) + 'M';
+					return '$' + amt.toLocaleString();
 				} else if (amt >= 1000) {
 					return '$' + (amt / 1000).toLocaleString(undefined, {minimumFractionDigits: 0, maximumFractionDigits: 9}) + 'K';
 				} else {
