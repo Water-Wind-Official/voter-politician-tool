@@ -9,8 +9,6 @@ export function renderMoneyPage(democratMoney: Money[], republicanMoney: Money[]
 
 	function formatAmount(amount: number): string {
 		if (amount >= 1000000000) {
-			return `$${(amount / 1000000000).toLocaleString(undefined, {minimumFractionDigits: 0, maximumFractionDigits: 9})}B`;
-		} else if (amount >= 1000000) {
 			return `$${amount.toLocaleString()}`;
 		} else if (amount >= 1000) {
 			return `$${(amount / 1000).toLocaleString(undefined, {minimumFractionDigits: 0, maximumFractionDigits: 9})}K`;
@@ -921,8 +919,6 @@ export function renderMoneyPage(democratMoney: Money[], republicanMoney: Money[]
 
 			const formatAmount = (amt) => {
 				if (amt >= 1000000000) {
-					return '$' + (amt / 1000000000).toLocaleString(undefined, {minimumFractionDigits: 0, maximumFractionDigits: 9}) + 'B';
-				} else if (amt >= 1000000) {
 					return '$' + amt.toLocaleString();
 				} else if (amt >= 1000) {
 					return '$' + (amt / 1000).toLocaleString(undefined, {minimumFractionDigits: 0, maximumFractionDigits: 9}) + 'K';
