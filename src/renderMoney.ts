@@ -9,11 +9,11 @@ export function renderMoneyPage(democratMoney: Money[], republicanMoney: Money[]
 
 	function formatAmount(amount: number): string {
 		if (amount >= 1000000000) {
-			return `$${(amount / 1000000000).toString()}B`;
+			return `$${(amount / 1000000000).toLocaleString(undefined, {minimumFractionDigits: 0, maximumFractionDigits: 3})}B`;
 		} else if (amount >= 1000000) {
-			return `$${(amount / 1000000).toString()}M`;
+			return `$${(amount / 1000000).toLocaleString(undefined, {minimumFractionDigits: 0, maximumFractionDigits: 3})}M`;
 		} else if (amount >= 1000) {
-			return `$${(amount / 1000).toString()}K`;
+			return `$${(amount / 1000).toLocaleString(undefined, {minimumFractionDigits: 0, maximumFractionDigits: 3})}K`;
 		} else {
 			return `$${amount.toLocaleString()}`;
 		}
@@ -576,50 +576,74 @@ export function renderMoneyPage(democratMoney: Money[], republicanMoney: Money[]
 				<h2 class="section-title democrat-title">Democratic Funding</h2>
 			</div>
 			<div class="money-list">
-				${democratMoney.length > 0 ?
-					democratMoney.map(money => {
-						if (money.funding_type === 'Inside' && money.description) {
-							// Show as bullet points for presidential committee entries
-							const bulletPoints = money.description.split('\n').filter(line => line.trim());
-							return `
-								<div class="money-item democrat-money">
-									<div class="money-header" onclick="toggleMoneyDescription(this)">
-										${money.icon_url ? `<img class="money-icon" src="${escapeHtml(money.icon_url)}" alt="Money icon" />` : '<div class="money-cash">💰</div>'}
-										<div class="money-title">${escapeHtml(money.title)}</div>
+				${(() => {
+					const mainCommittee = democratMoney.find(m => m.funding_type === 'Main presidential committee');
+					const insideEntries = democratMoney.filter(m => m.funding_type === 'Inside');
+					const otherEntries = democratMoney.filter(m => m.funding_type !== 'Main presidential committee' && m.funding_type !== 'Inside');
+					
+					if (mainCommittee && insideEntries.length > 0) {
+						// Group Inside entries within Main presidential committee
+						const bulletPoints = insideEntries.map(money => 
+							`${money.amount ? formatAmount(money.amount) + ': ' : ''}${escapeHtml(money.title)}`
+						).join('\n');
+						
+						return `
+							<div class="money-item democrat-money">
+								<div class="money-header" onclick="toggleMoneyDescription(this)">
+									${mainCommittee.icon_url ? `<img class="money-icon" src="${escapeHtml(mainCommittee.icon_url)}" alt="Money icon" />` : '<div class="money-cash">💰</div>'}
+									<div class="money-title">${escapeHtml(mainCommittee.title)}</div>
+									${mainCommittee.amount ? `<div class="money-amount">${formatAmount(mainCommittee.amount)}</div>` : ''}
+									<div class="money-arrow">▼</div>
+								</div>
+								${mainCommittee.amount ? `<div class="money-amount">${formatAmount(mainCommittee.amount)}</div>` : ''}
+								<div class="money-description collapsed">
+									${mainCommittee.description ? `<p style="margin-bottom: 1rem; color: #cbd5e1;">${escapeHtml(mainCommittee.description)}</p>` : ''}
+									<h4 style="margin-top: 1rem; margin-bottom: 0.5rem; color: #94a3b8;">Major Contributors:</h4>
+									<ul style="margin: 0; padding-left: 1.5rem;">
+										${bulletPoints.split('\n').map(point => `<li style="margin-bottom: 0.5rem; color: #cbd5e1;">${point}</li>`).join('')}
+									</ul>
+								</div>
+								${mainCommittee.category ? `<div class="money-category">${escapeHtml(mainCommittee.category)}</div>` : ''}
+								${renderMoneyLinks(mainCommittee)}
+							</div>
+							${otherEntries.length > 0 ? 
+								otherEntries.map(money => `
+									<div class="money-item democrat-money">
+										<div class="money-header" onclick="toggleMoneyDescription(this)">
+											${money.icon_url ? `<img class="money-icon" src="${escapeHtml(money.icon_url)}" alt="Money icon" />` : '<div class="money-cash">💰</div>'}
+											<div class="money-title">${escapeHtml(money.title)}</div>
+											${money.description ? '<div class="money-arrow">▼</div>' : ''}
+										</div>
+										${money.description ? `<div class="money-description collapsed">${escapeHtml(money.description)}</div>` : ''}
+										${money.category ? `<div class="money-category">${escapeHtml(money.category)}</div>` : ''}
 										${money.amount ? `<div class="money-amount">${formatAmount(money.amount)}</div>` : ''}
+										${renderMoneyLinks(money)}
 									</div>
-									${money.amount ? `<div class="money-amount">${formatAmount(money.amount)}</div>` : ''}
-									<div class="money-description collapsed">
-										<ul style="margin: 0; padding-left: 1.5rem;">
-											${bulletPoints.map(point => `<li style="margin-bottom: 0.5rem; color: #cbd5e1;">${escapeHtml(point.trim())}</li>`).join('')}
-										</ul>
-									</div>
-									${money.category ? `<div class="money-category">${escapeHtml(money.category)}</div>` : ''}
-									${renderMoneyLinks(money)}
+								`).join('') : ''
+							}
+						`;
+					} else if (democratMoney.length > 0) {
+						// Regular display if no main committee
+						return democratMoney.map(money => `
+							<div class="money-item democrat-money">
+								<div class="money-header" onclick="toggleMoneyDescription(this)">
+									${money.icon_url ? `<img class="money-icon" src="${escapeHtml(money.icon_url)}" alt="Money icon" />` : '<div class="money-cash">💰</div>'}
+									<div class="money-title">${escapeHtml(money.title)}</div>
+									${money.description ? '<div class="money-arrow">▼</div>' : ''}
 								</div>
-							`;
-						} else {
-							// Regular display for other entries
-							return `
-								<div class="money-item democrat-money">
-									<div class="money-header" onclick="toggleMoneyDescription(this)">
-										${money.icon_url ? `<img class="money-icon" src="${escapeHtml(money.icon_url)}" alt="Money icon" />` : '<div class="money-cash">💰</div>'}
-										<div class="money-title">${escapeHtml(money.title)}</div>
-										${money.description ? '<div class="money-arrow">▼</div>' : ''}
-									</div>
-									${money.description ? `<div class="money-description collapsed">${escapeHtml(money.description)}</div>` : ''}
-									${money.category ? `<div class="money-category">${escapeHtml(money.category)}</div>` : ''}
-									${money.amount ? `<div class="money-amount">${formatAmount(money.amount)}</div>` : ''}
-									${renderMoneyLinks(money)}
-								</div>
-							`;
-						}
-					}).join('') :
-					`<div class="empty-state">
-						<p>No Democratic funding information available</p>
-						<p>Check back later for updates</p>
-					</div>`
-				}
+								${money.description ? `<div class="money-description collapsed">${escapeHtml(money.description)}</div>` : ''}
+								${money.category ? `<div class="money-category">${escapeHtml(money.category)}</div>` : ''}
+								${money.amount ? `<div class="money-amount">${formatAmount(money.amount)}</div>` : ''}
+								${renderMoneyLinks(money)}
+							</div>
+						`).join('');
+					} else {
+						return `<div class="empty-state">
+							<p>No Democratic funding information available</p>
+							<p>Check back later for updates</p>
+						</div>`;
+					}
+				})()}
 			</div>
 		</div>
 
@@ -659,25 +683,74 @@ export function renderMoneyPage(democratMoney: Money[], republicanMoney: Money[]
 				<h2 class="section-title republican-title">Republican Funding</h2>
 			</div>
 			<div class="money-list">
-				${republicanMoney.length > 0 ?
-					republicanMoney.map(money => `
-						<div class="money-item republican-money">
-							<div class="money-header" onclick="toggleMoneyDescription(this)">
-								${money.icon_url ? `<img class="money-icon" src="${escapeHtml(money.icon_url)}" alt="Money icon" />` : '<div class="money-cash">💰</div>'}
-								<div class="money-title">${escapeHtml(money.title)}</div>
-								${money.description ? '<div class="money-arrow">▼</div>' : ''}
+				${(() => {
+					const mainCommittee = republicanMoney.find(m => m.funding_type === 'Main presidential committee');
+					const insideEntries = republicanMoney.filter(m => m.funding_type === 'Inside');
+					const otherEntries = republicanMoney.filter(m => m.funding_type !== 'Main presidential committee' && m.funding_type !== 'Inside');
+					
+					if (mainCommittee && insideEntries.length > 0) {
+						// Group Inside entries within Main presidential committee
+						const bulletPoints = insideEntries.map(money => 
+							`${money.amount ? formatAmount(money.amount) + ': ' : ''}${escapeHtml(money.title)}`
+						).join('\n');
+						
+						return `
+							<div class="money-item republican-money">
+								<div class="money-header" onclick="toggleMoneyDescription(this)">
+									${mainCommittee.icon_url ? `<img class="money-icon" src="${escapeHtml(mainCommittee.icon_url)}" alt="Money icon" />` : '<div class="money-cash">💰</div>'}
+									<div class="money-title">${escapeHtml(mainCommittee.title)}</div>
+									${mainCommittee.amount ? `<div class="money-amount">${formatAmount(mainCommittee.amount)}</div>` : ''}
+									<div class="money-arrow">▼</div>
+								</div>
+								${mainCommittee.amount ? `<div class="money-amount">${formatAmount(mainCommittee.amount)}</div>` : ''}
+								<div class="money-description collapsed">
+									${mainCommittee.description ? `<p style="margin-bottom: 1rem; color: #cbd5e1;">${escapeHtml(mainCommittee.description)}</p>` : ''}
+									<h4 style="margin-top: 1rem; margin-bottom: 0.5rem; color: #94a3b8;">Major Contributors:</h4>
+									<ul style="margin: 0; padding-left: 1.5rem;">
+										${bulletPoints.split('\n').map(point => `<li style="margin-bottom: 0.5rem; color: #cbd5e1;">${point}</li>`).join('')}
+									</ul>
+								</div>
+								${mainCommittee.category ? `<div class="money-category">${escapeHtml(mainCommittee.category)}</div>` : ''}
+								${renderMoneyLinks(mainCommittee)}
 							</div>
-							${money.description ? `<div class="money-description collapsed">${escapeHtml(money.description)}</div>` : ''}
-							${money.category ? `<div class="money-category">${escapeHtml(money.category)}</div>` : ''}
-							${money.amount ? `<div class="money-amount">${formatAmount(money.amount)}</div>` : ''}
-							${renderMoneyLinks(money)}
-						</div>
-					`).join('') :
-					`<div class="empty-state">
-						<p>No Republican funding information available</p>
-						<p>Check back later for updates</p>
-					</div>`
-				}
+							${otherEntries.length > 0 ? 
+								otherEntries.map(money => `
+									<div class="money-item republican-money">
+										<div class="money-header" onclick="toggleMoneyDescription(this)">
+											${money.icon_url ? `<img class="money-icon" src="${escapeHtml(money.icon_url)}" alt="Money icon" />` : '<div class="money-cash">💰</div>'}
+											<div class="money-title">${escapeHtml(money.title)}</div>
+											${money.description ? '<div class="money-arrow">▼</div>' : ''}
+										</div>
+										${money.description ? `<div class="money-description collapsed">${escapeHtml(money.description)}</div>` : ''}
+										${money.category ? `<div class="money-category">${escapeHtml(money.category)}</div>` : ''}
+										${money.amount ? `<div class="money-amount">${formatAmount(money.amount)}</div>` : ''}
+										${renderMoneyLinks(money)}
+									</div>
+								`).join('') : ''
+							}
+						`;
+					} else if (republicanMoney.length > 0) {
+						// Regular display if no main committee
+						return republicanMoney.map(money => `
+							<div class="money-item republican-money">
+								<div class="money-header" onclick="toggleMoneyDescription(this)">
+									${money.icon_url ? `<img class="money-icon" src="${escapeHtml(money.icon_url)}" alt="Money icon" />` : '<div class="money-cash">💰</div>'}
+									<div class="money-title">${escapeHtml(money.title)}</div>
+									${money.description ? '<div class="money-arrow">▼</div>' : ''}
+								</div>
+								${money.description ? `<div class="money-description collapsed">${escapeHtml(money.description)}</div>` : ''}
+								${money.category ? `<div class="money-category">${escapeHtml(money.category)}</div>` : ''}
+								${money.amount ? `<div class="money-amount">${formatAmount(money.amount)}</div>` : ''}
+								${renderMoneyLinks(money)}
+							</div>
+						`).join('');
+					} else {
+						return `<div class="empty-state">
+							<p>No Republican funding information available</p>
+							<p>Check back later for updates</p>
+						</div>`;
+					}
+				})()}
 			</div>
 		</div>
 

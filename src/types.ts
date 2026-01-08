@@ -46,7 +46,7 @@ export interface Money {
 	is_active: boolean;
 	icon_url: string | null;
 	amount: number | null;
-	funding_type: 'Inside' | 'Outside' | null;
+	funding_type: 'Inside' | 'Outside' | 'Main presidential committee' | null;
 	link1: string | null;
 	link2: string | null;
 	link3: string | null;

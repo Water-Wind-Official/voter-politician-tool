@@ -760,6 +760,7 @@ export function renderAdminDashboard(data: any): string {
 						<select name="funding_type">
 							<option value="">Select Type</option>
 							<option value="Inside">Inside (Direct Campaign Contributions)</option>
+							<option value="Main presidential committee">Main presidential committee</option>
 							<option value="Outside">Outside (Super PACs, Independent Spending)</option>
 						</select>
 					</div>
