@@ -650,7 +650,7 @@ export function renderMoneyPage(democratMoney: Money[], republicanMoney: Money[]
 		<!-- Fact Points Section (Center) -->
 		<div class="section center-section">
 			<div class="section-header">
-				<img class="section-icon" src="https://content.mycutegraphics.com/graphics/animal/cute-elephant.png" alt="Fact" />
+				<div class="section-icon" style="font-size: 2rem; margin-right: 0.5rem;">💵</div>
 				<h2 class="section-title center-title">Fact Points</h2>
 			</div>
 			<div class="money-list">
