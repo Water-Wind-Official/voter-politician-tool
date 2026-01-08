@@ -671,6 +671,42 @@ export function renderMoneyPage(democratMoney: Money[], republicanMoney: Money[]
 				font-size: 1.4rem;
 			}
 		}
+
+		.iridescent-total-disclaimer {
+			font-size: 0.7rem;
+			color: rgba(255, 255, 255, 0.8);
+			text-align: center;
+			margin-top: 0.25rem;
+			font-weight: 400;
+			position: relative;
+			z-index: 1;
+		}
+
+		.iridescent-total.democrat {
+			background: linear-gradient(45deg, 
+				#3b82f6, #60a5fa, #93c5fd, #2563eb, #1d4ed8, #3b82f6);
+			background-size: 300% 300%;
+			animation: iridescent-shift-democrat 4s ease-in-out infinite;
+		}
+
+		.iridescent-total.republican {
+			background: linear-gradient(45deg, 
+				#dc2626, #ef4444, #f87171, #b91c1c, #991b1b, #dc2626);
+			background-size: 300% 300%;
+			animation: iridescent-shift-republican 4s ease-in-out infinite;
+		}
+
+		@keyframes iridescent-shift-democrat {
+			0% { background-position: 0% 50%; }
+			50% { background-position: 100% 50%; }
+			100% { background-position: 0% 50%; }
+		}
+
+		@keyframes iridescent-shift-republican {
+			0% { background-position: 0% 50%; }
+			50% { background-position: 100% 50%; }
+			100% { background-position: 0% 50%; }
+		}
 	</style>
 </head>
 <body>
@@ -806,8 +842,9 @@ export function renderMoneyPage(democratMoney: Money[], republicanMoney: Money[]
 					}
 				})()}
 			</div>
-			<div class="iridescent-total">
+			<div class="iridescent-total democrat">
 				<div class="iridescent-total-amount">${formatAmount(democratTotal)}</div>
+				<div class="iridescent-total-disclaimer">Estimated Value of Political Spending</div>
 			</div>
 		</div>
 
@@ -959,8 +996,9 @@ export function renderMoneyPage(democratMoney: Money[], republicanMoney: Money[]
 					}
 				})()}
 			</div>
-			<div class="iridescent-total">
+			<div class="iridescent-total republican">
 				<div class="iridescent-total-amount">${formatAmount(republicanTotal)}</div>
+				<div class="iridescent-total-disclaimer">Estimated Value of Political Spending</div>
 			</div>
 		</div>
 
