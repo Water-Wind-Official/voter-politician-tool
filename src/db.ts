@@ -754,8 +754,8 @@ export async function getMoney(db: D1Database, id: number): Promise<Money | null
 export async function createMoney(db: D1Database, data: Omit<Money, 'id' | 'created_at' | 'updated_at'>): Promise<number> {
 	const result = await db
 		.prepare(`
-			INSERT INTO moneyhub (title, description, party, category, priority, is_active, link1, link2, link3, link4, link5, link6)
-			VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+			INSERT INTO moneyhub (title, description, party, category, priority, is_active, amount, icon_url, link1, link2, link3, link4, link5, link6)
+			VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
 		`)
 		.bind(
 			data.title,
@@ -764,6 +764,8 @@ export async function createMoney(db: D1Database, data: Omit<Money, 'id' | 'crea
 			data.category,
 			data.priority,
 			data.is_active,
+			data.amount,
+			data.icon_url,
 			data.link1,
 			data.link2,
 			data.link3,
@@ -804,6 +806,14 @@ export async function updateMoney(db: D1Database, id: number, data: Partial<Omit
 	if (data.is_active !== undefined) {
 		updates.push('is_active = ?');
 		values.push(data.is_active);
+	}
+	if (data.amount !== undefined) {
+		updates.push('amount = ?');
+		values.push(data.amount);
+	}
+	if (data.icon_url !== undefined) {
+		updates.push('icon_url = ?');
+		values.push(data.icon_url);
 	}
 	if (data.link1 !== undefined) {
 		updates.push('link1 = ?');
