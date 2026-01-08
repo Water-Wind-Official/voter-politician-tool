@@ -9,11 +9,11 @@ export function renderMoneyPage(democratMoney: Money[], republicanMoney: Money[]
 
 	function formatAmount(amount: number): string {
 		if (amount >= 1000000000) {
-			return `$${(amount / 1000000000).toLocaleString(undefined, {minimumFractionDigits: 0, maximumFractionDigits: 3})}B`;
+			return `$${(amount / 1000000000).toLocaleString(undefined, {minimumFractionDigits: 0, maximumFractionDigits: 0})}B`;
 		} else if (amount >= 1000000) {
-			return `$${(amount / 1000000).toLocaleString(undefined, {minimumFractionDigits: 0, maximumFractionDigits: 3})}M`;
+			return `$${(amount / 1000000).toLocaleString(undefined, {minimumFractionDigits: 0, maximumFractionDigits: 0})}M`;
 		} else if (amount >= 1000) {
-			return `$${(amount / 1000).toLocaleString(undefined, {minimumFractionDigits: 0, maximumFractionDigits: 3})}K`;
+			return `$${(amount / 1000).toLocaleString(undefined, {minimumFractionDigits: 0, maximumFractionDigits: 0})}K`;
 		} else {
 			return `$${amount.toLocaleString()}`;
 		}
@@ -583,16 +583,58 @@ export function renderMoneyPage(democratMoney: Money[], republicanMoney: Money[]
 					
 					if (mainCommittee && insideEntries.length > 0) {
 						// Group Inside entries within Main presidential committee
-						const bulletPoints = insideEntries.map(money => 
-							`${money.amount ? formatAmount(money.amount) + ': ' : ''}${escapeHtml(money.title)}`
-						).join('\n');
+						const bulletPoints = insideEntries.map(money => {
+							let point = `${money.amount ? formatAmount(money.amount) + ': ' : ''}${escapeHtml(money.title)}`;
+							
+							// Add citations from individual contributor
+							const contributorCitations = [];
+							if (money.link1) contributorCitations.push('1');
+							if (money.link2) contributorCitations.push('2');
+							if (money.link3) contributorCitations.push('3');
+							if (money.link4) contributorCitations.push('4');
+							if (money.link5) contributorCitations.push('5');
+							if (money.link6) contributorCitations.push('6');
+							
+							if (contributorCitations.length > 0) {
+								point += contributorCitations.join('');
+							}
+							
+							return point;
+						}).join('\n');
+						
+						// Collect all citations from contributors for display after main committee citations
+						const allContributorCitations = [];
+						insideEntries.forEach(money => {
+							if (money.link1) allContributorCitations.push({ url: money.link1, number: 1 });
+							if (money.link2) allContributorCitations.push({ url: money.link2, number: 2 });
+							if (money.link3) allContributorCitations.push({ url: money.link3, number: 3 });
+							if (money.link4) allContributorCitations.push({ url: money.link4, number: 4 });
+							if (money.link5) allContributorCitations.push({ url: money.link5, number: 5 });
+							if (money.link6) allContributorCitations.push({ url: money.link6, number: 6 });
+						});
+						
+						// Combine main committee citations with contributor citations
+						const mainCommitteeLinks = [];
+						if (mainCommittee.link1) mainCommitteeLinks.push({ url: mainCommittee.link1, number: 1 });
+						if (mainCommittee.link2) mainCommitteeLinks.push({ url: mainCommittee.link2, number: 2 });
+						if (mainCommittee.link3) mainCommitteeLinks.push({ url: mainCommittee.link3, number: 3 });
+						if (mainCommittee.link4) mainCommitteeLinks.push({ url: mainCommittee.link4, number: 4 });
+						if (mainCommittee.link5) mainCommitteeLinks.push({ url: mainCommittee.link5, number: 5 });
+						if (mainCommittee.link6) mainCommitteeLinks.push({ url: mainCommittee.link6, number: 6 });
+						
+						// Renumber contributor citations to continue after main committee citations
+						const renumberedContributorCitations = allContributorCitations.map((link, index) => ({
+							url: link.url,
+							number: mainCommitteeLinks.length + index + 1
+						}));
+						
+						const allLinks = [...mainCommitteeLinks, ...renumberedContributorCitations];
 						
 						return `
 							<div class="money-item democrat-money">
 								<div class="money-header" onclick="toggleMoneyDescription(this)">
 									${mainCommittee.icon_url ? `<img class="money-icon" src="${escapeHtml(mainCommittee.icon_url)}" alt="Money icon" />` : '<div class="money-cash">💰</div>'}
 									<div class="money-title">${escapeHtml(mainCommittee.title)}</div>
-									${mainCommittee.amount ? `<div class="money-amount">${formatAmount(mainCommittee.amount)}</div>` : ''}
 									<div class="money-arrow">▼</div>
 								</div>
 								${mainCommittee.amount ? `<div class="money-amount">${formatAmount(mainCommittee.amount)}</div>` : ''}
@@ -604,7 +646,9 @@ export function renderMoneyPage(democratMoney: Money[], republicanMoney: Money[]
 									</ul>
 								</div>
 								${mainCommittee.category ? `<div class="money-category">${escapeHtml(mainCommittee.category)}</div>` : ''}
-								${renderMoneyLinks(mainCommittee)}
+								<div class="money-links">
+									${allLinks.map(link => `<a href="${escapeHtml(link.url)}" target="_blank" class="money-link-superscript">${link.number}</a>`).join('')}
+								</div>
 							</div>
 							${otherEntries.length > 0 ? 
 								otherEntries.map(money => `
@@ -690,16 +734,58 @@ export function renderMoneyPage(democratMoney: Money[], republicanMoney: Money[]
 					
 					if (mainCommittee && insideEntries.length > 0) {
 						// Group Inside entries within Main presidential committee
-						const bulletPoints = insideEntries.map(money => 
-							`${money.amount ? formatAmount(money.amount) + ': ' : ''}${escapeHtml(money.title)}`
-						).join('\n');
+						const bulletPoints = insideEntries.map(money => {
+							let point = `${money.amount ? formatAmount(money.amount) + ': ' : ''}${escapeHtml(money.title)}`;
+							
+							// Add citations from individual contributor
+							const contributorCitations = [];
+							if (money.link1) contributorCitations.push('1');
+							if (money.link2) contributorCitations.push('2');
+							if (money.link3) contributorCitations.push('3');
+							if (money.link4) contributorCitations.push('4');
+							if (money.link5) contributorCitations.push('5');
+							if (money.link6) contributorCitations.push('6');
+							
+							if (contributorCitations.length > 0) {
+								point += contributorCitations.join('');
+							}
+							
+							return point;
+						}).join('\n');
+						
+						// Collect all citations from contributors for display after main committee citations
+						const allContributorCitations = [];
+						insideEntries.forEach(money => {
+							if (money.link1) allContributorCitations.push({ url: money.link1, number: 1 });
+							if (money.link2) allContributorCitations.push({ url: money.link2, number: 2 });
+							if (money.link3) allContributorCitations.push({ url: money.link3, number: 3 });
+							if (money.link4) allContributorCitations.push({ url: money.link4, number: 4 });
+							if (money.link5) allContributorCitations.push({ url: money.link5, number: 5 });
+							if (money.link6) allContributorCitations.push({ url: money.link6, number: 6 });
+						});
+						
+						// Combine main committee citations with contributor citations
+						const mainCommitteeLinks = [];
+						if (mainCommittee.link1) mainCommitteeLinks.push({ url: mainCommittee.link1, number: 1 });
+						if (mainCommittee.link2) mainCommitteeLinks.push({ url: mainCommittee.link2, number: 2 });
+						if (mainCommittee.link3) mainCommitteeLinks.push({ url: mainCommittee.link3, number: 3 });
+						if (mainCommittee.link4) mainCommitteeLinks.push({ url: mainCommittee.link4, number: 4 });
+						if (mainCommittee.link5) mainCommitteeLinks.push({ url: mainCommittee.link5, number: 5 });
+						if (mainCommittee.link6) mainCommitteeLinks.push({ url: mainCommittee.link6, number: 6 });
+						
+						// Renumber contributor citations to continue after main committee citations
+						const renumberedContributorCitations = allContributorCitations.map((link, index) => ({
+							url: link.url,
+							number: mainCommitteeLinks.length + index + 1
+						}));
+						
+						const allLinks = [...mainCommitteeLinks, ...renumberedContributorCitations];
 						
 						return `
 							<div class="money-item republican-money">
 								<div class="money-header" onclick="toggleMoneyDescription(this)">
 									${mainCommittee.icon_url ? `<img class="money-icon" src="${escapeHtml(mainCommittee.icon_url)}" alt="Money icon" />` : '<div class="money-cash">💰</div>'}
 									<div class="money-title">${escapeHtml(mainCommittee.title)}</div>
-									${mainCommittee.amount ? `<div class="money-amount">${formatAmount(mainCommittee.amount)}</div>` : ''}
 									<div class="money-arrow">▼</div>
 								</div>
 								${mainCommittee.amount ? `<div class="money-amount">${formatAmount(mainCommittee.amount)}</div>` : ''}
@@ -711,7 +797,9 @@ export function renderMoneyPage(democratMoney: Money[], republicanMoney: Money[]
 									</ul>
 								</div>
 								${mainCommittee.category ? `<div class="money-category">${escapeHtml(mainCommittee.category)}</div>` : ''}
-								${renderMoneyLinks(mainCommittee)}
+								<div class="money-links">
+									${allLinks.map(link => `<a href="${escapeHtml(link.url)}" target="_blank" class="money-link-superscript">${link.number}</a>`).join('')}
+								</div>
 							</div>
 							${otherEntries.length > 0 ? 
 								otherEntries.map(money => `
