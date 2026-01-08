@@ -8,13 +8,7 @@ export function renderMoneyPage(democratMoney: Money[], republicanMoney: Money[]
 	const grandTotal = democratTotal + republicanTotal + bothTotal;
 
 	function formatAmount(amount: number): string {
-		if (amount >= 1000000000) {
-			return `$${amount.toLocaleString()}`;
-		} else if (amount >= 1000) {
-			return `$${(amount / 1000).toLocaleString(undefined, {minimumFractionDigits: 0, maximumFractionDigits: 9})}K`;
-		} else {
-			return `$${amount.toLocaleString()}`;
-		}
+		return `$${amount.toLocaleString()}`;
 	}
 
 	return `
@@ -655,7 +649,7 @@ export function renderMoneyPage(democratMoney: Money[], republicanMoney: Money[]
 											if (money.link6) contributorCitations.push(startCounter++);
 											
 											return `<li style="margin-bottom: 0.5rem; color: #cbd5e1; cursor: pointer;" onclick="showContributorDetails('${escapeHtml(money.title)}', '${money.amount || 0}', '${escapeHtml(money.description || '')}', [${money.link1 ? `'${escapeHtml(money.link1)}'` : ''},${money.link2 ? `'${escapeHtml(money.link2)}'` : ''},${money.link3 ? `'${escapeHtml(money.link3)}'` : ''},${money.link4 ? `'${escapeHtml(money.link4)}'` : ''},${money.link5 ? `'${escapeHtml(money.link5)}'` : ''},${money.link6 ? `'${escapeHtml(money.link6)}'` : ''}].filter(Boolean))">
-												${money.amount ? formatAmount(money.amount) + ': ' : ''}${escapeHtml(money.title)}${contributorCitations.join('')}
+												${money.amount ? formatAmount(money.amount) + ': ' : ''}${escapeHtml(money.title)}
 											</li>`;
 										}).join('')}
 									</ul>
@@ -823,7 +817,7 @@ export function renderMoneyPage(democratMoney: Money[], republicanMoney: Money[]
 											if (money.link6) contributorCitations.push(startCounter++);
 											
 											return `<li style="margin-bottom: 0.5rem; color: #cbd5e1; cursor: pointer;" onclick="showContributorDetails('${escapeHtml(money.title)}', '${money.amount || 0}', '${escapeHtml(money.description || '')}', [${money.link1 ? `'${escapeHtml(money.link1)}'` : ''},${money.link2 ? `'${escapeHtml(money.link2)}'` : ''},${money.link3 ? `'${escapeHtml(money.link3)}'` : ''},${money.link4 ? `'${escapeHtml(money.link4)}'` : ''},${money.link5 ? `'${escapeHtml(money.link5)}'` : ''},${money.link6 ? `'${escapeHtml(money.link6)}'` : ''}].filter(Boolean))">
-												${money.amount ? formatAmount(money.amount) + ': ' : ''}${escapeHtml(money.title)}${contributorCitations.join('')}
+												${money.amount ? formatAmount(money.amount) + ': ' : ''}${escapeHtml(money.title)}
 											</li>`;
 										}).join('')}
 									</ul>
@@ -918,13 +912,7 @@ export function renderMoneyPage(democratMoney: Money[], republicanMoney: Money[]
 			content.style.boxShadow = '0 20px 25px -5px rgba(0, 0, 0, 0.3)';
 
 			const formatAmount = (amt) => {
-				if (amt >= 1000000000) {
-					return '$' + amt.toLocaleString();
-				} else if (amt >= 1000) {
-					return '$' + (amt / 1000).toLocaleString(undefined, {minimumFractionDigits: 0, maximumFractionDigits: 9}) + 'K';
-				} else {
-					return '$' + parseInt(amt).toLocaleString();
-				}
+				return '$' + amt.toLocaleString();
 			};
 
 			const headerDiv = document.createElement('div');
