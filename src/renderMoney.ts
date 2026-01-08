@@ -529,6 +529,122 @@ export function renderMoneyPage(democratMoney: Money[], republicanMoney: Money[]
 			text-shadow: 0 0 10px rgba(34, 197, 94, 0.3);
 		}
 
+		.iridescent-total {
+			background: linear-gradient(45deg, 
+				#ff6b6b, #4ecdc4, #45b7d1, #96ceb4, #feca57, #ff6b6b);
+			background-size: 300% 300%;
+			border: 2px solid rgba(255, 255, 255, 0.3);
+			border-radius: 16px;
+			padding: 1.5rem;
+			margin-top: 2rem;
+			text-align: center;
+			backdrop-filter: blur(10px);
+			animation: iridescent 3s ease-in-out infinite;
+			position: relative;
+			overflow: hidden;
+		}
+
+		.iridescent-total::before {
+			content: '';
+			position: absolute;
+			top: -50%;
+			left: -50%;
+			width: 200%;
+			height: 200%;
+			background: linear-gradient(45deg,
+				transparent 30%,
+				rgba(255, 255, 255, 0.1) 50%,
+				transparent 70%);
+			animation: shimmer 2s ease-in-out infinite;
+		}
+
+		.iridescent-total-amount {
+			font-size: 2.5rem;
+			font-weight: 900;
+			color: #ffffff;
+			text-shadow: 0 0 20px rgba(255, 255, 255, 0.5);
+			position: relative;
+			z-index: 1;
+		}
+
+		@keyframes iridescent {
+			0%, 100% {
+				background-position: 0% 50%;
+				transform: scale(1);
+			}
+			50% {
+				background-position: 100% 50%;
+				transform: scale(1.02);
+			}
+		}
+
+		@keyframes shimmer {
+			0% {
+				transform: translateX(-100%) translateY(-100%) rotate(45deg);
+			}
+			100% {
+				transform: translateX(100%) translateY(100%) rotate(45deg);
+			}
+		}
+
+		.iridescent-total {
+			background: linear-gradient(45deg, 
+				#ff6b6b, #4ecdc4, #45b7d1, #96ceb4, #feca57, #ff6b6b);
+			background-size: 300% 300%;
+			border: 2px solid rgba(255, 255, 255, 0.3);
+			border-radius: 16px;
+			padding: 1.5rem;
+			margin-top: 2rem;
+			text-align: center;
+			backdrop-filter: blur(10px);
+			animation: iridescent 3s ease-in-out infinite;
+			position: relative;
+			overflow: hidden;
+		}
+
+		.iridescent-total::before {
+			content: '';
+			position: absolute;
+			top: -50%;
+			left: -50%;
+			width: 200%;
+			height: 200%;
+			background: linear-gradient(45deg,
+				transparent 30%,
+				rgba(255, 255, 255, 0.1) 50%,
+				transparent 70%);
+			animation: shimmer 2s ease-in-out infinite;
+		}
+
+		.iridescent-total-amount {
+			font-size: 2.5rem;
+			font-weight: 900;
+			color: #ffffff;
+			text-shadow: 0 0 20px rgba(255, 255, 255, 0.5);
+			position: relative;
+			z-index: 1;
+		}
+
+		@keyframes iridescent {
+			0%, 100% {
+				background-position: 0% 50%;
+				transform: scale(1);
+			}
+			50% {
+				background-position: 100% 50%;
+				transform: scale(1.02);
+			}
+		}
+
+		@keyframes shimmer {
+			0% {
+				transform: translateX(-100%) translateY(-100%) rotate(45deg);
+			}
+			100% {
+				transform: translateX(100%) translateY(100%) rotate(45deg);
+			}
+		}
+
 		@media (max-width: 768px) {
 			body {
 				padding: 1rem;
@@ -561,7 +677,7 @@ export function renderMoneyPage(democratMoney: Money[], republicanMoney: Money[]
 	<div class="container">
 		<header>
 			<h1>Campaign Money & Lobbying</h1>
-			<p class="subtitle">Funding sources, campaign finance, and lobbying activities for political parties</p>
+			<p class="subtitle">Funding sources, Finances <small style="font-size: 0.8rem; opacity: 0.7;">All Data is relevant to the 2024 Election Cycle</small></p>
 			<nav>
 				<a href="/">← Back to Map</a>
 				<a href="/money">Money Hub</a>
@@ -689,6 +805,9 @@ export function renderMoneyPage(democratMoney: Money[], republicanMoney: Money[]
 						</div>`;
 					}
 				})()}
+			</div>
+			<div class="iridescent-total">
+				<div class="iridescent-total-amount">${formatAmount(democratTotal)}</div>
 			</div>
 		</div>
 
@@ -839,6 +958,9 @@ export function renderMoneyPage(democratMoney: Money[], republicanMoney: Money[]
 						</div>`;
 					}
 				})()}
+			</div>
+			<div class="iridescent-total">
+				<div class="iridescent-total-amount">${formatAmount(republicanTotal)}</div>
 			</div>
 		</div>
 
