@@ -755,7 +755,7 @@ export async function createMoney(db: D1Database, data: Omit<Money, 'id' | 'crea
 	const result = await db
 		.prepare(`
 			INSERT INTO moneyhub (title, description, party, category, priority, is_active, amount, funding_type, icon_url, link1, link2, link3, link4, link5, link6)
-			VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+			VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
 		`)
 		.bind(
 			data.title,
