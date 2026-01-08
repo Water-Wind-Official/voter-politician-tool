@@ -756,6 +756,14 @@ export function renderAdminDashboard(data: any): string {
 						<input type="text" name="category" placeholder="e.g., Campaign Funding, Lobbying">
 					</div>
 					<div class="form-group">
+						<label>Funding Type</label>
+						<select name="funding_type">
+							<option value="">Select Type</option>
+							<option value="Inside">Inside (Direct Campaign Contributions)</option>
+							<option value="Outside">Outside (Super PACs, Independent Spending)</option>
+						</select>
+					</div>
+					<div class="form-group">
 						<label>Amount ($)</label>
 						<input type="number" name="amount" placeholder="e.g., 1000000" min="0">
 						<small style="color: #666; font-size: 0.85rem; margin-top: 0.25rem; display: block;">Dollar value of this monetary contribution (optional)</small>
