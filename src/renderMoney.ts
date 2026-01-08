@@ -1,10 +1,41 @@
 import type { Money } from './types';
 
 export function renderMoneyPage(democratMoney: Money[], republicanMoney: Money[], bothMoney: Money[]): string {
+	// Sort money arrays by amount (descending), with main presidential committee always first
+	function sortMoneyByAmount(moneyArray: Money[]): Money[] {
+		return [...moneyArray].sort((a, b) => {
+			// Main presidential committee always comes first
+			const aIsMain = a.funding_type === 'Main presidential committee';
+			const bIsMain = b.funding_type === 'Main presidential committee';
+			
+			if (aIsMain && !bIsMain) return -1;
+			if (!aIsMain && bIsMain) return 1;
+			
+			// Then sort by amount (descending)
+			const aAmount = a.amount || 0;
+			const bAmount = b.amount || 0;
+			
+			if (aAmount !== bAmount) {
+				return bAmount - aAmount; // Higher amounts first
+			}
+			
+			// If amounts are equal, use priority as tiebreaker (lower priority number = higher priority)
+			const aPriority = a.priority || 999;
+			const bPriority = b.priority || 999;
+			
+			return aPriority - bPriority;
+		});
+	}
+	
+	// Sort all money arrays
+	const sortedDemocratMoney = sortMoneyByAmount(democratMoney);
+	const sortedRepublicanMoney = sortMoneyByAmount(republicanMoney);
+	const sortedBothMoney = sortMoneyByAmount(bothMoney);
+	
 	// Calculate totals
-	const democratTotal = democratMoney.reduce((sum, money) => sum + (money.amount || 0), 0);
-	const republicanTotal = republicanMoney.reduce((sum, money) => sum + (money.amount || 0), 0);
-	const bothTotal = bothMoney.reduce((sum, money) => sum + (money.amount || 0), 0);
+	const democratTotal = sortedDemocratMoney.reduce((sum, money) => sum + (money.amount || 0), 0);
+	const republicanTotal = sortedRepublicanMoney.reduce((sum, money) => sum + (money.amount || 0), 0);
+	const bothTotal = sortedBothMoney.reduce((sum, money) => sum + (money.amount || 0), 0);
 	const grandTotal = democratTotal + republicanTotal + bothTotal;
 
 	function formatAmount(amount: number): string {
@@ -548,9 +579,9 @@ export function renderMoneyPage(democratMoney: Money[], republicanMoney: Money[]
 			</div>
 			<div class="money-list">
 				${(() => {
-					const mainCommittee = democratMoney.find(m => m.funding_type === 'Main presidential committee');
-					const insideEntries = democratMoney.filter(m => m.funding_type === 'Inside');
-					const otherEntries = democratMoney.filter(m => m.funding_type !== 'Main presidential committee' && m.funding_type !== 'Inside');
+					const mainCommittee = sortedDemocratMoney.find(m => m.funding_type === 'Main presidential committee');
+					const insideEntries = sortedDemocratMoney.filter(m => m.funding_type === 'Inside');
+					const otherEntries = sortedDemocratMoney.filter(m => m.funding_type !== 'Main presidential committee' && m.funding_type !== 'Inside');
 					
 					if (mainCommittee && insideEntries.length > 0) {
 						// Group Inside entries within Main presidential committee
@@ -570,34 +601,23 @@ export function renderMoneyPage(democratMoney: Money[], republicanMoney: Money[]
 							let point = `${money.amount ? formatAmount(money.amount) + ': ' : ''}${escapeHtml(money.title)}`;
 							
 							// Add citations from individual contributor with proper numbering
-							const contributorCitations = [];
 							if (money.link1) {
-								contributorCitations.push(citationCounter.toString());
 								allContributorCitations.push({ url: money.link1, number: citationCounter++ });
 							}
 							if (money.link2) {
-								contributorCitations.push(citationCounter.toString());
 								allContributorCitations.push({ url: money.link2, number: citationCounter++ });
 							}
 							if (money.link3) {
-								contributorCitations.push(citationCounter.toString());
 								allContributorCitations.push({ url: money.link3, number: citationCounter++ });
 							}
 							if (money.link4) {
-								contributorCitations.push(citationCounter.toString());
 								allContributorCitations.push({ url: money.link4, number: citationCounter++ });
 							}
 							if (money.link5) {
-								contributorCitations.push(citationCounter.toString());
 								allContributorCitations.push({ url: money.link5, number: citationCounter++ });
 							}
 							if (money.link6) {
-								contributorCitations.push(citationCounter.toString());
 								allContributorCitations.push({ url: money.link6, number: citationCounter++ });
-							}
-							
-							if (contributorCitations.length > 0) {
-								point += contributorCitations.join('');
 							}
 							
 							return point;
@@ -623,41 +643,8 @@ export function renderMoneyPage(democratMoney: Money[], republicanMoney: Money[]
 									<h4 style="margin-top: 1rem; margin-bottom: 0.5rem; color: #94a3b8;">Major Contributors:</h4>
 									<ul style="margin: 0; padding-left: 1.5rem;">
 										${insideEntries.map(money => {
-											const contributorCitations = [];
-											let startCounter = mainCommitteeLinks.length + 1;
-											const contributorLinks = [];
-											if (money.link1) {
-												contributorCitations.push(startCounter.toString());
-												contributorLinks.push({ url: money.link1, number: startCounter++ });
-											}
-											if (money.link2) {
-												contributorCitations.push(startCounter.toString());
-												contributorLinks.push({ url: money.link2, number: startCounter++ });
-											}
-											if (money.link3) {
-												contributorCitations.push(startCounter.toString());
-												contributorLinks.push({ url: money.link3, number: startCounter++ });
-											}
-											if (money.link4) {
-												contributorCitations.push(startCounter.toString());
-												contributorLinks.push({ url: money.link4, number: startCounter++ });
-											}
-											if (money.link5) {
-												contributorCitations.push(startCounter.toString());
-												contributorLinks.push({ url: money.link5, number: startCounter++ });
-											}
-											if (money.link6) {
-												contributorCitations.push(startCounter.toString());
-												contributorLinks.push({ url: money.link6, number: startCounter++ });
-											}
-											
-											return `<li style="margin-bottom: 1rem; color: #cbd5e1; cursor: pointer;" onclick="showContributorDetails('${escapeHtml(money.title)}', '${money.amount || 0}', '${escapeHtml(money.description || '')}', [${money.link1 ? `'${escapeHtml(money.link1)}'` : ''},${money.link2 ? `'${escapeHtml(money.link2)}'` : ''},${money.link3 ? `'${escapeHtml(money.link3)}'` : ''},${money.link4 ? `'${escapeHtml(money.link4)}'` : ''},${money.link5 ? `'${escapeHtml(money.link5)}'` : ''},${money.link6 ? `'${escapeHtml(money.link6)}'` : ''}].filter(Boolean))">
+											return `<li style="margin-bottom: 0.5rem; color: #cbd5e1; cursor: pointer;" onclick="showContributorDetails('${escapeHtml(money.title)}', '${money.amount || 0}', '${escapeHtml(money.description || '')}', [${money.link1 ? `'${escapeHtml(money.link1)}'` : ''},${money.link2 ? `'${escapeHtml(money.link2)}'` : ''},${money.link3 ? `'${escapeHtml(money.link3)}'` : ''},${money.link4 ? `'${escapeHtml(money.link4)}'` : ''},${money.link5 ? `'${escapeHtml(money.link5)}'` : ''},${money.link6 ? `'${escapeHtml(money.link6)}'` : ''}].filter(Boolean))">
 												${money.amount ? formatAmount(money.amount) + ': ' : ''}${escapeHtml(money.title)}
-												${contributorLinks.length > 0 ? `
-													<div class="contributor-citations" style="margin-top: 0.25rem; font-size: 0.7rem; color: #64748b;">
-														Sources: ${contributorLinks.map(link => `<a href="${escapeHtml(link.url)}" target="_blank" style="color: #60a5fa; text-decoration: none;">[${link.number}]</a>`).join('')}
-													</div>
-												` : ''}
 											</li>`;
 										}).join('')}
 									</ul>
@@ -680,9 +667,9 @@ export function renderMoneyPage(democratMoney: Money[], republicanMoney: Money[]
 								`).join('') : ''
 							}
 						`;
-					} else if (democratMoney.length > 0) {
+					} else if (sortedDemocratMoney.length > 0) {
 						// Regular display if no main committee
-						return democratMoney.map(money => `
+						return sortedDemocratMoney.map(money => `
 							<div class="money-item democrat-money">
 								<div class="money-header" onclick="toggleMoneyDescription(this)">
 									${money.icon_url ? `<img class="money-icon" src="${escapeHtml(money.icon_url)}" alt="Money icon" />` : '<div class="money-cash">💰</div>'}
@@ -712,8 +699,8 @@ export function renderMoneyPage(democratMoney: Money[], republicanMoney: Money[]
 				<h2 class="section-title center-title">Fact Points</h2>
 			</div>
 			<div class="money-list">
-				${bothMoney.length > 0 ?
-					bothMoney.map(money => `
+				${sortedBothMoney.length > 0 ?
+					sortedBothMoney.map(money => `
 						<div class="money-item both-money">
 							<div class="money-header" onclick="toggleMoneyDescription(this)">
 								${money.icon_url ? `<img class="money-icon" src="${escapeHtml(money.icon_url)}" alt="Money icon" />` : '<div class="money-cash">💰</div>'}
@@ -742,9 +729,9 @@ export function renderMoneyPage(democratMoney: Money[], republicanMoney: Money[]
 			</div>
 			<div class="money-list">
 				${(() => {
-					const mainCommittee = republicanMoney.find(m => m.funding_type === 'Main presidential committee');
-					const insideEntries = republicanMoney.filter(m => m.funding_type === 'Inside');
-					const otherEntries = republicanMoney.filter(m => m.funding_type !== 'Main presidential committee' && m.funding_type !== 'Inside');
+					const mainCommittee = sortedRepublicanMoney.find(m => m.funding_type === 'Main presidential committee');
+					const insideEntries = sortedRepublicanMoney.filter(m => m.funding_type === 'Inside');
+					const otherEntries = sortedRepublicanMoney.filter(m => m.funding_type !== 'Main presidential committee' && m.funding_type !== 'Inside');
 					
 					if (mainCommittee && insideEntries.length > 0) {
 						// Group Inside entries within Main presidential committee
@@ -764,34 +751,23 @@ export function renderMoneyPage(democratMoney: Money[], republicanMoney: Money[]
 							let point = `${money.amount ? formatAmount(money.amount) + ': ' : ''}${escapeHtml(money.title)}`;
 							
 							// Add citations from individual contributor with proper numbering
-							const contributorCitations = [];
 							if (money.link1) {
-								contributorCitations.push(citationCounter.toString());
 								allContributorCitations.push({ url: money.link1, number: citationCounter++ });
 							}
 							if (money.link2) {
-								contributorCitations.push(citationCounter.toString());
 								allContributorCitations.push({ url: money.link2, number: citationCounter++ });
 							}
 							if (money.link3) {
-								contributorCitations.push(citationCounter.toString());
 								allContributorCitations.push({ url: money.link3, number: citationCounter++ });
 							}
 							if (money.link4) {
-								contributorCitations.push(citationCounter.toString());
 								allContributorCitations.push({ url: money.link4, number: citationCounter++ });
 							}
 							if (money.link5) {
-								contributorCitations.push(citationCounter.toString());
 								allContributorCitations.push({ url: money.link5, number: citationCounter++ });
 							}
 							if (money.link6) {
-								contributorCitations.push(citationCounter.toString());
 								allContributorCitations.push({ url: money.link6, number: citationCounter++ });
-							}
-							
-							if (contributorCitations.length > 0) {
-								point += contributorCitations.join('');
 							}
 							
 							return point;
@@ -817,41 +793,8 @@ export function renderMoneyPage(democratMoney: Money[], republicanMoney: Money[]
 									<h4 style="margin-top: 1rem; margin-bottom: 0.5rem; color: #94a3b8;">Major Contributors:</h4>
 									<ul style="margin: 0; padding-left: 1.5rem;">
 										${insideEntries.map(money => {
-											const contributorCitations = [];
-											let startCounter = mainCommitteeLinks.length + 1;
-											const contributorLinks = [];
-											if (money.link1) {
-												contributorCitations.push(startCounter.toString());
-												contributorLinks.push({ url: money.link1, number: startCounter++ });
-											}
-											if (money.link2) {
-												contributorCitations.push(startCounter.toString());
-												contributorLinks.push({ url: money.link2, number: startCounter++ });
-											}
-											if (money.link3) {
-												contributorCitations.push(startCounter.toString());
-												contributorLinks.push({ url: money.link3, number: startCounter++ });
-											}
-											if (money.link4) {
-												contributorCitations.push(startCounter.toString());
-												contributorLinks.push({ url: money.link4, number: startCounter++ });
-											}
-											if (money.link5) {
-												contributorCitations.push(startCounter.toString());
-												contributorLinks.push({ url: money.link5, number: startCounter++ });
-											}
-											if (money.link6) {
-												contributorCitations.push(startCounter.toString());
-												contributorLinks.push({ url: money.link6, number: startCounter++ });
-											}
-											
-											return `<li style="margin-bottom: 1rem; color: #cbd5e1; cursor: pointer;" onclick="showContributorDetails('${escapeHtml(money.title)}', '${money.amount || 0}', '${escapeHtml(money.description || '')}', [${money.link1 ? `'${escapeHtml(money.link1)}'` : ''},${money.link2 ? `'${escapeHtml(money.link2)}'` : ''},${money.link3 ? `'${escapeHtml(money.link3)}'` : ''},${money.link4 ? `'${escapeHtml(money.link4)}'` : ''},${money.link5 ? `'${escapeHtml(money.link5)}'` : ''},${money.link6 ? `'${escapeHtml(money.link6)}'` : ''}].filter(Boolean))">
+											return `<li style="margin-bottom: 0.5rem; color: #cbd5e1; cursor: pointer;" onclick="showContributorDetails('${escapeHtml(money.title)}', '${money.amount || 0}', '${escapeHtml(money.description || '')}', [${money.link1 ? `'${escapeHtml(money.link1)}'` : ''},${money.link2 ? `'${escapeHtml(money.link2)}'` : ''},${money.link3 ? `'${escapeHtml(money.link3)}'` : ''},${money.link4 ? `'${escapeHtml(money.link4)}'` : ''},${money.link5 ? `'${escapeHtml(money.link5)}'` : ''},${money.link6 ? `'${escapeHtml(money.link6)}'` : ''}].filter(Boolean))">
 												${money.amount ? formatAmount(money.amount) + ': ' : ''}${escapeHtml(money.title)}
-												${contributorLinks.length > 0 ? `
-													<div class="contributor-citations" style="margin-top: 0.25rem; font-size: 0.7rem; color: #64748b;">
-														Sources: ${contributorLinks.map(link => `<a href="${escapeHtml(link.url)}" target="_blank" style="color: #f87171; text-decoration: none;">[${link.number}]</a>`).join('')}
-													</div>
-												` : ''}
 											</li>`;
 										}).join('')}
 									</ul>
@@ -874,9 +817,9 @@ export function renderMoneyPage(democratMoney: Money[], republicanMoney: Money[]
 								`).join('') : ''
 							}
 						`;
-					} else if (republicanMoney.length > 0) {
+					} else if (sortedRepublicanMoney.length > 0) {
 						// Regular display if no main committee
-						return republicanMoney.map(money => `
+						return sortedRepublicanMoney.map(money => `
 							<div class="money-item republican-money">
 								<div class="money-header" onclick="toggleMoneyDescription(this)">
 									${money.icon_url ? `<img class="money-icon" src="${escapeHtml(money.icon_url)}" alt="Money icon" />` : '<div class="money-cash">💰</div>'}
