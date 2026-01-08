@@ -749,6 +749,8 @@ export async function getMoney(db: D1Database, id: number): Promise<Money | null
 		.bind(id)
 		.first();
 	return result as Money | null;
+}
+
 export async function createMoney(db: D1Database, data: Omit<Money, 'id' | 'created_at' | 'updated_at'>): Promise<number> {
 	const result = await db
 		.prepare(`
