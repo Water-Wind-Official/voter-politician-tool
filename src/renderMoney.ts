@@ -583,37 +583,6 @@ export function renderMoneyPage(democratMoney: Money[], republicanMoney: Money[]
 					
 					if (mainCommittee && insideEntries.length > 0) {
 						// Group Inside entries within Main presidential committee
-						const bulletPoints = insideEntries.map(money => {
-							let point = `${money.amount ? formatAmount(money.amount) + ': ' : ''}${escapeHtml(money.title)}`;
-							
-							// Add citations from individual contributor
-							const contributorCitations = [];
-							if (money.link1) contributorCitations.push('1');
-							if (money.link2) contributorCitations.push('2');
-							if (money.link3) contributorCitations.push('3');
-							if (money.link4) contributorCitations.push('4');
-							if (money.link5) contributorCitations.push('5');
-							if (money.link6) contributorCitations.push('6');
-							
-							if (contributorCitations.length > 0) {
-								point += contributorCitations.join('');
-							}
-							
-							return point;
-						}).join('\n');
-						
-						// Collect all citations from contributors for display after main committee citations
-						const allContributorCitations = [];
-						insideEntries.forEach(money => {
-							if (money.link1) allContributorCitations.push({ url: money.link1, number: 1 });
-							if (money.link2) allContributorCitations.push({ url: money.link2, number: 2 });
-							if (money.link3) allContributorCitations.push({ url: money.link3, number: 3 });
-							if (money.link4) allContributorCitations.push({ url: money.link4, number: 4 });
-							if (money.link5) allContributorCitations.push({ url: money.link5, number: 5 });
-							if (money.link6) allContributorCitations.push({ url: money.link6, number: 6 });
-						});
-						
-						// Combine main committee citations with contributor citations
 						const mainCommitteeLinks = [];
 						if (mainCommittee.link1) mainCommitteeLinks.push({ url: mainCommittee.link1, number: 1 });
 						if (mainCommittee.link2) mainCommitteeLinks.push({ url: mainCommittee.link2, number: 2 });
@@ -622,13 +591,48 @@ export function renderMoneyPage(democratMoney: Money[], republicanMoney: Money[]
 						if (mainCommittee.link5) mainCommitteeLinks.push({ url: mainCommittee.link5, number: 5 });
 						if (mainCommittee.link6) mainCommitteeLinks.push({ url: mainCommittee.link6, number: 6 });
 						
-						// Renumber contributor citations to continue after main committee citations
-						const renumberedContributorCitations = allContributorCitations.map((link, index) => ({
-							url: link.url,
-							number: mainCommitteeLinks.length + index + 1
-						}));
+						// Collect all contributor citations with proper numbering
+						const allContributorCitations = [];
+						let citationCounter = mainCommitteeLinks.length + 1;
 						
-						const allLinks = [...mainCommitteeLinks, ...renumberedContributorCitations];
+						const bulletPoints = insideEntries.map(money => {
+							let point = `${money.amount ? formatAmount(money.amount) + ': ' : ''}${escapeHtml(money.title)}`;
+							
+							// Add citations from individual contributor with proper numbering
+							const contributorCitations = [];
+							if (money.link1) {
+								contributorCitations.push(citationCounter.toString());
+								allContributorCitations.push({ url: money.link1, number: citationCounter++ });
+							}
+							if (money.link2) {
+								contributorCitations.push(citationCounter.toString());
+								allContributorCitations.push({ url: money.link2, number: citationCounter++ });
+							}
+							if (money.link3) {
+								contributorCitations.push(citationCounter.toString());
+								allContributorCitations.push({ url: money.link3, number: citationCounter++ });
+							}
+							if (money.link4) {
+								contributorCitations.push(citationCounter.toString());
+								allContributorCitations.push({ url: money.link4, number: citationCounter++ });
+							}
+							if (money.link5) {
+								contributorCitations.push(citationCounter.toString());
+								allContributorCitations.push({ url: money.link5, number: citationCounter++ });
+							}
+							if (money.link6) {
+								contributorCitations.push(citationCounter.toString());
+								allContributorCitations.push({ url: money.link6, number: citationCounter++ });
+							}
+							
+							if (contributorCitations.length > 0) {
+								point += contributorCitations.join('');
+							}
+							
+							return point;
+						}).join('\n');
+						
+						const allLinks = [...mainCommitteeLinks, ...allContributorCitations];
 						
 						return `
 							<div class="money-item democrat-money">
@@ -642,7 +646,20 @@ export function renderMoneyPage(democratMoney: Money[], republicanMoney: Money[]
 									${mainCommittee.description ? `<p style="margin-bottom: 1rem; color: #cbd5e1;">${escapeHtml(mainCommittee.description)}</p>` : ''}
 									<h4 style="margin-top: 1rem; margin-bottom: 0.5rem; color: #94a3b8;">Major Contributors:</h4>
 									<ul style="margin: 0; padding-left: 1.5rem;">
-										${bulletPoints.split('\n').map(point => `<li style="margin-bottom: 0.5rem; color: #cbd5e1;">${point}</li>`).join('')}
+										${insideEntries.map(money => {
+											const contributorCitations = [];
+											let startCounter = mainCommitteeLinks.length + 1;
+											if (money.link1) contributorCitations.push(startCounter++);
+											if (money.link2) contributorCitations.push(startCounter++);
+											if (money.link3) contributorCitations.push(startCounter++);
+											if (money.link4) contributorCitations.push(startCounter++);
+											if (money.link5) contributorCitations.push(startCounter++);
+											if (money.link6) contributorCitations.push(startCounter++);
+											
+											return `<li style="margin-bottom: 0.5rem; color: #cbd5e1; cursor: pointer;" onclick="showContributorDetails('${escapeHtml(money.title)}', '${money.amount || 0}', '${escapeHtml(money.description || '')}', [${money.link1 ? `'${escapeHtml(money.link1)}'` : ''},${money.link2 ? `'${escapeHtml(money.link2)}'` : ''},${money.link3 ? `'${escapeHtml(money.link3)}'` : ''},${money.link4 ? `'${escapeHtml(money.link4)}'` : ''},${money.link5 ? `'${escapeHtml(money.link5)}'` : ''},${money.link6 ? `'${escapeHtml(money.link6)}'` : ''}].filter(Boolean))">
+												${money.amount ? formatAmount(money.amount) + ': ' : ''}${escapeHtml(money.title)}${contributorCitations.join('')}
+											</li>`;
+										}).join('')}
 									</ul>
 								</div>
 								${mainCommittee.category ? `<div class="money-category">${escapeHtml(mainCommittee.category)}</div>` : ''}
@@ -858,6 +875,125 @@ export function renderMoneyPage(democratMoney: Money[], republicanMoney: Money[]
 					headerElement.classList.remove('expanded');
 				}
 			}
+		}
+
+		function showContributorDetails(title, amount, description, links) {
+			const modal = document.createElement('div');
+			modal.style.position = 'fixed';
+			modal.style.top = '0';
+			modal.style.left = '0';
+			modal.style.right = '0';
+			modal.style.bottom = '0';
+			modal.style.background = 'rgba(0, 0, 0, 0.8)';
+			modal.style.display = 'flex';
+			modal.style.alignItems = 'center';
+			modal.style.justifyContent = 'center';
+			modal.style.zIndex = '1000';
+
+			const content = document.createElement('div');
+			content.style.background = 'linear-gradient(135deg, #1e293b 0%, #334155 100%)';
+			content.style.border = '2px solid rgba(148, 163, 184, 0.2)';
+			content.style.borderRadius = '16px';
+			content.style.padding = '2rem';
+			content.style.maxWidth = '500px';
+			content.style.width = '90%';
+			content.style.maxHeight = '80vh';
+			content.style.overflowY = 'auto';
+			content.style.color = '#f1f5f9';
+			content.style.boxShadow = '0 20px 25px -5px rgba(0, 0, 0, 0.3)';
+
+			const formatAmount = (amt) => {
+				if (amt >= 1000000000) {
+					return '$' + (amt / 1000000000).toLocaleString(undefined, {minimumFractionDigits: 0, maximumFractionDigits: 0}) + 'B';
+				} else if (amt >= 1000000) {
+					return '$' + (amt / 1000000).toLocaleString(undefined, {minimumFractionDigits: 0, maximumFractionDigits: 0}) + 'M';
+				} else if (amt >= 1000) {
+					return '$' + (amt / 1000).toLocaleString(undefined, {minimumFractionDigits: 0, maximumFractionDigits: 0}) + 'K';
+				} else {
+					return '$' + parseInt(amt).toLocaleString();
+				}
+			};
+
+			const headerDiv = document.createElement('div');
+			headerDiv.style.display = 'flex';
+			headerDiv.style.justifyContent = 'space-between';
+			headerDiv.style.alignItems = 'center';
+			headerDiv.style.marginBottom = '1.5rem';
+
+			const titleH2 = document.createElement('h2');
+			titleH2.style.color = '#60a5fa';
+			titleH2.style.margin = '0';
+			titleH2.style.fontSize = '1.5rem';
+			titleH2.textContent = title;
+
+			const closeButton = document.createElement('button');
+			closeButton.textContent = '✕';
+			closeButton.style.background = 'none';
+			closeButton.style.border = 'none';
+			closeButton.style.color = '#cbd5e1';
+			closeButton.style.fontSize = '1.5rem';
+			closeButton.style.cursor = 'pointer';
+			closeButton.onclick = () => modal.remove();
+
+			headerDiv.appendChild(titleH2);
+			headerDiv.appendChild(closeButton);
+
+			if (amount) {
+				const amountDiv = document.createElement('div');
+				amountDiv.style.fontSize = '2rem';
+				amountDiv.style.fontWeight = 'bold';
+				amountDiv.style.color = '#22c55e';
+				amountDiv.style.marginBottom = '1rem';
+				amountDiv.textContent = formatAmount(amount);
+				content.appendChild(amountDiv);
+			}
+
+			if (description) {
+				const descDiv = document.createElement('div');
+				descDiv.style.color = '#cbd5e1';
+				descDiv.style.lineHeight = '1.6';
+				descDiv.style.marginBottom = '1.5rem';
+				descDiv.textContent = description;
+				content.appendChild(descDiv);
+			}
+
+			if (links.length > 0) {
+				const sourcesDiv = document.createElement('div');
+				sourcesDiv.style.marginTop = '1rem';
+
+				const sourcesH3 = document.createElement('h3');
+				sourcesH3.style.color = '#94a3b8';
+				sourcesH3.style.marginBottom = '0.5rem';
+				sourcesH3.textContent = 'Sources:';
+				sourcesDiv.appendChild(sourcesH3);
+
+				links.forEach((link, index) => {
+					const linkDiv = document.createElement('div');
+					linkDiv.style.marginBottom = '0.5rem';
+					
+					const linkA = document.createElement('a');
+					linkA.href = link;
+					linkA.target = '_blank';
+					linkA.style.color = '#60a5fa';
+					linkA.style.textDecoration = 'none';
+					linkA.textContent = (index + 1) + '. ' + link;
+					
+					linkDiv.appendChild(linkA);
+					sourcesDiv.appendChild(linkDiv);
+				});
+
+				content.appendChild(sourcesDiv);
+			}
+
+			content.appendChild(headerDiv);
+			modal.appendChild(content);
+			document.body.appendChild(modal);
+
+			modal.addEventListener('click', (e) => {
+				if (e.target === modal) {
+					modal.remove();
+				}
+			});
 		}
 	</script>
 </body>
