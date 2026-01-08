@@ -569,25 +569,6 @@ export function renderMoneyPage(democratMoney: Money[], republicanMoney: Money[]
 			</nav>
 		</header>
 
-		<!-- Total Amounts Section -->
-		<div class="total-amounts">
-			<h3>Total Campaign Funds</h3>
-			<div class="total-row">
-				<div class="total-item">
-					<div class="total-label">Democratic</div>
-					<div class="total-value democrat-total">${formatAmount(democratTotal)}</div>
-				</div>
-				<div class="total-item">
-					<div class="total-label">Republican</div>
-					<div class="total-value republican-total">${formatAmount(republicanTotal)}</div>
-				</div>
-				<div class="total-item">
-					<div class="total-label">Grand Total</div>
-					<div class="total-value grand-total">${formatAmount(grandTotal)}</div>
-				</div>
-			</div>
-		</div>
-
 		<!-- Democrats Section (Left) -->
 		<div class="section democrat-section">
 			<div class="section-header">
