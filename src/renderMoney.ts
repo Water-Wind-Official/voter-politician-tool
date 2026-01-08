@@ -33,6 +33,7 @@ export function renderMoneyPage(democratMoney: Money[], republicanMoney: Money[]
 				radial-gradient(circle at 40% 80%, rgba(120, 119, 198, 0.3) 0%, transparent 50%),
 				linear-gradient(135deg, #0f172a 0%, #1e293b 25%, #334155 50%, #475569 75%, #64748b 100%);
 			min-height: 100vh;
+			height: auto;
 			padding: 2rem;
 			color: #f1f5f9;
 			position: relative;
@@ -60,6 +61,9 @@ export function renderMoneyPage(democratMoney: Money[], republicanMoney: Money[]
 			grid-template-columns: 1fr 1fr 1fr;
 			gap: 2rem;
 			align-items: start;
+			width: 100%;
+			min-height: 100vh;
+			height: auto;
 		}
 
 		header {
@@ -142,7 +146,8 @@ export function renderMoneyPage(democratMoney: Money[], republicanMoney: Money[]
 			border-radius: 16px;
 			padding: 2rem;
 			box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(148, 163, 184, 0.1);
-			min-height: 600px;
+			min-height: auto;
+			height: auto;
 			position: relative;
 		}
 
@@ -160,7 +165,6 @@ export function renderMoneyPage(democratMoney: Money[], republicanMoney: Money[]
 
 		.democrat-section {
 			position: relative;
-			overflow: hidden;
 		}
 
 		.democrat-section::before {
@@ -176,7 +180,6 @@ export function renderMoneyPage(democratMoney: Money[], republicanMoney: Money[]
 
 		.republican-section {
 			position: relative;
-			overflow: hidden;
 		}
 
 		.republican-section::before {
@@ -342,7 +345,7 @@ export function renderMoneyPage(democratMoney: Money[], republicanMoney: Money[]
 		}
 
 		.money-description:not(.collapsed) {
-			max-height: 500px;
+			max-height: 2000px;
 			margin-top: 1rem;
 			opacity: 1;
 		}
@@ -351,45 +354,21 @@ export function renderMoneyPage(democratMoney: Money[], republicanMoney: Money[]
 			transform: rotate(180deg);
 		}
 
-		.money-links {
-			position: absolute;
-			bottom: 0.5rem;
-			right: 0.5rem;
-			display: flex;
-			gap: 0.25rem;
-		}
-
-		.money-link-superscript {
-			display: inline-block;
-			width: 1rem;
-			height: 1rem;
-			line-height: 1rem;
-			text-align: center;
-			font-size: 0.7rem;
-			font-weight: bold;
-			background: rgba(59, 130, 246, 0.1);
-			color: #2563eb;
-			border-radius: 50%;
-			text-decoration: none;
-			transition: all 0.2s;
-			border: 1px solid rgba(59, 130, 246, 0.2);
-		}
-
-		.money-link-superscript:hover {
-			background: #2563eb;
-			color: white;
-			transform: scale(1.1);
-		}
-
-		/* Ensure money items are positioned relatively for absolute positioning of links */
-		.money-item {
-			position: relative;
-			padding-bottom: 2rem; /* Make room for the superscript links */
-		}
-
 		.money-description {
 			color: #cbd5e1;
 			line-height: 1.5;
+		}
+
+		.money-citations {
+			margin-top: 0.5rem;
+			font-size: 0.8rem;
+			color: #94a3b8;
+		}
+
+		.contributor-citations {
+			margin-top: 0.25rem;
+			font-size: 0.7rem;
+			color: #64748b;
 		}
 
 		.money-category {
@@ -584,7 +563,7 @@ export function renderMoneyPage(democratMoney: Money[], republicanMoney: Money[]
 						if (mainCommittee.link6) mainCommitteeLinks.push({ url: mainCommittee.link6, number: 6 });
 						
 						// Collect all contributor citations with proper numbering
-						const allContributorCitations = [];
+						const allContributorCitations: { url: string; number: number }[] = [];
 						let citationCounter = mainCommitteeLinks.length + 1;
 						
 						const bulletPoints = insideEntries.map(money => {
@@ -634,6 +613,11 @@ export function renderMoneyPage(democratMoney: Money[], republicanMoney: Money[]
 									<div class="money-arrow">▼</div>
 								</div>
 								${mainCommittee.amount ? `<div class="money-amount">${formatAmount(mainCommittee.amount)}</div>` : ''}
+								${mainCommitteeLinks.length > 0 ? `
+									<div class="money-citations" style="margin-top: 0.5rem; font-size: 0.8rem; color: #94a3b8;">
+										Sources: ${mainCommitteeLinks.map(link => `<a href="${escapeHtml(link.url)}" target="_blank" style="color: #60a5fa; text-decoration: none;">[${link.number}]</a>`).join('')}
+									</div>
+								` : ''}
 								<div class="money-description collapsed">
 									${mainCommittee.description ? `<p style="margin-bottom: 1rem; color: #cbd5e1;">${escapeHtml(mainCommittee.description)}</p>` : ''}
 									<h4 style="margin-top: 1rem; margin-bottom: 0.5rem; color: #94a3b8;">Major Contributors:</h4>
@@ -641,23 +625,44 @@ export function renderMoneyPage(democratMoney: Money[], republicanMoney: Money[]
 										${insideEntries.map(money => {
 											const contributorCitations = [];
 											let startCounter = mainCommitteeLinks.length + 1;
-											if (money.link1) contributorCitations.push(startCounter++);
-											if (money.link2) contributorCitations.push(startCounter++);
-											if (money.link3) contributorCitations.push(startCounter++);
-											if (money.link4) contributorCitations.push(startCounter++);
-											if (money.link5) contributorCitations.push(startCounter++);
-											if (money.link6) contributorCitations.push(startCounter++);
+											const contributorLinks = [];
+											if (money.link1) {
+												contributorCitations.push(startCounter.toString());
+												contributorLinks.push({ url: money.link1, number: startCounter++ });
+											}
+											if (money.link2) {
+												contributorCitations.push(startCounter.toString());
+												contributorLinks.push({ url: money.link2, number: startCounter++ });
+											}
+											if (money.link3) {
+												contributorCitations.push(startCounter.toString());
+												contributorLinks.push({ url: money.link3, number: startCounter++ });
+											}
+											if (money.link4) {
+												contributorCitations.push(startCounter.toString());
+												contributorLinks.push({ url: money.link4, number: startCounter++ });
+											}
+											if (money.link5) {
+												contributorCitations.push(startCounter.toString());
+												contributorLinks.push({ url: money.link5, number: startCounter++ });
+											}
+											if (money.link6) {
+												contributorCitations.push(startCounter.toString());
+												contributorLinks.push({ url: money.link6, number: startCounter++ });
+											}
 											
-											return `<li style="margin-bottom: 0.5rem; color: #cbd5e1; cursor: pointer;" onclick="showContributorDetails('${escapeHtml(money.title)}', '${money.amount || 0}', '${escapeHtml(money.description || '')}', [${money.link1 ? `'${escapeHtml(money.link1)}'` : ''},${money.link2 ? `'${escapeHtml(money.link2)}'` : ''},${money.link3 ? `'${escapeHtml(money.link3)}'` : ''},${money.link4 ? `'${escapeHtml(money.link4)}'` : ''},${money.link5 ? `'${escapeHtml(money.link5)}'` : ''},${money.link6 ? `'${escapeHtml(money.link6)}'` : ''}].filter(Boolean))">
+											return `<li style="margin-bottom: 1rem; color: #cbd5e1; cursor: pointer;" onclick="showContributorDetails('${escapeHtml(money.title)}', '${money.amount || 0}', '${escapeHtml(money.description || '')}', [${money.link1 ? `'${escapeHtml(money.link1)}'` : ''},${money.link2 ? `'${escapeHtml(money.link2)}'` : ''},${money.link3 ? `'${escapeHtml(money.link3)}'` : ''},${money.link4 ? `'${escapeHtml(money.link4)}'` : ''},${money.link5 ? `'${escapeHtml(money.link5)}'` : ''},${money.link6 ? `'${escapeHtml(money.link6)}'` : ''}].filter(Boolean))">
 												${money.amount ? formatAmount(money.amount) + ': ' : ''}${escapeHtml(money.title)}
+												${contributorLinks.length > 0 ? `
+													<div class="contributor-citations" style="margin-top: 0.25rem; font-size: 0.7rem; color: #64748b;">
+														Sources: ${contributorLinks.map(link => `<a href="${escapeHtml(link.url)}" target="_blank" style="color: #60a5fa; text-decoration: none;">[${link.number}]</a>`).join('')}
+													</div>
+												` : ''}
 											</li>`;
 										}).join('')}
 									</ul>
 								</div>
 								${mainCommittee.category ? `<div class="money-category">${escapeHtml(mainCommittee.category)}</div>` : ''}
-								<div class="money-links">
-									${allLinks.map(link => `<a href="${escapeHtml(link.url)}" target="_blank" class="money-link-superscript">${link.number}</a>`).join('')}
-								</div>
 							</div>
 							${otherEntries.length > 0 ? 
 								otherEntries.map(money => `
@@ -670,7 +675,7 @@ export function renderMoneyPage(democratMoney: Money[], republicanMoney: Money[]
 										${money.description ? `<div class="money-description collapsed">${escapeHtml(money.description)}</div>` : ''}
 										${money.category ? `<div class="money-category">${escapeHtml(money.category)}</div>` : ''}
 										${money.amount ? `<div class="money-amount">${formatAmount(money.amount)}</div>` : ''}
-										${renderMoneyLinks(money)}
+										${renderIndividualMoneyLinks(money, 'democrat')}
 									</div>
 								`).join('') : ''
 							}
@@ -687,7 +692,7 @@ export function renderMoneyPage(democratMoney: Money[], republicanMoney: Money[]
 								${money.description ? `<div class="money-description collapsed">${escapeHtml(money.description)}</div>` : ''}
 								${money.category ? `<div class="money-category">${escapeHtml(money.category)}</div>` : ''}
 								${money.amount ? `<div class="money-amount">${formatAmount(money.amount)}</div>` : ''}
-								${renderMoneyLinks(money)}
+								${renderIndividualMoneyLinks(money, 'democrat')}
 							</div>
 						`).join('');
 					} else {
@@ -718,7 +723,7 @@ export function renderMoneyPage(democratMoney: Money[], republicanMoney: Money[]
 							${money.description ? `<div class="money-description collapsed">${escapeHtml(money.description)}</div>` : ''}
 							${money.category ? `<div class="money-category">${escapeHtml(money.category)}</div>` : ''}
 							${money.amount ? `<div class="money-amount">${formatAmount(money.amount)}</div>` : ''}
-							${renderMoneyLinks(money)}
+							${renderIndividualMoneyLinks(money, 'both')}
 						</div>
 					`).join('') :
 					`<div class="empty-state">
@@ -752,7 +757,7 @@ export function renderMoneyPage(democratMoney: Money[], republicanMoney: Money[]
 						if (mainCommittee.link6) mainCommitteeLinks.push({ url: mainCommittee.link6, number: 6 });
 						
 						// Collect all contributor citations with proper numbering
-						const allContributorCitations = [];
+						const allContributorCitations: { url: string; number: number }[] = [];
 						let citationCounter = mainCommitteeLinks.length + 1;
 						
 						const bulletPoints = insideEntries.map(money => {
@@ -802,6 +807,11 @@ export function renderMoneyPage(democratMoney: Money[], republicanMoney: Money[]
 									<div class="money-arrow">▼</div>
 								</div>
 								${mainCommittee.amount ? `<div class="money-amount">${formatAmount(mainCommittee.amount)}</div>` : ''}
+								${mainCommitteeLinks.length > 0 ? `
+									<div class="money-citations" style="margin-top: 0.5rem; font-size: 0.8rem; color: #94a3b8;">
+										Sources: ${mainCommitteeLinks.map(link => `<a href="${escapeHtml(link.url)}" target="_blank" style="color: #f87171; text-decoration: none;">[${link.number}]</a>`).join('')}
+									</div>
+								` : ''}
 								<div class="money-description collapsed">
 									${mainCommittee.description ? `<p style="margin-bottom: 1rem; color: #cbd5e1;">${escapeHtml(mainCommittee.description)}</p>` : ''}
 									<h4 style="margin-top: 1rem; margin-bottom: 0.5rem; color: #94a3b8;">Major Contributors:</h4>
@@ -809,23 +819,44 @@ export function renderMoneyPage(democratMoney: Money[], republicanMoney: Money[]
 										${insideEntries.map(money => {
 											const contributorCitations = [];
 											let startCounter = mainCommitteeLinks.length + 1;
-											if (money.link1) contributorCitations.push(startCounter++);
-											if (money.link2) contributorCitations.push(startCounter++);
-											if (money.link3) contributorCitations.push(startCounter++);
-											if (money.link4) contributorCitations.push(startCounter++);
-											if (money.link5) contributorCitations.push(startCounter++);
-											if (money.link6) contributorCitations.push(startCounter++);
+											const contributorLinks = [];
+											if (money.link1) {
+												contributorCitations.push(startCounter.toString());
+												contributorLinks.push({ url: money.link1, number: startCounter++ });
+											}
+											if (money.link2) {
+												contributorCitations.push(startCounter.toString());
+												contributorLinks.push({ url: money.link2, number: startCounter++ });
+											}
+											if (money.link3) {
+												contributorCitations.push(startCounter.toString());
+												contributorLinks.push({ url: money.link3, number: startCounter++ });
+											}
+											if (money.link4) {
+												contributorCitations.push(startCounter.toString());
+												contributorLinks.push({ url: money.link4, number: startCounter++ });
+											}
+											if (money.link5) {
+												contributorCitations.push(startCounter.toString());
+												contributorLinks.push({ url: money.link5, number: startCounter++ });
+											}
+											if (money.link6) {
+												contributorCitations.push(startCounter.toString());
+												contributorLinks.push({ url: money.link6, number: startCounter++ });
+											}
 											
-											return `<li style="margin-bottom: 0.5rem; color: #cbd5e1; cursor: pointer;" onclick="showContributorDetails('${escapeHtml(money.title)}', '${money.amount || 0}', '${escapeHtml(money.description || '')}', [${money.link1 ? `'${escapeHtml(money.link1)}'` : ''},${money.link2 ? `'${escapeHtml(money.link2)}'` : ''},${money.link3 ? `'${escapeHtml(money.link3)}'` : ''},${money.link4 ? `'${escapeHtml(money.link4)}'` : ''},${money.link5 ? `'${escapeHtml(money.link5)}'` : ''},${money.link6 ? `'${escapeHtml(money.link6)}'` : ''}].filter(Boolean))">
+											return `<li style="margin-bottom: 1rem; color: #cbd5e1; cursor: pointer;" onclick="showContributorDetails('${escapeHtml(money.title)}', '${money.amount || 0}', '${escapeHtml(money.description || '')}', [${money.link1 ? `'${escapeHtml(money.link1)}'` : ''},${money.link2 ? `'${escapeHtml(money.link2)}'` : ''},${money.link3 ? `'${escapeHtml(money.link3)}'` : ''},${money.link4 ? `'${escapeHtml(money.link4)}'` : ''},${money.link5 ? `'${escapeHtml(money.link5)}'` : ''},${money.link6 ? `'${escapeHtml(money.link6)}'` : ''}].filter(Boolean))">
 												${money.amount ? formatAmount(money.amount) + ': ' : ''}${escapeHtml(money.title)}
+												${contributorLinks.length > 0 ? `
+													<div class="contributor-citations" style="margin-top: 0.25rem; font-size: 0.7rem; color: #64748b;">
+														Sources: ${contributorLinks.map(link => `<a href="${escapeHtml(link.url)}" target="_blank" style="color: #f87171; text-decoration: none;">[${link.number}]</a>`).join('')}
+													</div>
+												` : ''}
 											</li>`;
 										}).join('')}
 									</ul>
 								</div>
 								${mainCommittee.category ? `<div class="money-category">${escapeHtml(mainCommittee.category)}</div>` : ''}
-								<div class="money-links">
-									${allLinks.map(link => `<a href="${escapeHtml(link.url)}" target="_blank" class="money-link-superscript">${link.number}</a>`).join('')}
-								</div>
 							</div>
 							${otherEntries.length > 0 ? 
 								otherEntries.map(money => `
@@ -838,7 +869,7 @@ export function renderMoneyPage(democratMoney: Money[], republicanMoney: Money[]
 										${money.description ? `<div class="money-description collapsed">${escapeHtml(money.description)}</div>` : ''}
 										${money.category ? `<div class="money-category">${escapeHtml(money.category)}</div>` : ''}
 										${money.amount ? `<div class="money-amount">${formatAmount(money.amount)}</div>` : ''}
-										${renderMoneyLinks(money)}
+										${renderIndividualMoneyLinks(money, 'republican')}
 									</div>
 								`).join('') : ''
 							}
@@ -855,7 +886,7 @@ export function renderMoneyPage(democratMoney: Money[], republicanMoney: Money[]
 								${money.description ? `<div class="money-description collapsed">${escapeHtml(money.description)}</div>` : ''}
 								${money.category ? `<div class="money-category">${escapeHtml(money.category)}</div>` : ''}
 								${money.amount ? `<div class="money-amount">${formatAmount(money.amount)}</div>` : ''}
-								${renderMoneyLinks(money)}
+								${renderIndividualMoneyLinks(money, 'republican')}
 							</div>
 						`).join('');
 					} else {
@@ -1000,6 +1031,25 @@ export function renderMoneyPage(democratMoney: Money[], republicanMoney: Money[]
 </body>
 </html>
 	`;
+}
+
+function renderIndividualMoneyLinks(money: any, party: 'democrat' | 'republican' | 'both' = 'democrat'): string {
+	const links = [];
+	if (money.link1) links.push({ url: money.link1, number: 1 });
+	if (money.link2) links.push({ url: money.link2, number: 2 });
+	if (money.link3) links.push({ url: money.link3, number: 3 });
+	if (money.link4) links.push({ url: money.link4, number: 4 });
+	if (money.link5) links.push({ url: money.link5, number: 5 });
+	if (money.link6) links.push({ url: money.link6, number: 6 });
+
+	if (links.length === 0) return '';
+
+	// Set color based on party
+	const linkColor = party === 'republican' ? '#f87171' : party === 'both' ? '#94a3b8' : '#60a5fa';
+
+	return `<div class="money-citations" style="margin-top: 0.5rem; font-size: 0.8rem; color: #94a3b8;">
+		Sources: ${links.map(link => `<a href="${escapeHtml(link.url)}" target="_blank" style="color: ${linkColor}; text-decoration: none;">[${link.number}]</a>`).join('')}
+	</div>`;
 }
 
 function renderMoneyLinks(money: any): string {
