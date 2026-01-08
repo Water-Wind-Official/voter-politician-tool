@@ -598,35 +598,6 @@ export function renderMoneyPage(democratMoney: Money[], republicanMoney: Money[]
 			</div>
 		</div>
 
-		<!-- Republicans Section (Right) -->
-		<div class="section republican-section">
-			<div class="section-header">
-				<img class="section-icon elephant-icon" src="https://content.mycutegraphics.com/graphics/animal/cute-elephant.png" alt="Elephant" />
-				<h2 class="section-title republican-title">Republican Funding</h2>
-			</div>
-			<div class="money-list">
-				${republicanMoney.length > 0 ?
-					republicanMoney.map(money => `
-						<div class="money-item republican-money">
-							<div class="money-header" onclick="toggleMoneyDescription(this)">
-								${money.icon_url ? `<img class="money-icon" src="${escapeHtml(money.icon_url)}" alt="Money icon" />` : '<div class="money-cash">💰</div>'}
-								<div class="money-title">${escapeHtml(money.title)}</div>
-								${money.description ? '<div class="money-arrow">▼</div>' : ''}
-							</div>
-							${money.description ? `<div class="money-description collapsed">${escapeHtml(money.description)}</div>` : ''}
-							${money.category ? `<div class="money-category">${escapeHtml(money.category)}</div>` : ''}
-							${money.amount ? `<div class="money-amount">${formatAmount(money.amount)}</div>` : ''}
-							${renderMoneyLinks(money)}
-						</div>
-					`).join('') :
-					`<div class="empty-state">
-						<p>No Republican funding information available</p>
-						<p>Check back later for updates</p>
-					</div>`
-				}
-			</div>
-		</div>
-
 		<!-- Fact Points Section (Center) -->
 		<div class="section center-section">
 			<div class="section-header">
@@ -656,7 +627,36 @@ export function renderMoneyPage(democratMoney: Money[], republicanMoney: Money[]
 			</div>
 		</div>
 
-	<script>
+		<!-- Republicans Section (Right) -->
+		<div class="section republican-section">
+			<div class="section-header">
+				<img class="section-icon elephant-icon" src="https://content.mycutegraphics.com/graphics/animal/cute-elephant.png" alt="Elephant" />
+				<h2 class="section-title republican-title">Republican Funding</h2>
+			</div>
+			<div class="money-list">
+				${republicanMoney.length > 0 ?
+					republicanMoney.map(money => `
+						<div class="money-item republican-money">
+							<div class="money-header" onclick="toggleMoneyDescription(this)">
+								${money.icon_url ? `<img class="money-icon" src="${escapeHtml(money.icon_url)}" alt="Money icon" />` : '<div class="money-cash">💰</div>'}
+								<div class="money-title">${escapeHtml(money.title)}</div>
+								${money.description ? '<div class="money-arrow">▼</div>' : ''}
+							</div>
+							${money.description ? `<div class="money-description collapsed">${escapeHtml(money.description)}</div>` : ''}
+							${money.category ? `<div class="money-category">${escapeHtml(money.category)}</div>` : ''}
+							${money.amount ? `<div class="money-amount">${formatAmount(money.amount)}</div>` : ''}
+							${renderMoneyLinks(money)}
+						</div>
+					`).join('') :
+					`<div class="empty-state">
+						<p>No Republican funding information available</p>
+						<p>Check back later for updates</p>
+					</div>`
+				}
+			</div>
+		</div>
+
+		<script>
 		function toggleMoneyDescription(headerElement) {
 			const description = headerElement.parentElement.querySelector('.money-description');
 			const arrow = headerElement.querySelector('.money-arrow');
