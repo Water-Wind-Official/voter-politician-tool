@@ -1,11 +1,64 @@
 import type { State } from './types';
 
 export function renderElectionHub(states: State[]): string {
+	// Electoral data for 2024 election
+	const electoralData: { [key: string]: { total: number; harris: number; trump: number; margin: number } } = {
+		'AL': { total: 9, harris: 0, trump: 9, margin: 25.4 },
+		'AK': { total: 3, harris: 0, trump: 3, margin: 32.6 },
+		'AZ': { total: 11, harris: 0, trump: 11, margin: 5.5 },
+		'AR': { total: 6, harris: 0, trump: 6, margin: 27.8 },
+		'CA': { total: 54, harris: 54, trump: 0, margin: 29.0 },
+		'CO': { total: 10, harris: 10, trump: 0, margin: 13.5 },
+		'CT': { total: 7, harris: 7, trump: 0, margin: 21.2 },
+		'DE': { total: 3, harris: 3, trump: 0, margin: 18.7 },
+		'DC': { total: 3, harris: 3, trump: 0, margin: 85.6 },
+		'FL': { total: 30, harris: 0, trump: 30, margin: 3.1 },
+		'GA': { total: 16, harris: 0, trump: 16, margin: 5.2 },
+		'HI': { total: 4, harris: 4, trump: 0, margin: 29.5 },
+		'ID': { total: 4, harris: 0, trump: 4, margin: 31.8 },
+		'IL': { total: 19, harris: 19, trump: 0, margin: 17.6 },
+		'IN': { total: 11, harris: 0, trump: 11, margin: 21.1 },
+		'IA': { total: 6, harris: 0, trump: 6, margin: 14.1 },
+		'KS': { total: 6, harris: 0, trump: 6, margin: 18.2 },
+		'KY': { total: 8, harris: 0, trump: 8, margin: 26.0 },
+		'LA': { total: 8, harris: 0, trump: 8, margin: 19.6 },
+		'ME': { total: 4, harris: 3, trump: 1, margin: 9.1 }, // Split votes
+		'MD': { total: 10, harris: 10, trump: 0, margin: 33.2 },
+		'MA': { total: 11, harris: 11, trump: 0, margin: 33.5 },
+		'MI': { total: 15, harris: 0, trump: 15, margin: 2.9 },
+		'MN': { total: 10, harris: 10, trump: 0, margin: 7.2 },
+		'MS': { total: 6, harris: 0, trump: 6, margin: 17.8 },
+		'MO': { total: 10, harris: 0, trump: 10, margin: 15.4 },
+		'MT': { total: 4, harris: 0, trump: 4, margin: 16.4 },
+		'NE': { total: 5, harris: 1, trump: 4, margin: 15.2 }, // Split votes
+		'NV': { total: 6, harris: 0, trump: 6, margin: 2.4 },
+		'NH': { total: 4, harris: 4, trump: 0, margin: 8.8 },
+		'NJ': { total: 14, harris: 14, trump: 0, margin: 15.9 },
+		'NM': { total: 5, harris: 5, trump: 0, margin: 10.8 },
+		'NY': { total: 28, harris: 28, trump: 0, margin: 21.4 },
+		'NC': { total: 16, harris: 0, trump: 16, margin: 3.3 },
+		'ND': { total: 3, harris: 0, trump: 3, margin: 33.4 },
+		'OH': { total: 17, harris: 0, trump: 17, margin: 8.0 },
+		'OK': { total: 7, harris: 0, trump: 7, margin: 32.3 },
+		'OR': { total: 8, harris: 8, trump: 0, margin: 16.1 },
+		'PA': { total: 19, harris: 0, trump: 19, margin: 0.3 },
+		'RI': { total: 4, harris: 4, trump: 0, margin: 19.8 },
+		'SC': { total: 9, harris: 0, trump: 9, margin: 14.0 },
+		'SD': { total: 3, harris: 0, trump: 3, margin: 21.9 },
+		'TN': { total: 11, harris: 0, trump: 11, margin: 23.9 },
+		'TX': { total: 40, harris: 0, trump: 40, margin: 11.0 },
+		'UT': { total: 6, harris: 0, trump: 6, margin: 20.6 },
+		'VT': { total: 3, harris: 3, trump: 0, margin: 25.2 },
+		'VA': { total: 13, harris: 13, trump: 0, margin: 10.2 },
+		'WA': { total: 12, harris: 12, trump: 0, margin: 18.2 },
+		'WV': { total: 4, harris: 0, trump: 4, margin: 26.8 },
+		'WI': { total: 10, harris: 0, trump: 10, margin: 0.9 },
+		'WY': { total: 3, harris: 0, trump: 3, margin: 43.4 }
+	};
+
 	// Calculate electoral summary
-	const republicanStates = states.filter(s => s.electoral_winner === 'Republican');
-	const democratStates = states.filter(s => s.electoral_winner === 'Democrat');
-	const republicanVotes = republicanStates.reduce((sum, s) => sum + (s.electoral_votes || 0), 0);
-	const democratVotes = democratStates.reduce((sum, s) => sum + (s.electoral_votes || 0), 0);
+	const republicanVotes = Object.values(electoralData).reduce((sum, data) => sum + data.trump, 0);
+	const democratVotes = Object.values(electoralData).reduce((sum, data) => sum + data.harris, 0);
 	const totalVotes = republicanVotes + democratVotes;
 
 	// Sort states by name
@@ -303,74 +356,52 @@ export function renderElectionHub(states: State[]): string {
 			<div class="summary-card republican">
 				<h3>Republican</h3>
 				<div class="votes">${republicanVotes}</div>
-				<div class="states">${republicanStates.length} states</div>
+				<div class="states">${Object.values(electoralData).filter(data => data.trump > 0).length} states</div>
 			</div>
 			<div class="summary-card democrat">
 				<h3>Democrat</h3>
 				<div class="votes">${democratVotes}</div>
-				<div class="states">${democratStates.length} states</div>
+				<div class="states">${Object.values(electoralData).filter(data => data.harris > 0).length} states + DC</div>
 			</div>
 			<div class="summary-card">
 				<h3>Total Electoral Votes</h3>
 				<div class="votes">${totalVotes}</div>
-				<div class="states">${states.length} states + DC</div>
+				<div class="states">51 total</div>
 			</div>
 		</div>
 
-		<div class="states-grid">
-			${sortedStates.map(state => {
-				if (!state.electoral_winner) {
+		<table style="width: 100%; border-collapse: collapse; margin-top: 2rem;">
+			<thead>
+				<tr style="background: rgba(30, 41, 59, 0.95);">
+					<th style="padding: 1rem; text-align: left; border: 1px solid rgba(148, 163, 184, 0.2); color: #f1f5f9;">State</th>
+					<th style="padding: 1rem; text-align: center; border: 1px solid rgba(148, 163, 184, 0.2); color: #f1f5f9;">Total EV</th>
+					<th style="padding: 1rem; text-align: center; border: 1px solid rgba(148, 163, 184, 0.2); color: #f1f5f9;">Harris</th>
+					<th style="padding: 1rem; text-align: center; border: 1px solid rgba(148, 163, 184, 0.2); color: #f1f5f9;">Trump</th>
+					<th style="padding: 1rem; text-align: center; border: 1px solid rgba(148, 163, 184, 0.2); color: #f1f5f9;">Winner</th>
+					<th style="padding: 1rem; text-align: center; border: 1px solid rgba(148, 163, 184, 0.2); color: #f1f5f9;">Margin</th>
+				</tr>
+			</thead>
+			<tbody>
+				${sortedStates.map(state => {
+					const data = electoralData[state.code] || { total: 0, harris: 0, trump: 0, margin: 0 };
+					const winner = data.harris > data.trump ? 'Democrat' : data.trump > data.harris ? 'Republican' : 'Split';
+					const rowClass = winner === 'Democrat' ? 'winner-democrat' : winner === 'Republican' ? 'winner-republican' : '';
+
 					return `
-						<div class="state-card">
-							<div class="state-header">
-								<div class="state-name">${state.name}</div>
-							</div>
-							<div class="state-details">
-								<div class="state-detail">
-									<span class="state-detail-label">Status</span>
-									<span class="state-detail-value">No data</span>
-								</div>
-								<div class="state-detail">
-									<span class="state-detail-label">Electoral Votes</span>
-									<span class="state-detail-value">${state.electoral_votes || 'N/A'}</span>
-								</div>
-							</div>
-						</div>
+						<tr class="${rowClass}" style="background: ${winner === 'Democrat' ? 'rgba(59, 130, 246, 0.1)' : winner === 'Republican' ? 'rgba(239, 68, 68, 0.1)' : 'rgba(30, 41, 59, 0.95)'};">
+							<td style="padding: 1rem; border: 1px solid rgba(148, 163, 184, 0.2); color: #f1f5f9;"><strong>${state.name}</strong> (${state.code})</td>
+							<td style="padding: 1rem; text-align: center; border: 1px solid rgba(148, 163, 184, 0.2); color: #f1f5f9;">${data.total}</td>
+							<td style="padding: 1rem; text-align: center; border: 1px solid rgba(148, 163, 184, 0.2); color: ${data.harris > 0 ? '#3b82f6' : '#94a3b8'};">${data.harris > 0 ? data.harris : '-'}</td>
+							<td style="padding: 1rem; text-align: center; border: 1px solid rgba(148, 163, 184, 0.2); color: ${data.trump > 0 ? '#ef4444' : '#94a3b8'};">${data.trump > 0 ? data.trump : '-'}</td>
+							<td style="padding: 1rem; text-align: center; border: 1px solid rgba(148, 163, 184, 0.2); color: #f1f5f9;">${winner}</td>
+							<td style="padding: 1rem; text-align: center; border: 1px solid rgba(148, 163, 184, 0.2); color: #f1f5f9;">${data.margin ? data.margin.toFixed(1) + '%' : '-'}</td>
+						</tr>
 					`;
-				}
+				}).join('')}
+			</tbody>
+		</table>
 
-				const winnerClass = state.electoral_winner.toLowerCase();
-				const marginText = state.electoral_margin ? `${state.electoral_margin}%` : 'N/A';
-
-				return `
-					<div class="state-card ${winnerClass}">
-						<div class="state-header">
-							<div class="state-name">${state.name}</div>
-							<div class="state-winner ${winnerClass}">${state.electoral_winner}</div>
-						</div>
-						<div class="state-details">
-							<div class="state-detail">
-								<span class="state-detail-label">Electoral Votes</span>
-								<span class="state-detail-value">${state.electoral_votes || 'N/A'}</span>
-							</div>
-							<div class="state-detail">
-								<span class="state-detail-label">Margin</span>
-								<span class="state-detail-value">${marginText}</span>
-							</div>
-							<div class="state-detail">
-								<span class="state-detail-label">Year</span>
-								<span class="state-detail-value">${state.electoral_year || 'N/A'}</span>
-							</div>
-							<div class="state-detail">
-								<span class="state-detail-label">State Code</span>
-								<span class="state-detail-value">${state.code}</span>
-							</div>
-						</div>
-					</div>
-				`;
-			}).join('')}
 		</div>
-	</div>
 </body>
 </html>`;
 }
