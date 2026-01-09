@@ -454,3 +454,5 @@ export function renderElectionHub(states: State[]): string {
 	</div>
 </body>
 </html>
+	`;
+}
