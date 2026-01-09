@@ -328,6 +328,21 @@ export function renderElectionHub(states: State[]): string {
 			border-color: rgba(120, 119, 198, 0.5);
 		}
 
+		.nav-link.trump-winner {
+			background: linear-gradient(135deg, rgba(255, 215, 0, 0.2) 0%, rgba(255, 215, 0, 0.1) 100%);
+			border-color: rgba(255, 215, 0, 0.4);
+			box-shadow: 0 0 20px rgba(255, 215, 0, 0.3), 0 4px 16px rgba(0, 0, 0, 0.3);
+			color: #ffd700;
+			font-weight: 600;
+		}
+
+		.nav-link.trump-winner:hover {
+			background: linear-gradient(135deg, rgba(255, 215, 0, 0.3) 0%, rgba(255, 215, 0, 0.2) 100%);
+			border-color: rgba(255, 215, 0, 0.6);
+			box-shadow: 0 0 25px rgba(255, 215, 0, 0.4), 0 4px 16px rgba(0, 0, 0, 0.3);
+			transform: translateY(-1px);
+		}
+
 		@media (max-width: 768px) {
 			body {
 				padding: 1rem;
@@ -361,11 +376,11 @@ export function renderElectionHub(states: State[]): string {
 		<nav class="nav-links">
 			<a href="/" class="nav-link">Home</a>
 			<a href="/congress" class="nav-link">Congress</a>
-			<a href="/senators" class="nav-link">Senators</a>
-			<a href="/house" class="nav-link">House</a>
 			<a href="/election" class="nav-link active">Election</a>
 			<a href="/issues" class="nav-link">Issues</a>
 			<a href="/money" class="nav-link">Money</a>
+			<a href="/harris" class="nav-link">Harris</a>
+			<a href="/trump" class="nav-link trump-winner">Trump</a>
 		</nav>
 
 		<div class="electoral-summary">
