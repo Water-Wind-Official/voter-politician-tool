@@ -192,6 +192,22 @@ export function renderElectionHub(states: State[]): string {
 			color: #94a3b8;
 		}
 
+		.votes-democrat {
+			color: #3b82f6;
+		}
+
+		.votes-republican {
+			color: #ef4444;
+		}
+
+		.winner-democrat {
+			background: rgba(59, 130, 246, 0.1);
+		}
+
+		.winner-republican {
+			background: rgba(239, 68, 68, 0.1);
+		}
+
 		.states-grid {
 			display: grid;
 			grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
