@@ -192,6 +192,17 @@ export function renderElectionHub(states: State[]): string {
 			color: #94a3b8;
 		}
 
+		.total-votes-link {
+			text-decoration: none;
+			color: inherit;
+			transition: all 0.3s ease;
+		}
+
+		.total-votes-link:hover {
+			transform: translateY(-2px);
+			box-shadow: 0 8px 24px rgba(120, 119, 198, 0.3);
+		}
+
 		.votes-democrat {
 			color: #3b82f6;
 		}
@@ -289,15 +300,6 @@ export function renderElectionHub(states: State[]): string {
 		}
 
 		.state-detail-value {
-			font-size: 1rem;
-			font-weight: 600;
-			color: #cbd5e1;
-		}
-
-		.no-data {
-			text-align: center;
-			padding: 3rem;
-			color: #64748b;
 		}
 
 		.nav-links {
@@ -379,31 +381,45 @@ export function renderElectionHub(states: State[]): string {
 			<a href="/election" class="nav-link active">Election</a>
 			<a href="/issues" class="nav-link">Issues</a>
 			<a href="/money" class="nav-link">Money</a>
-			<a href="/harris" class="nav-link">Harris</a>
-			<a href="/trump" class="nav-link trump-winner">Trump</a>
 		</nav>
+
+		<div class="candidates-section">
+			<a href="/harris" class="candidate-card democrat-card">
+				<div class="candidate-icon">🫏</div>
+				<div class="candidate-info">
+					<h2 class="candidate-name">Kamala Harris</h2>
+					<div class="candidate-party">Democratic Party</div>
+					<div class="candidate-votes">${democratVotes} Electoral Votes</div>
+				</div>
+				<div class="candidate-arrow">→</div>
+			</a>
+			
+			<a href="/trump" class="candidate-card republican-card winner-card">
+				<div class="candidate-icon">🫏</div>
+				<div class="candidate-info">
+					<h2 class="candidate-name">Donald Trump</h2>
+					<div class="candidate-party">Republican Party</div>
+					<div class="candidate-votes">${republicanVotes} Electoral Votes</div>
+					<div class="winner-badge">🏆 WINNER</div>
+				</div>
+				<div class="candidate-arrow">→</div>
+			</a>
+		</div>
 
 		<div class="electoral-summary">
 			<div class="summary-card republican">
 				<h3>Republican</h3>
 				<div class="votes">${republicanVotes}</div>
-				<div class="states">${Object.values(electoralData).filter(data => data.trump > 0).length} states</div>
+				<div class="states">Donald Trump<br>${Object.values(electoralData).filter(data => data.trump > 0).length} States</div>
 			</div>
-			<div class="summary-card democrat">
-				<h3>Democrat</h3>
-				<div class="votes">${democratVotes}</div>
-				<div class="states">${Object.values(electoralData).filter(data => data.harris > 0).length} states + DC</div>
-			</div>
-			<div class="summary-card">
-				<h3>Total Electoral Votes</h3>
-				<div class="votes">${totalVotes}</div>
-				<div class="states">51 total</div>
-			</div>
-		</div>
 
-		<table style="width: 100%; border-collapse: collapse; margin-top: 2rem;">
-			<thead>
-				<tr style="background: rgba(30, 41, 59, 0.95);">
+			.nav-link.trump-winner {
+				background: linear-gradient(135deg, rgba(255, 215, 0, 0.2) 0%, rgba(255, 215, 0, 0.1) 100%);
+				border-color: rgba(255, 215, 0, 0.4);
+				box-shadow: 0 0 20px rgba(255, 215, 0, 0.3), 0 4px 16px rgba(0, 0, 0, 0.3);
+				color: #ffd700;
+				font-weight: 600;
+			}
 					<th style="padding: 1rem; text-align: left; border: 1px solid rgba(148, 163, 184, 0.2); color: #f1f5f9;">State</th>
 					<th style="padding: 1rem; text-align: center; border: 1px solid rgba(148, 163, 184, 0.2); color: #f1f5f9;">Total EV</th>
 					<th style="padding: 1rem; text-align: center; border: 1px solid rgba(148, 163, 184, 0.2); color: #f1f5f9;">Harris</th>
@@ -432,7 +448,9 @@ export function renderElectionHub(states: State[]): string {
 			</tbody>
 		</table>
 
-		</div>
+		<footer style="text-align: center; margin-top: 3rem; padding: 2rem; color: #94a3b8; font-size: 0.875rem;">
+			<p>Source: <a href="https://www.fec.gov/resources/cms-content/documents/2024presgeresults.pdf" target="_blank" style="color: #93c5fd; text-decoration: none;">Federal Election Commission Official Results</a></p>
+		</footer>
+	</div>
 </body>
-</html>`;
-}
+</html>
