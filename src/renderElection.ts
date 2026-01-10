@@ -505,7 +505,7 @@ export function renderElectionHub(states: State[]): string {
 				<div class="candidate-arrow">→</div>
 			</a>
 			<a href="/trump" class="candidate-card republican-card winner-card">
-				<div class="candidate-icon">🫏</div>
+				<div class="candidate-icon">🐘</div>
 				<div class="candidate-info">
 					<h2 class="candidate-name">Donald Trump</h2>
 					<div class="candidate-party">Republican Party</div>
@@ -514,19 +514,6 @@ export function renderElectionHub(states: State[]): string {
 				</div>
 				<div class="candidate-arrow">→</div>
 			</a>
-		</div>
-
-		<div class="electoral-summary">
-			<div class="summary-card republican">
-				<h3>Republican</h3>
-				<div class="votes">${republicanVotes}</div>
-				<div class="states">Donald Trump<br>${Object.values(electoralData).filter(data => data.trump > 0).length} States</div>
-			</div>
-			<div class="summary-card democrat">
-				<h3>Democrat</h3>
-				<div class="votes">${democratVotes}</div>
-				<div class="states">Kamala Harris<br>${Object.values(electoralData).filter(data => data.harris > 0).length} States</div>
-			</div>
 		</div>
 
 		<div class="electoral-table">
