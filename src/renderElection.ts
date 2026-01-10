@@ -345,6 +345,117 @@ export function renderElectionHub(states: State[]): string {
 			transform: translateY(-1px);
 		}
 
+		.candidates-section {
+			display: grid;
+			grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+			gap: 2rem;
+			margin-bottom: 3rem;
+		}
+
+		.candidate-card {
+			display: flex;
+			align-items: center;
+			padding: 2rem;
+			background: linear-gradient(135deg, rgba(30, 41, 59, 0.95) 0%, rgba(51, 65, 85, 0.95) 100%);
+			border: 2px solid rgba(148, 163, 184, 0.2);
+			border-radius: 16px;
+			text-decoration: none;
+			color: inherit;
+			transition: all 0.3s ease;
+			position: relative;
+			overflow: hidden;
+		}
+
+		.candidate-card:hover {
+			transform: translateY(-4px);
+			box-shadow: 0 12px 32px rgba(0, 0, 0, 0.4);
+		}
+
+		.candidate-card.democrat-card {
+			border-color: rgba(59, 130, 246, 0.4);
+			background: linear-gradient(135deg, rgba(59, 130, 246, 0.1) 0%, rgba(29, 78, 216, 0.05) 100%);
+		}
+
+		.candidate-card.republican-card {
+			border-color: rgba(239, 68, 68, 0.4);
+			background: linear-gradient(135deg, rgba(239, 68, 68, 0.1) 0%, rgba(185, 28, 28, 0.05) 100%);
+		}
+
+		.candidate-card.winner-card {
+			border-color: rgba(255, 215, 0, 0.6);
+			background: linear-gradient(135deg, rgba(255, 215, 0, 0.15) 0%, rgba(255, 215, 0, 0.05) 100%);
+			box-shadow: 0 0 30px rgba(255, 215, 0, 0.2), 0 8px 32px rgba(0, 0, 0, 0.3);
+		}
+
+		.candidate-icon {
+			font-size: 3rem;
+			margin-right: 1.5rem;
+		}
+
+		.candidate-info {
+			flex: 1;
+		}
+
+		.candidate-name {
+			font-size: 1.5rem;
+			font-weight: 700;
+			margin-bottom: 0.5rem;
+			color: #f1f5f9;
+		}
+
+		.candidate-party {
+			font-size: 1rem;
+			color: #94a3b8;
+			margin-bottom: 0.5rem;
+		}
+
+		.candidate-votes {
+			font-size: 1.125rem;
+			font-weight: 600;
+			color: #cbd5e1;
+		}
+
+		.winner-badge {
+			display: inline-block;
+			background: linear-gradient(135deg, rgba(255, 215, 0, 0.3) 0%, rgba(255, 215, 0, 0.1) 100%);
+			color: #ffd700;
+			padding: 0.25rem 0.75rem;
+			border-radius: 20px;
+			font-size: 0.75rem;
+			font-weight: 700;
+			text-transform: uppercase;
+			margin-top: 0.5rem;
+			border: 1px solid rgba(255, 215, 0, 0.4);
+			box-shadow: 0 2px 8px rgba(255, 215, 0, 0.2);
+		}
+
+		.candidate-arrow {
+			font-size: 1.5rem;
+			color: #94a3b8;
+			margin-left: 1rem;
+			transition: all 0.3s ease;
+		}
+
+		.candidate-card:hover .candidate-arrow {
+			color: #f1f5f9;
+			transform: translateX(4px);
+		}
+
+		.electoral-table {
+			background: linear-gradient(135deg, rgba(30, 41, 59, 0.95) 0%, rgba(51, 65, 85, 0.95) 100%);
+			backdrop-filter: blur(20px);
+			border: 1px solid rgba(148, 163, 184, 0.2);
+			border-radius: 12px;
+			overflow: hidden;
+			box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+			margin-bottom: 3rem;
+		}
+
+		.electoral-table table {
+			width: 100%;
+			border-collapse: collapse;
+		}
+
 		@media (max-width: 768px) {
 			body {
 				padding: 1rem;
@@ -393,7 +504,6 @@ export function renderElectionHub(states: State[]): string {
 				</div>
 				<div class="candidate-arrow">→</div>
 			</a>
-			
 			<a href="/trump" class="candidate-card republican-card winner-card">
 				<div class="candidate-icon">🫏</div>
 				<div class="candidate-info">
@@ -412,41 +522,45 @@ export function renderElectionHub(states: State[]): string {
 				<div class="votes">${republicanVotes}</div>
 				<div class="states">Donald Trump<br>${Object.values(electoralData).filter(data => data.trump > 0).length} States</div>
 			</div>
+			<div class="summary-card democrat">
+				<h3>Democrat</h3>
+				<div class="votes">${democratVotes}</div>
+				<div class="states">Kamala Harris<br>${Object.values(electoralData).filter(data => data.harris > 0).length} States</div>
+			</div>
+		</div>
 
-			.nav-link.trump-winner {
-				background: linear-gradient(135deg, rgba(255, 215, 0, 0.2) 0%, rgba(255, 215, 0, 0.1) 100%);
-				border-color: rgba(255, 215, 0, 0.4);
-				box-shadow: 0 0 20px rgba(255, 215, 0, 0.3), 0 4px 16px rgba(0, 0, 0, 0.3);
-				color: #ffd700;
-				font-weight: 600;
-			}
-					<th style="padding: 1rem; text-align: left; border: 1px solid rgba(148, 163, 184, 0.2); color: #f1f5f9;">State</th>
-					<th style="padding: 1rem; text-align: center; border: 1px solid rgba(148, 163, 184, 0.2); color: #f1f5f9;">Total EV</th>
-					<th style="padding: 1rem; text-align: center; border: 1px solid rgba(148, 163, 184, 0.2); color: #f1f5f9;">Harris</th>
-					<th style="padding: 1rem; text-align: center; border: 1px solid rgba(148, 163, 184, 0.2); color: #f1f5f9;">Trump</th>
-					<th style="padding: 1rem; text-align: center; border: 1px solid rgba(148, 163, 184, 0.2); color: #f1f5f9;">Winner</th>
-					<th style="padding: 1rem; text-align: center; border: 1px solid rgba(148, 163, 184, 0.2); color: #f1f5f9;">Margin</th>
-				</tr>
-			</thead>
-			<tbody>
-				${sortedStates.map(state => {
-					const data = electoralData[state.code] || { total: 0, harris: 0, trump: 0, margin: 0 };
-					const winner = data.harris > data.trump ? 'Democrat' : data.trump > data.harris ? 'Republican' : 'Split';
-					const rowClass = winner === 'Democrat' ? 'winner-democrat' : winner === 'Republican' ? 'winner-republican' : '';
+		<div class="electoral-table">
+			<table>
+				<thead>
+					<tr>
+						<th style="padding: 1rem; text-align: left; border: 1px solid rgba(148, 163, 184, 0.2); color: #f1f5f9;">State</th>
+						<th style="padding: 1rem; text-align: center; border: 1px solid rgba(148, 163, 184, 0.2); color: #f1f5f9;">Total EV</th>
+						<th style="padding: 1rem; text-align: center; border: 1px solid rgba(148, 163, 184, 0.2); color: #f1f5f9;">Harris</th>
+						<th style="padding: 1rem; text-align: center; border: 1px solid rgba(148, 163, 184, 0.2); color: #f1f5f9;">Trump</th>
+						<th style="padding: 1rem; text-align: center; border: 1px solid rgba(148, 163, 184, 0.2); color: #f1f5f9;">Winner</th>
+						<th style="padding: 1rem; text-align: center; border: 1px solid rgba(148, 163, 184, 0.2); color: #f1f5f9;">Margin</th>
+					</tr>
+				</thead>
+				<tbody>
+					${sortedStates.map(state => {
+						const data = electoralData[state.code] || { total: 0, harris: 0, trump: 0, margin: 0 };
+						const winner = data.harris > data.trump ? 'Democrat' : data.trump > data.harris ? 'Republican' : 'Split';
+						const rowClass = winner === 'Democrat' ? 'winner-democrat' : winner === 'Republican' ? 'winner-republican' : '';
 
-					return `
-						<tr class="${rowClass}" style="background: ${winner === 'Democrat' ? 'rgba(59, 130, 246, 0.1)' : winner === 'Republican' ? 'rgba(239, 68, 68, 0.1)' : 'rgba(30, 41, 59, 0.95)'};">
-							<td style="padding: 1rem; border: 1px solid rgba(148, 163, 184, 0.2); color: #f1f5f9;"><strong>${state.name}</strong> (${state.code})</td>
-							<td style="padding: 1rem; text-align: center; border: 1px solid rgba(148, 163, 184, 0.2); color: #f1f5f9;">${data.total}</td>
-							<td style="padding: 1rem; text-align: center; border: 1px solid rgba(148, 163, 184, 0.2); color: ${data.harris > 0 ? '#3b82f6' : '#94a3b8'};">${data.harris > 0 ? data.harris : '-'}</td>
-							<td style="padding: 1rem; text-align: center; border: 1px solid rgba(148, 163, 184, 0.2); color: ${data.trump > 0 ? '#ef4444' : '#94a3b8'};">${data.trump > 0 ? data.trump : '-'}</td>
-							<td style="padding: 1rem; text-align: center; border: 1px solid rgba(148, 163, 184, 0.2); color: #f1f5f9;">${winner}</td>
-							<td style="padding: 1rem; text-align: center; border: 1px solid rgba(148, 163, 184, 0.2); color: #f1f5f9;">${data.margin ? data.margin.toFixed(1) + '%' : '-'}</td>
-						</tr>
-					`;
-				}).join('')}
-			</tbody>
-		</table>
+						return `
+							<tr class="${rowClass}" style="background: ${winner === 'Democrat' ? 'rgba(59, 130, 246, 0.1)' : winner === 'Republican' ? 'rgba(239, 68, 68, 0.1)' : 'rgba(30, 41, 59, 0.95)'};">
+								<td style="padding: 1rem; border: 1px solid rgba(148, 163, 184, 0.2); color: #f1f5f9;"><strong>${state.name}</strong> (${state.code})</td>
+								<td style="padding: 1rem; text-align: center; border: 1px solid rgba(148, 163, 184, 0.2); color: #f1f5f9;">${data.total}</td>
+								<td style="padding: 1rem; text-align: center; border: 1px solid rgba(148, 163, 184, 0.2); color: ${data.harris > 0 ? '#3b82f6' : '#94a3b8'};">${data.harris > 0 ? data.harris : '-'}</td>
+								<td style="padding: 1rem; text-align: center; border: 1px solid rgba(148, 163, 184, 0.2); color: ${data.trump > 0 ? '#ef4444' : '#94a3b8'};">${data.trump > 0 ? data.trump : '-'}</td>
+								<td style="padding: 1rem; text-align: center; border: 1px solid rgba(148, 163, 184, 0.2); color: #f1f5f9;">${winner}</td>
+								<td style="padding: 1rem; text-align: center; border: 1px solid rgba(148, 163, 184, 0.2); color: #f1f5f9;">${data.margin ? data.margin.toFixed(1) + '%' : '-'}</td>
+							</tr>
+						`;
+					}).join('')}
+				</tbody>
+			</table>
+		</div>
 
 		<footer style="text-align: center; margin-top: 3rem; padding: 2rem; color: #94a3b8; font-size: 0.875rem;">
 			<p>Source: <a href="https://www.fec.gov/resources/cms-content/documents/2024presgeresults.pdf" target="_blank" style="color: #93c5fd; text-decoration: none;">Federal Election Commission Official Results</a></p>
@@ -454,5 +568,5 @@ export function renderElectionHub(states: State[]): string {
 	</div>
 </body>
 </html>
-	`;
+`;
 }
