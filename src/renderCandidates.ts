@@ -10,14 +10,14 @@ export function renderCandidateProfile(candidate: 'trump' | 'harris'): string {
 			partyBg: 'rgba(220, 38, 38, 0.1)',
 			currentWebsite: 'https://www.donaldjtrump.com/',
 			wayback2024: 'https://web.archive.org/web/20241010000624/https://www.donaldjtrump.com/platform',
-			bio: `Donald John Trump is an American politician, media personality, and businessman who served as the 45th president of the United States from 2017 to 2021. Born in Queens, New York City, Trump graduated from the Kew-Forest School in 1964 and took over the family real estate business in 1971. He expanded it into building and renovating skyscrapers, hotels, casinos, and golf courses.
+			bio: `Donald John Trump is an American businessman, media personality, and politician who served as the 45th President of the United States from 2017 to 2021. Born in Queens, New York City, Trump graduated from the Wharton School of the University of Pennsylvania in 1968. He joined his family's real estate business and later expanded it into developing and constructing skyscrapers, hotels, casinos, and golf courses worldwide.
 
-Trump entered politics in 2015 with his candidacy for president, winning the Republican nomination and defeating Hillary Clinton in the 2016 election. He was inaugurated on January 20, 2017, and served one term before losing re-election to Joe Biden in 2020.
+Trump entered politics in 2015 with his presidential candidacy and won the Republican nomination, defeating Hillary Clinton in the 2016 election. He was inaugurated on January 20, 2017, and served one term before losing re-election to Joe Biden in 2020.
 
-After leaving office, Trump continued to be active in politics and announced his candidacy for the 2024 presidential election in November 2022. He won the Republican nomination and faced Vice President Kamala Harris in the 2024 general election, ultimately winning with 312 electoral votes.`,
+After leaving office, Trump remained active in politics and announced his candidacy for the 2024 presidential election in November 2022. He secured the Republican nomination and faced Vice President Kamala Harris in the general election, winning with 312 electoral votes.`,
 			achievements: [
 				'45th President of the United States (2017-2021)',
-				'Won 2024 Presidential Election',
+				'Won the 2024 Presidential Election',
 				'Appointed three Supreme Court justices',
 				'Signed the Tax Cuts and Jobs Act of 2017',
 				'Negotiated the Abraham Accords peace agreements',
@@ -51,11 +51,11 @@ After leaving office, Trump continued to be active in politics and announced his
 			partyBg: 'rgba(37, 99, 235, 0.1)',
 			currentWebsite: 'https://kamalaharris.com/',
 			wayback2024: 'https://web.archive.org/web/20241005024829/https://kamalaharris.com/issues/',
-			bio: `Kamala Devi Harris is an American politician and attorney who has served as the 49th vice president of the United States since 2021. She is the first woman, first Black American, and first South Asian American to hold the office. Born in Oakland, California, Harris graduated from Howard University and the University of California, Hastings College of the Law.
+			bio: `Kamala Devi Harris is an American politician and attorney who has served as the 49th Vice President of the United States since 2021. She is the first woman, the first Black American, and the first South Asian American to hold the office. Born in Oakland, California, Harris graduated from Howard University and the University of California, Hastings College of the Law.
 
-Harris began her career as a deputy district attorney in Alameda County, California, and later served as attorney general of California from 2011 to 2017. She was elected to the United States Senate in 2016, becoming the first South Asian American and second Black woman to serve in the Senate.
+Harris began her career as a deputy district attorney in Alameda County, California, and later served as Attorney General of California from 2011 to 2017. She was elected to the United States Senate in 2016, becoming the first South Asian American and the second Black woman to serve in the Senate.
 
-In 2020, Harris was selected by Joe Biden as his running mate in the presidential election. They won the election, and Harris was inaugurated as vice president on January 20, 2021. She served as Biden's vice president for one term.
+In 2020, Harris was selected by Joe Biden as his running mate in the presidential election. They won the election, and Harris was inaugurated as Vice President on January 20, 2021. She served as Biden's vice president throughout his term.
 
 Harris sought the Democratic nomination for president in the 2024 election and became the presumptive nominee after Biden withdrew from the race. She selected Minnesota Governor Tim Walz as her running mate and faced former President Donald Trump in the general election.`,
 			achievements: [
