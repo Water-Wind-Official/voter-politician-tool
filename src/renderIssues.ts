@@ -430,9 +430,152 @@ export function renderIssuesPage(democratIssues: Issue[], republicanIssues: Issu
 				height: 40px;
 			}
 		}
+
+		/* Gay Rights Rainbow Bow Tie Banner */
+		.gay-rights-banner {
+			position: fixed;
+			top: 20px;
+			right: 20px;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			text-decoration: none;
+			z-index: 1000;
+			transition: all 0.3s ease;
+			animation: rainbow-bow-pulse 3s ease-in-out infinite;
+		}
+
+		.bow-tie {
+			position: relative;
+			width: 120px;
+			height: 40px;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+		}
+
+		.bow-tie::before,
+		.bow-tie::after {
+			content: '';
+			position: absolute;
+			width: 50px;
+			height: 40px;
+			background: linear-gradient(45deg, 
+				#ff0000 0%, 
+				#ff7f00 16.7%, 
+				#ffff00 33.3%, 
+				#00ff00 50%, 
+				#0000ff 66.7%, 
+				#4b0082 83.3%, 
+				#9400d3 100%
+			);
+			border-radius: 50% 10% 50% 10%;
+			box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+		}
+
+		.bow-tie::before {
+			left: -25px;
+			transform: rotate(-15deg);
+		}
+
+		.bow-tie::after {
+			right: -25px;
+			transform: rotate(15deg);
+		}
+
+		.bow-tie-center {
+			position: absolute;
+			width: 20px;
+			height: 20px;
+			background: linear-gradient(45deg, 
+				#ff0000 0%, 
+				#ff7f00 16.7%, 
+				#ffff00 33.3%, 
+				#00ff00 50%, 
+				#0000ff 66.7%, 
+				#4b0082 83.3%, 
+				#9400d3 100%
+			);
+			border-radius: 50%;
+			z-index: 2;
+			box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+		}
+
+		.gay-rights-text {
+			position: absolute;
+			color: white;
+			font-weight: 700;
+			font-size: 11px;
+			text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);
+			z-index: 3;
+			white-space: nowrap;
+			letter-spacing: 0.5px;
+		}
+
+		.gay-rights-banner:hover {
+			transform: translateY(-2px) scale(1.1);
+		}
+
+		.gay-rights-banner:hover .bow-tie::before,
+		.gay-rights-banner:hover .bow-tie::after {
+			box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
+		}
+
+		.gay-rights-banner:hover .bow-tie-center {
+			box-shadow: 0 3px 12px rgba(0, 0, 0, 0.4);
+		}
+
+		@keyframes rainbow-bow-pulse {
+			0%, 100% {
+				filter: hue-rotate(0deg);
+			}
+			25% {
+				filter: hue-rotate(30deg);
+			}
+			50% {
+				filter: hue-rotate(60deg);
+			}
+			75% {
+				filter: hue-rotate(30deg);
+			}
+		}
+
+		@media (max-width: 768px) {
+			body {
+				padding: 1rem;
+			}
+
+			h1 {
+				font-size: 2rem;
+			}
+
+			.section {
+				padding: 1rem;
+			}
+
+			.section-icon {
+				width: 40px;
+				height: 40px;
+			}
+
+			.gay-rights-banner {
+				top: 10px;
+				right: 10px;
+				padding: 8px 16px;
+				font-size: 12px;
+			}
+		}
 	</style>
 </head>
 <body>
+	<!-- Gay Rights Rainbow Bow Tie Banner -->
+	<a href="https://axiom.blwaterwind.workers.dev/blog/gay-marriage-political-issue/" target="_blank" class="gay-rights-banner">
+		<div class="bow-tie">
+			<div class="bow-tie-center"></div>
+			<div class="gay-rights-text">Gay Rights</div>
+		</div>
+	</a>
+	
 	<div class="container">
 		<header>
 			<h1>Political Issues</h1>
