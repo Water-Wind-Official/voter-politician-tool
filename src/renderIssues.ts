@@ -431,7 +431,7 @@ export function renderIssuesPage(democratIssues: Issue[], republicanIssues: Issu
 			}
 		}
 
-		/* Gay Rights Rainbow Bow Tie Banner */
+		/* Gay Rights Rainbow Hearts Banner */
 		.gay-rights-banner {
 			position: fixed;
 			top: 20px;
@@ -442,24 +442,23 @@ export function renderIssuesPage(democratIssues: Issue[], republicanIssues: Issu
 			text-decoration: none;
 			z-index: 1000;
 			transition: all 0.3s ease;
-			animation: rainbow-bow-pulse 3s ease-in-out infinite;
+			animation: rainbow-hearts-pulse 3s ease-in-out infinite;
 		}
 
-		.bow-tie {
+		.hearts-container {
 			position: relative;
-			width: 120px;
+			width: 140px;
 			height: 40px;
 			display: flex;
 			align-items: center;
 			justify-content: center;
 		}
 
-		.bow-tie::before,
-		.bow-tie::after {
-			content: '';
+		.heart-left,
+		.heart-right {
 			position: absolute;
-			width: 50px;
-			height: 40px;
+			width: 25px;
+			height: 25px;
 			background: linear-gradient(45deg, 
 				#ff0000 0%, 
 				#ff7f00 16.7%, 
@@ -469,24 +468,25 @@ export function renderIssuesPage(democratIssues: Issue[], republicanIssues: Issu
 				#4b0082 83.3%, 
 				#9400d3 100%
 			);
-			border-radius: 50% 10% 50% 10%;
 			box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
 		}
 
-		.bow-tie::before {
-			left: -25px;
+		.heart-left {
+			left: -30px;
 			transform: rotate(-15deg);
 		}
 
-		.bow-tie::after {
-			right: -25px;
+		.heart-right {
+			right: -30px;
 			transform: rotate(15deg);
 		}
 
-		.bow-tie-center {
+		.heart-left::before,
+		.heart-right::before {
+			content: '';
 			position: absolute;
-			width: 20px;
-			height: 20px;
+			width: 25px;
+			height: 25px;
 			background: linear-gradient(45deg, 
 				#ff0000 0%, 
 				#ff7f00 16.7%, 
@@ -496,9 +496,19 @@ export function renderIssuesPage(democratIssues: Issue[], republicanIssues: Issu
 				#4b0082 83.3%, 
 				#9400d3 100%
 			);
-			border-radius: 50%;
-			z-index: 2;
-			box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+			border-radius: 50% 50% 50% 0;
+			transform: rotate(-45deg);
+			box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+		}
+
+		.heart-left::before {
+			left: 0;
+			top: 0;
+		}
+
+		.heart-right::before {
+			right: 0;
+			top: 0;
 		}
 
 		.gay-rights-text {
@@ -510,22 +520,26 @@ export function renderIssuesPage(democratIssues: Issue[], republicanIssues: Issu
 			z-index: 3;
 			white-space: nowrap;
 			letter-spacing: 0.5px;
+			top: 50%;
+			left: 50%;
+			transform: translate(-50%, -50%);
 		}
 
 		.gay-rights-banner:hover {
 			transform: translateY(-2px) scale(1.1);
 		}
 
-		.gay-rights-banner:hover .bow-tie::before,
-		.gay-rights-banner:hover .bow-tie::after {
+		.gay-rights-banner:hover .heart-left,
+		.gay-rights-banner:hover .heart-right {
 			box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
 		}
 
-		.gay-rights-banner:hover .bow-tie-center {
-			box-shadow: 0 3px 12px rgba(0, 0, 0, 0.4);
+		.gay-rights-banner:hover .heart-left::before,
+		.gay-rights-banner:hover .heart-right::before {
+			box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
 		}
 
-		@keyframes rainbow-bow-pulse {
+		@keyframes rainbow-hearts-pulse {
 			0%, 100% {
 				filter: hue-rotate(0deg);
 			}
@@ -568,10 +582,11 @@ export function renderIssuesPage(democratIssues: Issue[], republicanIssues: Issu
 	</style>
 </head>
 <body>
-	<!-- Gay Rights Rainbow Bow Tie Banner -->
+	<!-- Gay Rights Rainbow Hearts Banner -->
 	<a href="https://axiom.blwaterwind.workers.dev/blog/gay-marriage-political-issue/" target="_blank" class="gay-rights-banner">
-		<div class="bow-tie">
-			<div class="bow-tie-center"></div>
+		<div class="hearts-container">
+			<div class="heart-left"></div>
+			<div class="heart-right"></div>
 			<div class="gay-rights-text">Gay Rights</div>
 		</div>
 	</a>
